@@ -1,0 +1,45 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function logado() {
+      return request.auth != null;
+    }
+
+    function membro(fazendaId) {
+      return logado() &&
+        request.auth.uid in get(/databases/$(database)/documents/fazendas/$(fazendaId)).data.membros;
+    }
+
+    match /usuarios/{uid} {
+      allow read, create, update: if logado() && request.auth.uid == uid;
+      allow delete: if false;
+    }
+
+    match /fazendas/{fazendaId} {
+      // Só o próprio usuário como único membro e dono.
+      allow create: if logado()
+        && request.resource.data.donoUid == request.auth.uid
+        && request.resource.data.membros.keys().hasOnly([request.auth.uid])
+        && request.resource.data.membros[request.auth.uid] == "dono"
+        && request.resource.data.nome is string
+        && request.resource.data.nome.size() > 0;
+
+      allow read: if logado() && request.auth.uid in resource.data.membros;
+
+      // O dono edita, mas não pode trocar o dono nem se remover.
+      allow update: if logado()
+        && resource.data.membros[request.auth.uid] == "dono"
+        && request.resource.data.donoUid == resource.data.donoUid
+        && request.resource.data.membros[resource.data.donoUid] == "dono";
+
+      allow delete: if false;
+
+      // Subcoleções (animais, eventos, produção...). Não usar /{sub=**} aqui: no
+      // rules_version 2 ele também casa com o próprio documento da fazenda.
+      match /{colecao}/{resto=**} {
+        allow read, write: if membro(fazendaId);
+      }
+    }
+  }
+}
