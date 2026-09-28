@@ -1,4 +1,4 @@
-import { format, isValid, parse } from 'date-fns';
+import { addDays, differenceInCalendarDays, format, isValid, parse, parseISO } from 'date-fns';
 
 /** Data de manejo no formato `YYYY-MM-DD` (sem fuso). */
 export type DataISO = string;
@@ -17,6 +17,11 @@ export function isoParaBR(iso: DataISO): string {
   return isValid(data) && paraDataISO(data) === iso ? format(data, FORMATO_BR) : '';
 }
 
+/** `true` se o texto é uma data `YYYY-MM-DD` que existe no calendário. */
+export function ehDataISO(texto: string): boolean {
+  return isoParaBR(texto) !== '';
+}
+
 /** `dd/MM/yyyy` → `YYYY-MM-DD`, ou `null` se a data não existir. */
 export function brParaISO(br: string): DataISO | null {
   if (!/^\d{2}\/\d{2}\/\d{4}$/.test(br)) return null;
@@ -31,4 +36,19 @@ export function mascaraDataBR(texto: string): string {
   if (digitos.length <= 2) return digitos;
   if (digitos.length <= 4) return `${digitos.slice(0, 2)}/${digitos.slice(2)}`;
   return `${digitos.slice(0, 2)}/${digitos.slice(2, 4)}/${digitos.slice(4)}`;
+}
+
+/** Soma (ou subtrai) dias de uma data `YYYY-MM-DD`. */
+export function somarDias(iso: DataISO, dias: number): DataISO {
+  return paraDataISO(addDays(parseISO(iso), dias));
+}
+
+/** Dias corridos de `de` até `ate` (negativo se `ate` vier antes). */
+export function diasEntre(de: DataISO, ate: DataISO): number {
+  return differenceInCalendarDays(parseISO(ate), parseISO(de));
+}
+
+/** `YYYY-MM-DD` → `dd/MM`, para listas curtas. */
+export function isoParaDiaMes(iso: DataISO): string {
+  return isoParaBR(iso).slice(0, 5);
 }
