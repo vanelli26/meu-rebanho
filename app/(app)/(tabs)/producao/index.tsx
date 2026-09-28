@@ -8,8 +8,15 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useSessaoPronta } from '@/auth/SessaoProvider';
 import { ESPACO_BARRA_ABAS } from '@/components/BarraAbas';
+import { GraficoLitros } from '@/components/producao/GraficoLitros';
 import { Botao, Card, Texto } from '@/components/ui';
-import { ORDENHAS, resumoProducao, ROTULO_ORDENHA, type ProducaoOrdenha } from '@/domain/producao';
+import {
+  ORDENHAS,
+  resumoProducao,
+  ROTULO_ORDENHA,
+  serieDiaria,
+  type ProducaoOrdenha,
+} from '@/domain/producao';
 import { useHoje } from '@/features/hoje';
 import { useProducoes } from '@/features/producao';
 import { dataDeISO, isoParaBR, type DataISO } from '@/lib/datas';
@@ -26,6 +33,7 @@ export default function Producao() {
   const { carregando, producoes } = useProducoes(fazenda.id, hoje, DIAS_HISTORICO);
 
   const resumo = useMemo(() => resumoProducao(producoes, hoje), [producoes, hoje]);
+  const serie = useMemo(() => serieDiaria(producoes, hoje, DIAS_HISTORICO), [producoes, hoje]);
   const dias = useMemo(() => {
     const porDia = new Map<DataISO, ProducaoOrdenha[]>();
     for (const p of producoes) porDia.set(p.data, [...(porDia.get(p.data) ?? []), p]);
@@ -55,6 +63,18 @@ export default function Producao() {
         <Numero valor={resumo.ontem} rotulo="Ontem" separador />
         <Numero valor={resumo.media7Dias} rotulo="Média 7 dias" separador />
       </Card>
+
+      {dias.length ? (
+        <Card>
+          <View className="flex-row items-baseline justify-between">
+            <Texto variante="subtitulo">Leite no tanque</Texto>
+            <Texto variante="legenda" tom="suave">
+              últimos {DIAS_HISTORICO} dias
+            </Texto>
+          </View>
+          <GraficoLitros serie={serie} />
+        </Card>
+      ) : null}
 
       <View className="gap-2">
         <Texto variante="subtitulo" className="px-1">

@@ -5,6 +5,7 @@ import {
   ordenhaSugerida,
   producaoDoAnimal,
   resumoProducao,
+  serieDiaria,
   type ProducaoOrdenha,
 } from '@/domain/producao';
 
@@ -106,5 +107,42 @@ describe('ordenhaSugerida e esquemaLitros', () => {
     expect(esquemaLitros.safeParse(null).success).toBe(true);
     expect(esquemaLitros.safeParse(25.5).success).toBe(true);
     expect(esquemaLitros.safeParse(250).success).toBe(false);
+  });
+});
+
+describe('serieDiaria', () => {
+  const ordenha = (
+    data: string,
+    ordenha: 'manha' | 'tarde',
+    registros: Record<string, { litros: number; descartado: boolean }>,
+  ): ProducaoOrdenha => ({
+    id: `${data}_${ordenha}`,
+    ...montarProducao(data, ordenha, registros),
+  });
+  const producoes = [
+    ordenha('2026-09-27', 'manha', { a: { litros: 10, descartado: false } }),
+    ordenha('2026-09-27', 'tarde', {
+      a: { litros: 8.2, descartado: false },
+      b: { litros: 5, descartado: true },
+    }),
+    ordenha('2026-09-25', 'manha', { b: { litros: 6, descartado: true } }),
+  ];
+
+  it('soma o que foi para o tanque por dia, com null nos dias sem lançamento', () => {
+    expect(serieDiaria(producoes, '2026-09-28', 4)).toEqual([
+      { data: '2026-09-25', litros: 0 },
+      { data: '2026-09-26', litros: null },
+      { data: '2026-09-27', litros: 18.2 },
+      { data: '2026-09-28', litros: null },
+    ]);
+  });
+
+  it('por vaca, conta também o leite descartado', () => {
+    expect(serieDiaria(producoes, '2026-09-28', 4, 'b').map((p) => p.litros)).toEqual([
+      6,
+      null,
+      5,
+      null,
+    ]);
   });
 });

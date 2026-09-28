@@ -310,8 +310,9 @@ Todos os prazos vêm de `fazenda.configuracoes`.
 1. **Login**: logo, botão "Entrar com Google", aviso de que o primeiro acesso precisa de internet.
 2. **Criar fazenda**: nome, município, UF.
 3. **Painel**: vacas em lactação, produção de ontem, média de 7 dias, alertas com atalho para o animal, indicador de sincronização.
-4. **Rebanho**: lista ordenada e buscada pelo nome, com filtro por situação (o filtro "Prenhes" ordena pela previsão de parto); detalhe com linha do tempo, gráfico de produção e tratamentos. Não há aba de reprodução: eventos são registrados a partir do Rebanho, e as pendências reprodutivas aparecem nos alertas do Painel.
-5. **Lançar produção em lote**: escolher data e ordenha → lista das vacas em lactação → litros com teclado numérico e "próximo" automático → salvar em um documento.
+4. **Rebanho**: lista ordenada e buscada pelo nome, com filtro por situação (o filtro "Prenhes" ordena pela previsão de parto); detalhe com linha do tempo, gráfico de produção da vaca (30 dias) e tratamentos. Não há aba de reprodução: eventos são registrados a partir do Rebanho, e as pendências reprodutivas aparecem nos alertas do Painel.
+5. **Produção**: gráfico do leite no tanque por dia (30 dias, `serieDiaria`, barras sem animação; toque na barra mostra o dia) e histórico por dia.
+   **Lançar produção em lote**: escolher data e ordenha → lista das vacas em lactação → litros com teclado numérico e "próximo" automático → salvar em um documento.
 6. **Registrar evento reprodutivo** (`rebanho/evento`, pelo botão "Registrar evento" no detalhe da vaca): vaca → tipo → data (padrão hoje) → campos específicos. No parto, oferecer cadastro rápido da cria.
 7. **Tratamentos** (`tratamento`, pelo botão no detalhe do animal ou por "Tratamento em lote" em Conta e fazenda): um animal ou vários de uma vez (atalhos "Em lactação" e "Todo o rebanho"). No detalhe, lista de tratamentos (segurar para excluir) e avisos de carência de leite e carne.
 8. **Conta e fazenda** (`mais`, aberta ao tocar na foto do usuário no Painel; não é aba): configurações da fazenda, exportar CSV, conta (foto, e-mail, sair). Abas: Painel, Rebanho e Produção.
@@ -379,7 +380,7 @@ firebase deploy --only firestore:rules,firestore:indexes
 - [x] Tratamentos com carência (`carencia.ts` com testes)
 - [x] Marcação automática de leite descartado
 - [x] Tratamento em vários animais
-- [ ] Gráficos de produção
+- [x] Gráficos de produção
 - [ ] Exportar CSV
 - [ ] Notificações locais diárias com alertas
 - [ ] Tela de configurações dos prazos

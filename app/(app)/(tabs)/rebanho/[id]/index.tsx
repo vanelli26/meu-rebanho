@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSessaoPronta } from '@/auth/SessaoProvider';
 import { ESPACO_BARRA_ABAS } from '@/components/BarraAbas';
 import { NaoEncontrado } from '@/components/NaoEncontrado';
+import { GraficoLitros } from '@/components/producao/GraficoLitros';
 import { SeloSituacao } from '@/components/rebanho/SeloSituacao';
 import { LinhaDoTempo } from '@/components/reproducao/LinhaDoTempo';
 import { Aviso, Botao, Card, Texto } from '@/components/ui';
@@ -19,7 +20,7 @@ import {
   type Tratamento,
 } from '@/domain/carencia';
 import { diasEmLactacao, iepMedio, liberadaParaInseminar } from '@/domain/lactacao';
-import { producaoDoAnimal, ROTULO_ORDENHA } from '@/domain/producao';
+import { producaoDoAnimal, ROTULO_ORDENHA, serieDiaria } from '@/domain/producao';
 import { estadoReprodutivo, ROTULO_EVENTO, type EventoReprodutivo } from '@/domain/reproducao';
 import { useAnimal } from '@/features/animais';
 import { useContextoGravacao } from '@/features/contexto';
@@ -50,6 +51,10 @@ export default function DetalheAnimal() {
   const ordenhas = useMemo(
     () => (animal ? producaoDoAnimal(producoes, animal.id) : []),
     [producoes, animal],
+  );
+  const serie = useMemo(
+    () => (animal ? serieDiaria(producoes, hoje, 30, animal.id) : []),
+    [producoes, hoje, animal],
   );
 
   if (!animal) return carregando ? null : <NaoEncontrado />;
@@ -229,7 +234,8 @@ export default function DetalheAnimal() {
                 últimos 30 dias
               </Texto>
             </View>
-            {ordenhas.slice(0, 8).map((o) => (
+            <GraficoLitros serie={serie} altura={110} />
+            {ordenhas.slice(0, 4).map((o) => (
               <View
                 key={`${o.data}_${o.ordenha}`}
                 className="flex-row items-center justify-between border-b border-borda pb-2"

@@ -112,6 +112,31 @@ export function producaoDoAnimal(
     );
 }
 
+export type PontoSerie = { data: DataISO; litros: number | null };
+
+/**
+ * Litros por dia nos últimos `dias` dias (até hoje), do mais antigo ao mais novo.
+ * Sem `animalId`: o que foi para o tanque. Com `animalId`: tudo o que a vaca deu
+ * (inclusive descartado). Dia sem lançamento fica `null`.
+ */
+export function serieDiaria(
+  producoes: readonly ProducaoOrdenha[],
+  hoje: DataISO,
+  dias: number,
+  animalId?: string,
+): PontoSerie[] {
+  const porDia = new Map<DataISO, number>();
+  for (const p of producoes) {
+    const litros = animalId ? p.registros[animalId]?.litros : p.totalLitros;
+    if (litros === undefined) continue;
+    porDia.set(p.data, arredondar((porDia.get(p.data) ?? 0) + litros));
+  }
+  return Array.from({ length: dias }, (_, i) => {
+    const data = somarDias(hoje, i - dias + 1);
+    return { data, litros: porDia.get(data) ?? null };
+  });
+}
+
 /** Sugere a ordenha pela hora: antes do meio-dia, manhã; depois, tarde. */
 export function ordenhaSugerida(hora: number): Ordenha {
   return hora < 12 ? 'manha' : 'tarde';
