@@ -58,8 +58,10 @@ function useLeitura<T>(ref: DocumentReference<T> | null, rotulo: string): Leitur
       { includeMetadataChanges: true },
       (snap) => {
         // Documento ausente só no cache pode existir no servidor: espera a rede.
-        if (!snap.exists() && snap.metadata.fromCache) salvar({ tipo: 'sem-rede' });
-        else salvar({ tipo: 'ok', dados: snap.data() ?? null });
+        // Não chamar data() em documento inexistente: o RNFB roda o conversor com dados vazios.
+        if (snap.exists()) salvar({ tipo: 'ok', dados: snap.data() ?? null });
+        else if (snap.metadata.fromCache) salvar({ tipo: 'sem-rede' });
+        else salvar({ tipo: 'ok', dados: null });
       },
       (erro) => {
         console.error(`[sessão] Falha ao ler ${rotulo}:`, erro);
