@@ -3,7 +3,7 @@ import { Stack } from 'expo-router';
 import { IndicadorSyncAtual } from '@/components/IndicadorSyncAtual';
 import { useOpcoesCabecalho } from '@/lib/navegacao';
 
-// Ao abrir um animal vindo de outra aba, a lista fica embaixo para o "voltar".
+// Vindo de outra aba (animal ou evento), a lista fica embaixo para o "voltar".
 export const unstable_settings = { initialRouteName: 'index' };
 
 export default function Layout() {
@@ -12,6 +12,7 @@ export default function Layout() {
     <Stack screenOptions={{ ...opcoes, headerRight: () => <IndicadorSyncAtual /> }}>
       <Stack.Screen name="index" options={{ title: 'Rebanho', headerLargeTitle: true }} />
       <Stack.Screen name="novo" options={{ title: 'Novo animal' }} />
+      <Stack.Screen name="evento" options={{ title: 'Registrar evento' }} />
       <Stack.Screen name="[id]/index" options={{ title: '' }} />
       <Stack.Screen name="[id]/editar" options={{ title: 'Editar animal' }} />
     </Stack>

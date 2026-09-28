@@ -8,17 +8,24 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ESPACO_BARRA_ABAS } from '@/components/BarraAbas';
 import { LinhaAnimal } from '@/components/rebanho/LinhaAnimal';
 import { CampoBusca, Seletor, Texto, type Opcao } from '@/components/ui';
-import { buscarAnimais, situacaoAtual, type Situacao } from '@/domain/animal';
+import {
+  buscarAnimais,
+  ordenarPorPrevisaoParto,
+  situacaoAtual,
+  type Animal,
+  type Situacao,
+} from '@/domain/animal';
 import { useAnimais } from '@/features/animais';
 import { useHoje } from '@/features/hoje';
-import { dataDeISO } from '@/lib/datas';
+import { dataDeISO, diasEntre, isoParaBR, type DataISO } from '@/lib/datas';
 import { useTema } from '@/lib/tema';
 
-type Filtro = 'todos' | Situacao | 'inativos';
+type Filtro = 'todos' | Situacao | 'prenhes' | 'inativos';
 
 const FILTROS: Opcao<Filtro>[] = [
   { valor: 'todos', rotulo: 'Todos' },
   { valor: 'lactacao', rotulo: 'Lactação' },
+  { valor: 'prenhes', rotulo: 'Prenhes' },
   { valor: 'seca', rotulo: 'Secas' },
   { valor: 'novilha', rotulo: 'Novilhas' },
   { valor: 'bezerra', rotulo: 'Bezerras' },
@@ -39,12 +46,16 @@ export default function Rebanho() {
     const porFiltro = animais.filter((a) => {
       if (filtro === 'inativos') return a.status !== 'ativo';
       if (a.status !== 'ativo') return false;
+      if (filtro === 'prenhes') return a.resumo.prenhe;
       return filtro === 'todos' || situacaoAtual(a, hoje) === filtro;
     });
-    return buscarAnimais(porFiltro, busca);
+    const encontrados = buscarAnimais(porFiltro, busca);
+    // Prenhes: quem vai parir primeiro aparece em cima.
+    return filtro === 'prenhes' ? ordenarPorPrevisaoParto(encontrados) : encontrados;
   }, [animais, filtro, busca, hoje]);
 
   const ativos = animais.filter((a) => a.status === 'ativo').length;
+  const temFemeas = animais.some((a) => a.status === 'ativo' && a.sexo === 'F');
 
   return (
     <View className="flex-1 bg-fundo">
@@ -72,6 +83,7 @@ export default function Rebanho() {
           <LinhaAnimal
             animal={item}
             hoje={hoje}
+            detalhe={filtro === 'prenhes' ? textoPrevisaoParto(item, hojeISO) : undefined}
             onPress={() => router.push(`/rebanho/${item.id}`)}
           />
         )}
@@ -96,8 +108,23 @@ export default function Rebanho() {
 
       <Animated.View
         entering={ZoomIn.delay(200).springify().damping(14)}
+        className="flex-row gap-3"
         style={{ position: 'absolute', right: 20, bottom: ESPACO_BARRA_ABAS + insets.bottom - 12 }}
       >
+        {temFemeas ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Registrar evento reprodutivo"
+            onPress={() => router.push('/rebanho/evento')}
+            className="h-16 flex-row items-center gap-2 rounded-full border-[1.5px] border-primaria bg-superficie px-5 active:opacity-80"
+            style={{ boxShadow: '0px 8px 24px rgba(23, 58, 44, 0.18)' }}
+          >
+            <Ionicons name="heart" size={22} color={cores.primaria} />
+            <Texto variante="subtitulo" tom="primaria">
+              Evento
+            </Texto>
+          </Pressable>
+        ) : null}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Novo animal"
@@ -113,4 +140,12 @@ export default function Rebanho() {
       </Animated.View>
     </View>
   );
+}
+
+function textoPrevisaoParto(animal: Animal, hoje: DataISO): string {
+  const previsao = animal.resumo.previsaoParto;
+  if (!previsao) return 'Sem previsão de parto';
+  const dias = diasEntre(hoje, previsao);
+  const quando = dias < 0 ? `há ${-dias} dias` : dias === 0 ? 'hoje' : `em ${dias} dias`;
+  return `Parto previsto ${isoParaBR(previsao)} · ${quando}`;
 }

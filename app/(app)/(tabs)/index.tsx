@@ -30,7 +30,7 @@ type Atalho = {
 
 const ATALHOS: Atalho[] = [
   { icone: 'water', titulo: 'Lançar produção', destino: '/producao/lancar' },
-  { icone: 'heart', titulo: 'Evento reprodutivo', destino: '/reproducao/registrar' },
+  { icone: 'heart', titulo: 'Evento reprodutivo', destino: '/rebanho/evento' },
   { icone: 'add-circle', titulo: 'Novo animal', destino: '/rebanho/novo' },
   { icone: 'medkit', titulo: 'Tratamento', destino: '/mais' },
 ];
