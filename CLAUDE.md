@@ -79,6 +79,7 @@ app/
       producao/           # Lançamento em lote e histórico
     mais.tsx              # Conta e fazenda (aberta pela foto no Painel, fora das abas)
     tratamento.tsx        # Tratamento em um ou vários animais (fora das abas)
+    prazos.tsx            # Prazos reprodutivos da fazenda (só o dono edita)
   _layout.tsx             # Guarda de rota: login → onboarding → app
 src/
   firebase/
@@ -315,7 +316,7 @@ Todos os prazos vêm de `fazenda.configuracoes`.
    **Lançar produção em lote**: escolher data e ordenha → lista das vacas em lactação → litros com teclado numérico e "próximo" automático → salvar em um documento.
 6. **Registrar evento reprodutivo** (`rebanho/evento`, pelo botão "Registrar evento" no detalhe da vaca): vaca → tipo → data (padrão hoje) → campos específicos. No parto, oferecer cadastro rápido da cria.
 7. **Tratamentos** (`tratamento`, pelo botão no detalhe do animal ou por "Tratamento em lote" em Conta e fazenda): um animal ou vários de uma vez (atalhos "Em lactação" e "Todo o rebanho"). No detalhe, lista de tratamentos (segurar para excluir) e avisos de carência de leite e carne.
-8. **Conta e fazenda** (`mais`, aberta ao tocar na foto do usuário no Painel; não é aba): configurações da fazenda, exportar CSV, conta (foto, e-mail, sair). Abas: Painel, Rebanho e Produção.
+8. **Conta e fazenda** (`mais`, aberta ao tocar na foto do usuário no Painel; não é aba): prazos reprodutivos (`prazos`: limites em `LIMITES_PRAZOS`; salvar recalcula o resumo de todos os animais em batches), tratamento em lote, exportar CSV, lembretes, conta (foto, e-mail, sair). Abas: Painel, Rebanho e Produção.
 
 ---
 
@@ -383,7 +384,7 @@ firebase deploy --only firestore:rules,firestore:indexes
 - [x] Gráficos de produção
 - [ ] Exportar CSV
 - [ ] Notificações locais diárias com alertas
-- [ ] Tela de configurações dos prazos
+- [x] Tela de configurações dos prazos
 
 ### Fase 4 — Opcional
 

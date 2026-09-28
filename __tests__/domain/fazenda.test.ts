@@ -1,6 +1,7 @@
 import {
   CONFIGURACOES_PADRAO,
   ehUF,
+  esquemaConfiguracoes,
   esquemaNovaFazenda,
   montarNovaFazenda,
 } from '@/domain/fazenda';
@@ -58,6 +59,29 @@ describe('esquemaNovaFazenda', () => {
     expect(r.success).toBe(false);
     if (!r.success) {
       expect(r.error.issues.map((i) => i.path[0]).sort()).toEqual(['municipio', 'nome', 'uf']);
+    }
+  });
+});
+
+describe('esquemaConfiguracoes', () => {
+  it('aceita os prazos padrão', () => {
+    expect(esquemaConfiguracoes.parse(CONFIGURACOES_PADRAO)).toEqual(CONFIGURACOES_PADRAO);
+  });
+
+  it('rejeita vazio, fracionado e fora dos limites', () => {
+    const r = esquemaConfiguracoes.safeParse({
+      ...CONFIGURACOES_PADRAO,
+      diasGestacao: null,
+      diasRetornoCio: 21.5,
+      periodoVoluntarioEspera: 5,
+    });
+    expect(r.success).toBe(false);
+    if (!r.success) {
+      expect(r.error.issues.map((i) => i.path[0]).sort()).toEqual([
+        'diasGestacao',
+        'diasRetornoCio',
+        'periodoVoluntarioEspera',
+      ]);
     }
   });
 });

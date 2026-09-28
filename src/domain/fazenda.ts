@@ -87,3 +87,35 @@ export const esquemaNovaFazenda = z.object({
   municipio: z.string().trim().min(1, 'Informe o município.').max(80, 'Nome muito longo.'),
   uf: z.string().trim().toUpperCase().refine(ehUF, 'UF inválida. Use a sigla, ex.: PR.'),
 });
+
+/** Limites aceitos para cada prazo, em dias. Fora disso é erro de digitação. */
+export const LIMITES_PRAZOS: Record<keyof ConfiguracoesFazenda, [number, number]> = {
+  diasGestacao: [260, 300],
+  diasSecagemAntesParto: [30, 90],
+  periodoVoluntarioEspera: [20, 120],
+  diasDiagnosticoGestacao: [28, 90],
+  diasRetornoCio: [17, 25],
+};
+
+const prazo = (campo: keyof ConfiguracoesFazenda) => {
+  const [min, max] = LIMITES_PRAZOS[campo];
+  const fora = `Use entre ${min} e ${max} dias.`;
+  return z
+    .number()
+    .int('Use dias inteiros.')
+    .min(min, fora)
+    .max(max, fora)
+    .nullable()
+    .refine((v) => v !== null, 'Informe os dias.')
+    .transform((v) => v as number);
+};
+
+export const esquemaConfiguracoes = z.object({
+  diasGestacao: prazo('diasGestacao'),
+  diasSecagemAntesParto: prazo('diasSecagemAntesParto'),
+  periodoVoluntarioEspera: prazo('periodoVoluntarioEspera'),
+  diasDiagnosticoGestacao: prazo('diasDiagnosticoGestacao'),
+  diasRetornoCio: prazo('diasRetornoCio'),
+});
+
+export type FormularioConfiguracoes = z.input<typeof esquemaConfiguracoes>;

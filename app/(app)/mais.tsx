@@ -70,7 +70,13 @@ export default function Mais() {
           titulo={fazenda.nome}
           detalhe={`${fazenda.municipio} – ${fazenda.uf}`}
         />
-        <LinhaMenu icone="options" titulo="Prazos reprodutivos" selo="Em breve" ultimo />
+        <LinhaMenu
+          icone="options"
+          titulo="Prazos reprodutivos"
+          detalhe={`Gestação ${fazenda.configuracoes.diasGestacao} dias · espera ${fazenda.configuracoes.periodoVoluntarioEspera} dias`}
+          onPress={() => router.push('/prazos')}
+          ultimo
+        />
       </Grupo>
 
       <Grupo titulo="Ferramentas">
