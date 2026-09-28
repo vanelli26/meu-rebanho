@@ -87,12 +87,15 @@ src/
     converters.ts         # FirestoreDataConverter tipados por coleção
   auth/                   # Contexto de sessão, login/logout Google
   domain/                 # REGRAS DE NEGÓCIO PURAS (sem React, sem Firebase)
+    animal.ts             # Tipos, formulário, busca e brinco único
+    producao.ts           # Documento da ordenha, totais e médias
     reproducao.ts
     lactacao.ts
     carencia.ts
     resumoAnimal.ts       # Recalcula o resumo a partir dos eventos
     alertas.ts
-  features/               # Hooks (useAnimais, useProducaoDia...) e ações de gravação
+  features/               # Hooks (useAnimais, useProducoes...) e ações de gravação
+    DadosFazendaProvider.tsx  # Um listener para animais e um para todos os eventos
   components/ui/
   lib/
 firestore.rules
@@ -154,13 +157,17 @@ Resumo calculado (escrito só por `resumoAnimal.ts`):
 - `resumo.prenhe` (bool)
 - `resumo.ultimoParto`, `resumo.ultimaCobertura`, `resumo.ultimaSecagem`
 - `resumo.previsaoParto`, `resumo.previsaoSecagem`
+- `resumo.servicoSemDiagnostico` (inseminação/cobertura ainda sem diagnóstico, parto ou aborto depois; base dos alertas de retorno de cio e diagnóstico)
 - `resumo.carenciaLeiteAte` (data ou null)
 - `resumo.numeroPartos`
+
+A situação `bezerra` vira `novilha` com a idade sem nova gravação: as telas usam `situacaoAtual(animal, hoje)`.
 
 ### `eventos/{eventoId}` (subcoleção do animal)
 
 - `data`, `tipo`: `cio` | `inseminacao` | `cobertura` | `diagnostico_positivo` | `diagnostico_negativo` | `parto` | `aborto` | `secagem`
 - `touroSemen`, `responsavel`, `criaId`, `observacoes`, `criadoPor` (uid), `createdAt`
+- `fazendaId`: o app escuta **todos** os eventos da fazenda com `collectionGroup('eventos')` filtrando por este campo. Assim o histórico de toda vaca fica no cache e o resumo é recalculado certo mesmo offline.
 
 ### `tratamentos/{tratamentoId}` (subcoleção do animal)
 
@@ -174,7 +181,7 @@ Um documento por ordenha, com todas as vacas dentro (barato de ler e gravar em l
 
 - `data`, `ordenha` (`manha` | `tarde` | `unica`)
 - `registros`: mapa `{ [animalId]: { litros: number, descartado: boolean } }`
-- `totalLitros`, `totalDescartado` (calculados no cliente ao salvar)
+- `totalLitros` (só o que foi para o tanque), `totalDescartado` (calculados no cliente ao salvar)
 - `criadoPor`, `updatedAt`
 
 ### Fluxo de gravação de evento ou tratamento
@@ -188,6 +195,7 @@ Em um único `writeBatch`:
 ### Índices
 
 Declarar em `firestore.indexes.json` os índices compostos que surgirem (ex.: animais por `status` + `resumo.situacao`).
+Já declarado: `eventos.fazendaId` com escopo de grupo de coleção (necessário para a consulta de eventos da fazenda).
 
 ---
 
@@ -235,6 +243,11 @@ service cloud.firestore {
       match /{colecao}/{resto=**} {
         allow read, write: if membro(fazendaId);
       }
+    }
+
+    // Eventos de todos os animais, lidos por grupo de coleção (filtrando fazendaId).
+    match /{caminho=**}/eventos/{eventoId} {
+      allow read: if membro(resource.data.fazendaId);
     }
   }
 }
@@ -340,11 +353,11 @@ firebase deploy --only firestore:rules,firestore:indexes
 
 ### Fase 2 — MVP de manejo
 
-- [ ] Cadastro, edição e lista de animais com busca
-- [ ] `src/domain/reproducao.ts`, `lactacao.ts` e `resumoAnimal.ts` com testes
-- [ ] Eventos reprodutivos com atualização do resumo em batch
-- [ ] Lançamento de produção em lote
-- [ ] Painel com resumo e alertas
+- [x] Cadastro, edição e lista de animais com busca
+- [x] `src/domain/reproducao.ts`, `lactacao.ts` e `resumoAnimal.ts` com testes
+- [x] Eventos reprodutivos com atualização do resumo em batch
+- [x] Lançamento de produção em lote
+- [x] Painel com resumo e alertas
 - [ ] Testar o app inteiro em modo avião
 
 ### Fase 3 — Sanidade e relatórios

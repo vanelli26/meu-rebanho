@@ -59,9 +59,10 @@ export default function LancarProducao() {
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
       {cabecalho.success && !dataFutura && !existente.carregando ? (
-        // A chave recria a lista (e o rascunho) ao trocar de ordenha.
+        // A chave recria a lista (e o rascunho) ao trocar de ordenha ou quando o
+        // lançamento salvo chega do servidor depois, para não sobrescrevê-lo.
         <ListaOrdenha
-          key={`${data}_${ordenha}`}
+          key={`${data}_${ordenha}_${existente.dados ? 'salva' : 'nova'}`}
           data={data as DataISO}
           ordenha={ordenha}
           existente={existente.dados}

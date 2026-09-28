@@ -60,6 +60,8 @@ npm run test:rules:emulador   # Security Rules no emulador (precisa de Java)
 
 Publicar regras e índices: `firebase deploy --only firestore:rules,firestore:indexes`
 
+> Publique as regras e os índices antes de usar a Fase 2: a lista de eventos da fazenda usa uma consulta de grupo de coleção (`eventos` por `fazendaId`) que falha sem o índice.
+
 ## Build para uso real
 
 ```bash
