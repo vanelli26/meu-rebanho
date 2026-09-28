@@ -12,9 +12,11 @@ export default function NovoAnimal() {
       valoresIniciais={FORMULARIO_ANIMAL_VAZIO}
       tituloBotao="Cadastrar animal"
       aoSalvar={(form) => {
-        // Grava e segue: a lista se atualiza pelo onSnapshot.
-        const id = criarAnimal(contexto, montarDadosAnimal(form, null));
-        router.replace(`/rebanho/${id}`);
+        // Grava e volta para a lista, que se atualiza pelo onSnapshot. Voltar (em vez de
+        // trocar esta tela pelo detalhe) evita a pilha quebrada que deixava a aba em branco no iOS.
+        criarAnimal(contexto, montarDadosAnimal(form, null));
+        if (router.canGoBack()) router.back();
+        else router.replace('/rebanho');
       }}
     />
   );

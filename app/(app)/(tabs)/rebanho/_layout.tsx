@@ -11,7 +11,7 @@ export default function Layout() {
   return (
     <Stack screenOptions={{ ...opcoes, headerRight: () => <IndicadorSyncAtual /> }}>
       <Stack.Screen name="index" options={{ title: 'Rebanho', headerLargeTitle: true }} />
-      <Stack.Screen name="novo" options={{ title: 'Novo animal', presentation: 'modal' }} />
+      <Stack.Screen name="novo" options={{ title: 'Novo animal' }} />
       <Stack.Screen name="[id]/index" options={{ title: '' }} />
       <Stack.Screen name="[id]/editar" options={{ title: 'Editar animal' }} />
     </Stack>
