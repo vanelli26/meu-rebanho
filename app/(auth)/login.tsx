@@ -1,4 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient';
+import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, FadeInUp } from 'react-native-reanimated';
@@ -27,6 +28,7 @@ export default function Login() {
 
   return (
     <LinearGradient colors={[marca.verdeClaro, marca.verde, marca.verdeEscuro]} style={{ flex: 1 }}>
+      <StatusBar style="light" />
       <Paisagem altura={300} />
       <SafeAreaView className="flex-1">
         <View className="flex-1 items-center justify-center gap-6 px-8">

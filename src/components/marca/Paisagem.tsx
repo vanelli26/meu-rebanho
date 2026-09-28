@@ -1,5 +1,5 @@
 import { StyleSheet, View } from 'react-native';
-import Svg, { Circle, Path } from 'react-native-svg';
+import Svg, { Path } from 'react-native-svg';
 
 /** Colinas de pasto em camadas, para o rodapé de telas da marca. */
 export function Paisagem({ altura = 260 }: { altura?: number }) {
@@ -8,8 +8,20 @@ export function Paisagem({ altura = 260 }: { altura?: number }) {
       pointerEvents="none"
       style={[StyleSheet.absoluteFill, { top: undefined, height: altura }]}
     >
+      {/* Sol fora do SVG esticado, para continuar redondo em qualquer largura. */}
+      <View
+        style={{
+          position: 'absolute',
+          right: '14%',
+          top: altura * 0.18,
+          width: altura * 0.26,
+          height: altura * 0.26,
+          borderRadius: altura,
+          backgroundColor: '#C9A227',
+          opacity: 0.22,
+        }}
+      />
       <Svg width="100%" height="100%" viewBox="0 0 400 260" preserveAspectRatio="none">
-        <Circle cx={318} cy={78} r={34} fill="#C9A227" opacity={0.22} />
         <Path
           d="M0 120 C80 80 160 90 230 120 C300 150 350 130 400 110 V260 H0 Z"
           fill="#2A6049"

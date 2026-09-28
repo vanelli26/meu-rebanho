@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { LinearGradient } from 'expo-linear-gradient';
+import { StatusBar } from 'expo-status-bar';
 import { useRef } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { KeyboardAvoidingView, Platform, ScrollView, View, type TextInput } from 'react-native';
@@ -38,6 +39,7 @@ export default function CriarFazenda() {
       className="flex-1 bg-fundo"
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
     >
+      <StatusBar style="light" />
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerClassName="pb-10">
         <LinearGradient
           colors={[marca.verdeClaro, marca.verdeEscuro]}
