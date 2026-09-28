@@ -78,6 +78,7 @@ app/
       rebanho/            # Lista (filtro "Prenhes" = partos previstos), detalhe, cadastro e registro de evento
       producao/           # Lançamento em lote e histórico
     mais.tsx              # Conta e fazenda (aberta pela foto no Painel, fora das abas)
+    tratamento.tsx        # Tratamento em um ou vários animais (fora das abas)
   _layout.tsx             # Guarda de rota: login → onboarding → app
 src/
   firebase/
@@ -94,7 +95,7 @@ src/
     resumoAnimal.ts       # Recalcula o resumo a partir dos eventos
     alertas.ts
   features/               # Hooks (useAnimais, useProducoes...) e ações de gravação
-    DadosFazendaProvider.tsx  # Um listener para animais e um para todos os eventos
+    DadosFazendaProvider.tsx  # Listeners de animais, de todos os eventos e de todos os tratamentos
   components/ui/
   lib/
 firestore.rules
@@ -175,6 +176,7 @@ A situação `bezerra` vira `novilha` com a idade sem nova gravação: as telas 
 - `data`, `tipo`: `vacina` | `vermifugo` | `antibiotico` | `hormonio` | `outro`
 - `produto`, `dose`, `via`, `carenciaLeiteDias`, `carenciaCarneDias`
 - `observacoes`, `criadoPor`, `createdAt`
+- `fazendaId`: lidos todos de uma vez por `collectionGroup('tratamentos')`, como os eventos, para recalcular a carência offline.
 
 ### `producao/{data_ordenha}`
 
@@ -196,7 +198,7 @@ Em um único `writeBatch`:
 ### Índices
 
 Declarar em `firestore.indexes.json` os índices compostos que surgirem (ex.: animais por `status` + `resumo.situacao`).
-Já declarado: `eventos.fazendaId` com escopo de grupo de coleção (necessário para a consulta de eventos da fazenda).
+Já declarados: `eventos.fazendaId` e `tratamentos.fazendaId` com escopo de grupo de coleção (consultas de eventos e tratamentos da fazenda).
 
 ---
 
@@ -246,8 +248,11 @@ service cloud.firestore {
       }
     }
 
-    // Eventos de todos os animais, lidos por grupo de coleção (filtrando fazendaId).
+    // Eventos e tratamentos de todos os animais, lidos por grupo de coleção (filtrando fazendaId).
     match /{caminho=**}/eventos/{eventoId} {
+      allow read: if membro(resource.data.fazendaId);
+    }
+    match /{caminho=**}/tratamentos/{tratamentoId} {
       allow read: if membro(resource.data.fazendaId);
     }
   }
@@ -285,8 +290,8 @@ Todos os prazos vêm de `fazenda.configuracoes`.
 
 **Carência de leite:**
 
-- `carenciaLeiteAte` = maior (data do tratamento + `carenciaLeiteDias`) entre os tratamentos.
-- Ao lançar produção de vaca com `carenciaLeiteAte` ≥ data da ordenha, marcar `descartado: true` e exibir aviso visível.
+- `carenciaLeiteAte` = maior (data do tratamento + `carenciaLeiteDias`) entre os tratamentos (último dia inclusive). Idem para carne, calculada na tela.
+- Ao lançar produção, a vaca com tratamento cobrindo a data da ordenha (`emCarenciaLeiteNaData`) vem com `descartado: true` e aviso visível. Vale também ao editar uma ordenha passada.
 - Totais de leite entregue excluem registros descartados.
 
 **Alertas do painel** (calculados no cliente a partir dos resumos, por urgência):
@@ -308,7 +313,7 @@ Todos os prazos vêm de `fazenda.configuracoes`.
 4. **Rebanho**: lista ordenada e buscada pelo nome, com filtro por situação (o filtro "Prenhes" ordena pela previsão de parto); detalhe com linha do tempo, gráfico de produção e tratamentos. Não há aba de reprodução: eventos são registrados a partir do Rebanho, e as pendências reprodutivas aparecem nos alertas do Painel.
 5. **Lançar produção em lote**: escolher data e ordenha → lista das vacas em lactação → litros com teclado numérico e "próximo" automático → salvar em um documento.
 6. **Registrar evento reprodutivo** (`rebanho/evento`, pelo botão "Registrar evento" no detalhe da vaca): vaca → tipo → data (padrão hoje) → campos específicos. No parto, oferecer cadastro rápido da cria.
-7. **Tratamentos**: um animal ou vários de uma vez.
+7. **Tratamentos** (`tratamento`, pelo botão no detalhe do animal ou por "Tratamento em lote" em Conta e fazenda): um animal ou vários de uma vez (atalhos "Em lactação" e "Todo o rebanho"). No detalhe, lista de tratamentos (segurar para excluir) e avisos de carência de leite e carne.
 8. **Conta e fazenda** (`mais`, aberta ao tocar na foto do usuário no Painel; não é aba): configurações da fazenda, exportar CSV, conta (foto, e-mail, sair). Abas: Painel, Rebanho e Produção.
 
 ---
@@ -371,9 +376,9 @@ firebase deploy --only firestore:rules,firestore:indexes
 
 ### Fase 3 — Sanidade e relatórios
 
-- [ ] Tratamentos com carência (`carencia.ts` com testes)
-- [ ] Marcação automática de leite descartado
-- [ ] Tratamento em vários animais
+- [x] Tratamentos com carência (`carencia.ts` com testes)
+- [x] Marcação automática de leite descartado
+- [x] Tratamento em vários animais
 - [ ] Gráficos de produção
 - [ ] Exportar CSV
 - [ ] Notificações locais diárias com alertas

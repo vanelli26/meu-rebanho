@@ -194,42 +194,42 @@ describe('subcoleções da fazenda', () => {
   });
 });
 
-describe('eventos por grupo de coleção', () => {
+describe.each(['eventos', 'tratamentos'])('%s por grupo de coleção', (colecao) => {
   beforeEach(async () => {
     await semear();
     await env.withSecurityRulesDisabled(async (ctx) => {
       const db = ctx.firestore();
       await setDoc(doc(db, 'fazendas', 'fazenda-2'), fazendaValida(OUTRO));
-      await setDoc(doc(db, 'fazendas', FAZENDA, 'animais', 'a1', 'eventos', 'e1'), {
+      await setDoc(doc(db, 'fazendas', FAZENDA, 'animais', 'a1', colecao, 'e1'), {
         tipo: 'parto',
         fazendaId: FAZENDA,
       });
-      await setDoc(doc(db, 'fazendas', 'fazenda-2', 'animais', 'b1', 'eventos', 'e2'), {
+      await setDoc(doc(db, 'fazendas', 'fazenda-2', 'animais', 'b1', colecao, 'e2'), {
         tipo: 'cio',
         fazendaId: 'fazenda-2',
       });
     });
   });
 
-  const eventosDe = (uid: string, fazendaId: string) =>
-    getDocs(query(collectionGroup(dbDe(uid), 'eventos'), where('fazendaId', '==', fazendaId)));
+  const doGrupo = (uid: string, fazendaId: string) =>
+    getDocs(query(collectionGroup(dbDe(uid), colecao), where('fazendaId', '==', fazendaId)));
 
-  it('membro lista os eventos da própria fazenda', async () => {
-    const snap = await assertSucceeds(eventosDe(DONO, FAZENDA));
+  it('membro lista os documentos da própria fazenda', async () => {
+    const snap = await assertSucceeds(doGrupo(DONO, FAZENDA));
     expect(snap.docs.map((d) => d.id)).toEqual(['e1']);
   });
 
-  it('não lista eventos de fazenda da qual não é membro', async () => {
-    await assertFails(eventosDe(DONO, 'fazenda-2'));
+  it('não lista documentos de fazenda da qual não é membro', async () => {
+    await assertFails(doGrupo(DONO, 'fazenda-2'));
   });
 
   it('consulta sem filtro pela fazenda é negada', async () => {
-    await assertFails(getDocs(collectionGroup(dbDe(DONO), 'eventos')));
+    await assertFails(getDocs(collectionGroup(dbDe(DONO), colecao)));
   });
 
   it('anônimo não lista', async () => {
     await assertFails(
-      getDocs(query(collectionGroup(dbAnonimo(), 'eventos'), where('fazendaId', '==', FAZENDA))),
+      getDocs(query(collectionGroup(dbAnonimo(), colecao), where('fazendaId', '==', FAZENDA))),
     );
   });
 });

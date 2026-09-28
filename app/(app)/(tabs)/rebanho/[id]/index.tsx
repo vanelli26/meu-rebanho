@@ -11,6 +11,13 @@ import { SeloSituacao } from '@/components/rebanho/SeloSituacao';
 import { LinhaDoTempo } from '@/components/reproducao/LinhaDoTempo';
 import { Aviso, Botao, Card, Texto } from '@/components/ui';
 import { identificacao, ROTULO_STATUS, situacaoAtual } from '@/domain/animal';
+import {
+  carenciaCarneAte,
+  emCarenciaLeite,
+  ordenarTratamentos,
+  ROTULO_TRATAMENTO,
+  type Tratamento,
+} from '@/domain/carencia';
 import { diasEmLactacao, iepMedio, liberadaParaInseminar } from '@/domain/lactacao';
 import { producaoDoAnimal, ROTULO_ORDENHA } from '@/domain/producao';
 import { estadoReprodutivo, ROTULO_EVENTO, type EventoReprodutivo } from '@/domain/reproducao';
@@ -20,6 +27,7 @@ import { useDadosFazenda } from '@/features/DadosFazendaProvider';
 import { excluirEvento } from '@/features/eventos';
 import { useHoje } from '@/features/hoje';
 import { useProducoes } from '@/features/producao';
+import { excluirTratamento } from '@/features/tratamentos';
 import { dataDeISO, idadeTexto, isoParaBR, isoParaDiaMes } from '@/lib/datas';
 import { numeroParaTexto } from '@/lib/numeros';
 import { useTema } from '@/lib/tema';
@@ -28,7 +36,7 @@ export default function DetalheAnimal() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { fazenda } = useSessaoPronta();
   const contexto = useContextoGravacao();
-  const { carregando, animal, eventos } = useAnimal(id);
+  const { carregando, animal, eventos, tratamentos } = useAnimal(id);
   const { animalPorId } = useDadosFazenda();
   const { cores } = useTema();
   const insets = useSafeAreaInsets();
@@ -54,6 +62,7 @@ export default function DetalheAnimal() {
   const iep = iepMedio(estado.intervalosEntrePartos);
   const mae = animal.maeId ? animalPorId.get(animal.maeId) : undefined;
   const filhos = [...animalPorId.values()].filter((a) => a.maeId === animal.id);
+  const carneAte = carenciaCarneAte(tratamentos);
 
   const confirmarExclusao = (evento: EventoReprodutivo) => {
     Alert.alert(
@@ -66,6 +75,21 @@ export default function DetalheAnimal() {
           text: 'Excluir',
           style: 'destructive',
           onPress: () => excluirEvento(contexto, animal, eventos, evento.id),
+        },
+      ],
+    );
+  };
+
+  const confirmarExclusaoTratamento = (tratamento: Tratamento) => {
+    Alert.alert(
+      `Excluir ${tratamento.produto}?`,
+      `Tratamento de ${isoParaBR(tratamento.data)}. A carência será recalculada.`,
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        {
+          text: 'Excluir',
+          style: 'destructive',
+          onPress: () => excluirTratamento(contexto, animal, eventos, tratamentos, tratamento.id),
         },
       ],
     );
@@ -124,21 +148,40 @@ export default function DetalheAnimal() {
           </View>
         </Card>
 
-        {r.carenciaLeiteAte && r.carenciaLeiteAte >= hoje ? (
+        {femea && emCarenciaLeite(r.carenciaLeiteAte, hoje) ? (
           <Aviso
             tipo="perigo"
             titulo="Leite fora do tanque"
-            mensagem={`Carência até ${isoParaBR(r.carenciaLeiteAte)}.`}
+            mensagem={`Carência até ${isoParaBR(r.carenciaLeiteAte as string)}.`}
+          />
+        ) : null}
+        {carneAte && carneAte >= hoje ? (
+          <Aviso
+            tipo="atencao"
+            titulo="Carência de carne"
+            mensagem={`Não abater nem vender para corte até ${isoParaBR(carneAte)}.`}
           />
         ) : null}
 
-        {femea && ativo ? (
-          <View>
-            <Botao
-              titulo="Registrar evento"
-              icone="add-circle"
-              onPress={() => router.push(`/rebanho/evento?animalId=${animal.id}`)}
-            />
+        {ativo ? (
+          <View className="flex-row gap-3">
+            {femea ? (
+              <View className="flex-1">
+                <Botao
+                  titulo="Evento"
+                  icone="add-circle"
+                  onPress={() => router.push(`/rebanho/evento?animalId=${animal.id}`)}
+                />
+              </View>
+            ) : null}
+            <View className="flex-1">
+              <Botao
+                titulo="Tratamento"
+                icone="medkit"
+                variante={femea ? 'secundaria' : 'primaria'}
+                onPress={() => router.push(`/tratamento?animalId=${animal.id}`)}
+              />
+            </View>
           </View>
         ) : null}
 
@@ -227,6 +270,50 @@ export default function DetalheAnimal() {
             ) : (
               <Texto tom="suave">Nenhum evento reprodutivo registrado.</Texto>
             )}
+          </Card>
+        ) : null}
+
+        {tratamentos.length ? (
+          <Card>
+            <Texto variante="subtitulo">Tratamentos</Texto>
+            {ordenarTratamentos(tratamentos).map((t) => (
+              <Pressable
+                key={t.id}
+                onLongPress={() => confirmarExclusaoTratamento(t)}
+                accessibilityHint="Segure para excluir"
+                className="flex-row gap-3 border-b border-borda pb-3 active:opacity-70"
+              >
+                <View className="h-10 w-10 items-center justify-center rounded-full bg-info-suave">
+                  <Ionicons name="medkit" size={18} color={cores.info} />
+                </View>
+                <View className="flex-1 gap-0.5">
+                  <View className="flex-row items-center justify-between gap-2">
+                    <Texto variante="rotulo" className="flex-1 text-[14px]" numberOfLines={1}>
+                      {t.produto}
+                    </Texto>
+                    <Texto variante="legenda" tom="suave">
+                      {isoParaBR(t.data)}
+                    </Texto>
+                  </View>
+                  <Texto variante="legenda" tom="suave">
+                    {[ROTULO_TRATAMENTO[t.tipo], t.dose, t.via].filter(Boolean).join(' · ')}
+                  </Texto>
+                  {t.carenciaLeiteDias || t.carenciaCarneDias ? (
+                    <Texto variante="legenda" tom="suave">
+                      Carência: {t.carenciaLeiteDias} d leite · {t.carenciaCarneDias} d carne
+                    </Texto>
+                  ) : null}
+                  {t.observacoes ? (
+                    <Texto variante="legenda" tom="suave">
+                      {t.observacoes}
+                    </Texto>
+                  ) : null}
+                </View>
+              </Pressable>
+            ))}
+            <Texto variante="legenda" tom="suave">
+              Lançou errado? Segure o tratamento para excluir.
+            </Texto>
           </Card>
         ) : null}
 

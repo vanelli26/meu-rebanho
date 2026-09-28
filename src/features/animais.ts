@@ -1,6 +1,7 @@
 import { serverTimestamp, writeBatch } from '@react-native-firebase/firestore';
 
 import type { Animal, DadosAnimal } from '@/domain/animal';
+import type { Tratamento } from '@/domain/carencia';
 import type { ConfiguracoesFazenda } from '@/domain/fazenda';
 import type { EventoReprodutivo } from '@/domain/reproducao';
 import { calcularResumo } from '@/domain/resumoAnimal';
@@ -19,12 +20,14 @@ export function useAnimal(animalId: string | undefined): {
   carregando: boolean;
   animal: Animal | null;
   eventos: EventoReprodutivo[];
+  tratamentos: Tratamento[];
 } {
-  const { carregando, animalPorId, eventosPorAnimal } = useDadosFazenda();
+  const { carregando, animalPorId, eventosPorAnimal, tratamentosPorAnimal } = useDadosFazenda();
   return {
     carregando,
     animal: (animalId && animalPorId.get(animalId)) || null,
     eventos: (animalId && eventosPorAnimal.get(animalId)) || [],
+    tratamentos: (animalId && tratamentosPorAnimal.get(animalId)) || [],
   };
 }
 

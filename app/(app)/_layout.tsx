@@ -24,6 +24,15 @@ export default function AppLayout() {
             headerRight: () => <IndicadorSyncAtual />,
           }}
         />
+        <Stack.Screen
+          name="tratamento"
+          options={{
+            ...opcoes,
+            headerShown: true,
+            title: 'Registrar tratamento',
+            headerRight: () => <IndicadorSyncAtual />,
+          }}
+        />
       </Stack>
     </DadosFazendaProvider>
   );

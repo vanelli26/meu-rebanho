@@ -6,6 +6,7 @@ import type {
 } from '@react-native-firebase/firestore';
 
 import type { Animal, ResumoAnimal } from '@/domain/animal';
+import type { Tratamento, TipoTratamento } from '@/domain/carencia';
 import type { ConfiguracoesFazenda, Papel } from '@/domain/fazenda';
 import type { Ordenha, ProducaoOrdenha, RegistroProducao } from '@/domain/producao';
 import type { EventoReprodutivo, TipoEvento } from '@/domain/reproducao';
@@ -122,6 +123,26 @@ export const eventoConverter = conversorLeitura<EventoDoAnimal>((snapshot) => {
     touroSemen: d.touroSemen ?? '',
     responsavel: d.responsavel ?? '',
     criaId: d.criaId ?? null,
+    observacoes: d.observacoes ?? '',
+  };
+});
+
+/** Tratamento com o animal a que pertence (lido por grupo de coleção). */
+export type TratamentoDoAnimal = Tratamento & { animalId: string };
+
+/** `fazendas/{fazendaId}/animais/{animalId}/tratamentos/{tratamentoId}` */
+export const tratamentoConverter = conversorLeitura<TratamentoDoAnimal>((snapshot) => {
+  const d = snapshot.data();
+  return {
+    id: snapshot.id,
+    animalId: snapshot.ref.parent.parent?.id ?? '',
+    data: d.data,
+    tipo: (d.tipo ?? 'outro') as TipoTratamento,
+    produto: d.produto ?? '',
+    dose: d.dose ?? '',
+    via: d.via ?? '',
+    carenciaLeiteDias: d.carenciaLeiteDias ?? 0,
+    carenciaCarneDias: d.carenciaCarneDias ?? 0,
     observacoes: d.observacoes ?? '',
   };
 });

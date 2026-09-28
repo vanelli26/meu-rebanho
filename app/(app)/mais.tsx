@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import type { ReactNode } from 'react';
 import { Alert, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -73,7 +74,13 @@ export default function Mais() {
       </Grupo>
 
       <Grupo titulo="Ferramentas">
-        <LinhaMenu icone="medkit" titulo="Sanidade" cor="info" selo="Em breve" />
+        <LinhaMenu
+          icone="medkit"
+          titulo="Tratamento em lote"
+          detalhe="Vacinação, vermifugação..."
+          cor="info"
+          onPress={() => router.push('/tratamento')}
+        />
         <LinhaMenu icone="share-outline" titulo="Exportar planilha" cor="info" selo="Em breve" />
         <LinhaMenu icone="notifications" titulo="Lembretes" cor="destaque" selo="Em breve" ultimo />
       </Grupo>

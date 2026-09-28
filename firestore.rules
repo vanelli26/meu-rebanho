@@ -49,5 +49,10 @@ service cloud.firestore {
     match /{caminho=**}/eventos/{eventoId} {
       allow read: if membro(resource.data.fazendaId);
     }
+
+    // Tratamentos de todos os animais, pelo mesmo motivo (carências calculadas offline).
+    match /{caminho=**}/tratamentos/{tratamentoId} {
+      allow read: if membro(resource.data.fazendaId);
+    }
   }
 }

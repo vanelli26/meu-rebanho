@@ -2,8 +2,12 @@ import { createContext, use, useMemo, type ReactNode } from 'react';
 
 import { useSessaoPronta } from '@/auth/SessaoProvider';
 import type { Animal } from '@/domain/animal';
-import type { EventoDoAnimal } from '@/firebase/converters';
-import { animaisLeituraRef, eventosDaFazendaQuery } from '@/firebase/paths';
+import type { EventoDoAnimal, TratamentoDoAnimal } from '@/firebase/converters';
+import {
+  animaisLeituraRef,
+  eventosDaFazendaQuery,
+  tratamentosDaFazendaQuery,
+} from '@/firebase/paths';
 
 import { useConsulta } from './leitura';
 
@@ -12,12 +16,13 @@ type DadosFazenda = {
   animais: Animal[];
   animalPorId: Map<string, Animal>;
   eventosPorAnimal: Map<string, EventoDoAnimal[]>;
+  tratamentosPorAnimal: Map<string, TratamentoDoAnimal[]>;
 };
 
 const Contexto = createContext<DadosFazenda | null>(null);
 
 /**
- * Mantém escutando os animais e todos os eventos da fazenda enquanto o app está aberto.
+ * Mantém escutando os animais e todos os eventos e tratamentos da fazenda enquanto o app está aberto.
  * Assim o cache fica completo (telas abrem offline) e há um só listener por coleção.
  */
 export function DadosFazendaProvider({ children }: { children: ReactNode }) {
@@ -28,23 +33,33 @@ export function DadosFazendaProvider({ children }: { children: ReactNode }) {
     `eventos:${fazenda.id}`,
     'eventos',
   );
+  const tratamentos = useConsulta(
+    tratamentosDaFazendaQuery(fazenda.id),
+    `tratamentos:${fazenda.id}`,
+    'tratamentos',
+  );
 
   const valor = useMemo<DadosFazenda>(() => {
-    const eventosPorAnimal = new Map<string, EventoDoAnimal[]>();
-    for (const evento of eventos.dados) {
-      const lista = eventosPorAnimal.get(evento.animalId);
-      if (lista) lista.push(evento);
-      else eventosPorAnimal.set(evento.animalId, [evento]);
-    }
     return {
-      carregando: animais.carregando || eventos.carregando,
+      carregando: animais.carregando || eventos.carregando || tratamentos.carregando,
       animais: animais.dados,
       animalPorId: new Map(animais.dados.map((a) => [a.id, a])),
-      eventosPorAnimal,
+      eventosPorAnimal: agruparPorAnimal(eventos.dados),
+      tratamentosPorAnimal: agruparPorAnimal(tratamentos.dados),
     };
-  }, [animais, eventos]);
+  }, [animais, eventos, tratamentos]);
 
   return <Contexto value={valor}>{children}</Contexto>;
+}
+
+function agruparPorAnimal<T extends { animalId: string }>(lista: readonly T[]): Map<string, T[]> {
+  const porAnimal = new Map<string, T[]>();
+  for (const item of lista) {
+    const doAnimal = porAnimal.get(item.animalId);
+    if (doAnimal) doAnimal.push(item);
+    else porAnimal.set(item.animalId, [item]);
+  }
+  return porAnimal;
 }
 
 export function useDadosFazenda(): DadosFazenda {

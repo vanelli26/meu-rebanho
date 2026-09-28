@@ -26,8 +26,9 @@ import {
   type Ordenha,
   type ProducaoOrdenha,
 } from '@/domain/producao';
-import { useAnimais } from '@/features/animais';
+import { emCarenciaLeiteNaData } from '@/domain/carencia';
 import { useContextoGravacao } from '@/features/contexto';
+import { useDadosFazenda } from '@/features/DadosFazendaProvider';
 import { useHoje } from '@/features/hoje';
 import { salvarProducao, useOrdenha } from '@/features/producao';
 import { dataDeISO, ehDataISO, isoParaBR, type DataISO } from '@/lib/datas';
@@ -135,7 +136,7 @@ function ListaOrdenha({
   topo: ReactNode;
 }) {
   const contexto = useContextoGravacao();
-  const { animais } = useAnimais();
+  const { animais, tratamentosPorAnimal } = useDadosFazenda();
   const insets = useSafeAreaInsets();
   const tecladoVisivel = useTecladoVisivel();
   const campos = useRef<(TextInput | null)[]>([]);
@@ -143,8 +144,9 @@ function ListaOrdenha({
   const [erros, setErros] = useState<Record<string, string>>({});
   const [salvo, setSalvo] = useState(false);
 
+  // Pela data da ordenha: vale também ao lançar ou editar dias passados.
   const emCarencia = (animal: Animal) =>
-    animal.resumo.carenciaLeiteAte !== null && animal.resumo.carenciaLeiteAte >= data;
+    emCarenciaLeiteNaData(tratamentosPorAnimal.get(animal.id) ?? [], data);
 
   // Vacas em lactação hoje, mais as que já têm registro nesta ordenha.
   const vacas = useMemo(() => {
@@ -161,7 +163,11 @@ function ListaOrdenha({
     for (const a of vacas) {
       const registro = existente?.registros[a.id];
       inicial[a.id] = registro
-        ? { texto: numeroParaTexto(registro.litros), descartado: registro.descartado }
+        ? {
+            texto: numeroParaTexto(registro.litros),
+            // Tratamento registrado depois do lançamento também marca o descarte.
+            descartado: registro.descartado || emCarencia(a),
+          }
         : { texto: '', descartado: emCarencia(a) };
     }
     return inicial;
@@ -239,7 +245,7 @@ function ListaOrdenha({
             <Aviso
               tipo="atencao"
               titulo="Nenhuma vaca em lactação"
-              mensagem="Registre o parto das vacas na aba Reprodução para que apareçam aqui."
+              mensagem="Registre o parto das vacas pelo Rebanho para que apareçam aqui."
             />
           ) : (
             <Texto variante="legenda" tom="suave" className="px-1">

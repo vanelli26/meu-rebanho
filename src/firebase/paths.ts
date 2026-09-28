@@ -14,6 +14,7 @@ import {
   eventoConverter,
   fazendaConverter,
   producaoConverter,
+  tratamentoConverter,
   usuarioConverter,
 } from './converters';
 import { db } from './init';
@@ -48,6 +49,17 @@ export const novoEventoRef = (fazendaId: string, animalId: string) =>
 export const eventosDaFazendaQuery = (fazendaId: string) =>
   query(collectionGroup(db, 'eventos'), where('fazendaId', '==', fazendaId)).withConverter(
     eventoConverter,
+  );
+
+export const tratamentosRef = (fazendaId: string, animalId: string) =>
+  collection(animalRef(fazendaId, animalId), 'tratamentos');
+export const novoTratamentoRef = (fazendaId: string, animalId: string) =>
+  doc(tratamentosRef(fazendaId, animalId));
+
+/** Todos os tratamentos da fazenda, por grupo de coleção (carências calculadas offline). */
+export const tratamentosDaFazendaQuery = (fazendaId: string) =>
+  query(collectionGroup(db, 'tratamentos'), where('fazendaId', '==', fazendaId)).withConverter(
+    tratamentoConverter,
   );
 
 export const producaoRef = (fazendaId: string) => collection(db, 'fazendas', fazendaId, 'producao');
