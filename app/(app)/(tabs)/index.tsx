@@ -1,17 +1,24 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, type Href } from 'expo-router';
-import type { ComponentProps } from 'react';
+import { useMemo, useState, type ComponentProps } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useSessaoPronta } from '@/auth/SessaoProvider';
+import { AlertaLinha } from '@/components/AlertaLinha';
 import { Avatar } from '@/components/Avatar';
 import { ESPACO_BARRA_ABAS } from '@/components/BarraAbas';
 import { IndicadorSyncAtual } from '@/components/IndicadorSyncAtual';
 import { Logo } from '@/components/marca/Logo';
 import { Card, Texto } from '@/components/ui';
+import { gerarAlertas } from '@/domain/alertas';
+import { resumoProducao } from '@/domain/producao';
+import { useAnimais } from '@/features/animais';
+import { useHoje } from '@/features/hoje';
+import { useProducoes } from '@/features/producao';
+import { numeroParaTexto } from '@/lib/numeros';
 import { saudacao } from '@/lib/saudacao';
 import { marca, useTema } from '@/lib/tema';
 
@@ -22,17 +29,35 @@ type Atalho = {
 };
 
 const ATALHOS: Atalho[] = [
-  { icone: 'water', titulo: 'Lançar produção', destino: '/producao' },
-  { icone: 'heart', titulo: 'Evento reprodutivo', destino: '/reproducao' },
-  { icone: 'add-circle', titulo: 'Novo animal', destino: '/rebanho' },
+  { icone: 'water', titulo: 'Lançar produção', destino: '/producao/lancar' },
+  { icone: 'heart', titulo: 'Evento reprodutivo', destino: '/reproducao/registrar' },
+  { icone: 'add-circle', titulo: 'Novo animal', destino: '/rebanho/novo' },
   { icone: 'medkit', titulo: 'Tratamento', destino: '/mais' },
 ];
+
+const LIMITE_ALERTAS = 6;
 
 export default function Painel() {
   const { conta, fazenda } = useSessaoPronta();
   const { cores, escuro } = useTema();
   const insets = useSafeAreaInsets();
   const primeiroNome = conta.nome.split(' ')[0] || 'produtor';
+  const hoje = useHoje();
+  const { carregando, animais } = useAnimais();
+  const { producoes } = useProducoes(fazenda.id, hoje, 8);
+  const [verTodos, setVerTodos] = useState(false);
+
+  const emLactacao = animais.filter(
+    (a) => a.status === 'ativo' && a.resumo.situacao === 'lactacao',
+  ).length;
+  const producao = useMemo(() => resumoProducao(producoes, hoje), [producoes, hoje]);
+  const alertas = useMemo(
+    () => gerarAlertas(animais, fazenda.configuracoes, hoje),
+    [animais, fazenda.configuracoes, hoje],
+  );
+  const visiveis = verTodos ? alertas : alertas.slice(0, LIMITE_ALERTAS);
+  const litros = (valor: number | null) =>
+    valor === null ? '— L' : `${numeroParaTexto(Math.round(valor))} L`;
 
   return (
     <ScrollView
@@ -89,15 +114,15 @@ export default function Painel() {
 
           <View className="mt-6 flex-row">
             {[
-              { valor: '—', rotulo: 'Em lactação' },
-              { valor: '— L', rotulo: 'Ontem' },
-              { valor: '— L', rotulo: 'Média 7 dias' },
+              { valor: carregando ? '—' : String(emLactacao), rotulo: 'Em lactação' },
+              { valor: litros(producao.ontem), rotulo: 'Ontem' },
+              { valor: litros(producao.media7Dias), rotulo: 'Média 7 dias' },
             ].map((item, i) => (
               <View
                 key={item.rotulo}
                 className={`flex-1 gap-0.5 ${i > 0 ? 'border-l border-[#F7F4EC]/15 pl-4' : ''}`}
               >
-                <Texto variante="numero" tom="creme">
+                <Texto variante="numero" tom="creme" numberOfLines={1} adjustsFontSizeToFit>
                   {item.valor}
                 </Texto>
                 <Texto variante="legenda" tom="creme-suave">
@@ -142,22 +167,53 @@ export default function Painel() {
       </View>
 
       <View className="gap-3">
-        <Texto variante="subtitulo" className="px-1">
-          Alertas
-        </Texto>
-        <Card indice={6} className="flex-row items-center gap-4">
-          <View className="h-12 w-12 items-center justify-center rounded-full bg-sucesso-suave">
-            <Ionicons name="checkmark-done" size={24} color={cores.sucesso} />
-          </View>
-          <View className="flex-1 gap-0.5">
-            <Texto variante="rotulo" className="text-[15px]">
-              Tudo em dia
-            </Texto>
+        <View className="flex-row items-baseline justify-between px-1">
+          <Texto variante="subtitulo">Alertas</Texto>
+          {alertas.length ? (
             <Texto variante="legenda" tom="suave">
-              Partos, secagens e carências aparecem aqui quando houver animais cadastrados.
+              {alertas.length} {alertas.length === 1 ? 'pendência' : 'pendências'}
             </Texto>
-          </View>
-        </Card>
+          ) : null}
+        </View>
+        {alertas.length ? (
+          <Card indice={6} className="gap-0 overflow-hidden p-0">
+            {visiveis.map((alerta, i) => (
+              <AlertaLinha
+                key={`${alerta.tipo}-${alerta.animalId}`}
+                alerta={alerta}
+                ultimo={i === visiveis.length - 1 && alertas.length <= LIMITE_ALERTAS}
+                onPress={() => router.push(`/rebanho/${alerta.animalId}`)}
+              />
+            ))}
+            {alertas.length > LIMITE_ALERTAS ? (
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => setVerTodos((v) => !v)}
+                className="min-h-12 items-center justify-center active:bg-superficie-2"
+              >
+                <Texto variante="rotulo" tom="primaria">
+                  {verTodos ? 'Mostrar menos' : `Ver todos (${alertas.length})`}
+                </Texto>
+              </Pressable>
+            ) : null}
+          </Card>
+        ) : (
+          <Card indice={6} className="flex-row items-center gap-4">
+            <View className="h-12 w-12 items-center justify-center rounded-full bg-sucesso-suave">
+              <Ionicons name="checkmark-done" size={24} color={cores.sucesso} />
+            </View>
+            <View className="flex-1 gap-0.5">
+              <Texto variante="rotulo" className="text-[15px]">
+                Tudo em dia
+              </Texto>
+              <Texto variante="legenda" tom="suave">
+                {animais.length
+                  ? 'Nenhuma carência, parto, secagem ou diagnóstico pendente.'
+                  : 'Partos, secagens e carências aparecem aqui quando houver animais cadastrados.'}
+              </Texto>
+            </View>
+          </Card>
+        )}
       </View>
     </ScrollView>
   );
