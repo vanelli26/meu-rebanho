@@ -53,6 +53,8 @@ export const eventosDaFazendaQuery = (fazendaId: string) =>
 export const producaoRef = (fazendaId: string) => collection(db, 'fazendas', fazendaId, 'producao');
 export const ordenhaRef = (fazendaId: string, idOrdenha: string) =>
   doc(producaoRef(fazendaId), idOrdenha);
+export const ordenhaLeituraRef = (fazendaId: string, idOrdenha: string) =>
+  ordenhaRef(fazendaId, idOrdenha).withConverter(producaoConverter);
 
 /** Ordenhas a partir de uma data, mais recentes primeiro. */
 export const producaoDesdeQuery = (fazendaId: string, desde: DataISO) =>

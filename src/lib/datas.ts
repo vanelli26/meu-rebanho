@@ -1,4 +1,12 @@
-import { addDays, differenceInCalendarDays, format, isValid, parse, parseISO } from 'date-fns';
+import {
+  addDays,
+  differenceInCalendarDays,
+  differenceInMonths,
+  format,
+  isValid,
+  parse,
+  parseISO,
+} from 'date-fns';
 
 /** Data de manejo no formato `YYYY-MM-DD` (sem fuso). */
 export type DataISO = string;
@@ -38,6 +46,11 @@ export function mascaraDataBR(texto: string): string {
   return `${digitos.slice(0, 2)}/${digitos.slice(2, 4)}/${digitos.slice(4)}`;
 }
 
+/** `YYYY-MM-DD` → `Date` local (meia-noite). */
+export function dataDeISO(iso: DataISO): Date {
+  return parseISO(iso);
+}
+
 /** Soma (ou subtrai) dias de uma data `YYYY-MM-DD`. */
 export function somarDias(iso: DataISO, dias: number): DataISO {
   return paraDataISO(addDays(parseISO(iso), dias));
@@ -51,4 +64,18 @@ export function diasEntre(de: DataISO, ate: DataISO): number {
 /** `YYYY-MM-DD` → `dd/MM`, para listas curtas. */
 export function isoParaDiaMes(iso: DataISO): string {
   return isoParaBR(iso).slice(0, 5);
+}
+
+/** Idade legível: "20 dias", "5 meses", "2 anos e 3 meses". */
+export function idadeTexto(nascimento: DataISO, hoje: DataISO): string {
+  const meses = differenceInMonths(parseISO(hoje), parseISO(nascimento));
+  if (meses < 1) {
+    const dias = Math.max(0, diasEntre(nascimento, hoje));
+    return `${dias} ${dias === 1 ? 'dia' : 'dias'}`;
+  }
+  if (meses < 12) return `${meses} ${meses === 1 ? 'mês' : 'meses'}`;
+  const anos = Math.floor(meses / 12);
+  const resto = meses % 12;
+  const textoAnos = `${anos} ${anos === 1 ? 'ano' : 'anos'}`;
+  return resto ? `${textoAnos} e ${resto} ${resto === 1 ? 'mês' : 'meses'}` : textoAnos;
 }

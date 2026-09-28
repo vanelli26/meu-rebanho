@@ -2,6 +2,7 @@ import {
   brParaISO,
   diasEntre,
   ehDataISO,
+  idadeTexto,
   isoParaBR,
   isoParaDiaMes,
   mascaraDataBR,
@@ -51,5 +52,15 @@ describe('somarDias, diasEntre, ehDataISO e isoParaDiaMes', () => {
     expect(ehDataISO('2026-02-28')).toBe(true);
     expect(ehDataISO('2026-02-30')).toBe(false);
     expect(isoParaDiaMes('2026-09-05')).toBe('05/09');
+  });
+});
+
+describe('idadeTexto', () => {
+  it('usa dias, meses ou anos e meses', () => {
+    expect(idadeTexto('2026-09-27', '2026-09-28')).toBe('1 dia');
+    expect(idadeTexto('2026-09-10', '2026-09-28')).toBe('18 dias');
+    expect(idadeTexto('2026-04-28', '2026-09-28')).toBe('5 meses');
+    expect(idadeTexto('2025-09-28', '2026-09-28')).toBe('1 ano');
+    expect(idadeTexto('2024-06-01', '2026-09-28')).toBe('2 anos e 3 meses');
   });
 });
