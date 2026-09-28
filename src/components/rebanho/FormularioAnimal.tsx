@@ -7,6 +7,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   brincoDisponivel,
   esquemaAnimal,
+  nomeDisponivel,
   ROTULO_STATUS,
   type FormularioAnimal as Formulario,
   type StatusAnimal,
@@ -33,7 +34,7 @@ const OPCOES_STATUS = (Object.keys(ROTULO_STATUS) as StatusAnimal[]).map((valor)
 
 type Props = {
   valoresIniciais: Formulario;
-  /** Na edição, o próprio animal não conta como brinco repetido. */
+  /** Na edição, o próprio animal não conta como nome ou brinco repetido. */
   animalId?: string;
   tituloBotao: string;
   aoSalvar: (dados: Formulario) => void;
@@ -43,7 +44,7 @@ type Props = {
 export function FormularioAnimal({ valoresIniciais, animalId, tituloBotao, aoSalvar }: Props) {
   const insets = useSafeAreaInsets();
   const { animais } = useAnimais();
-  const nomeRef = useRef<TextInput>(null);
+  const brincoRef = useRef<TextInput>(null);
   const edicao = animalId !== undefined;
 
   const [salvo, setSalvo] = useState(false);
@@ -55,14 +56,11 @@ export function FormularioAnimal({ valoresIniciais, animalId, tituloBotao, aoSal
   const status = useWatch({ control, name: 'status' });
 
   const salvar = handleSubmit((dados) => {
-    if (!brincoDisponivel(dados.brinco, animais, animalId)) {
-      setError(
-        'brinco',
-        { message: 'Já existe um animal com este brinco.' },
-        { shouldFocus: true },
-      );
-      return;
-    }
+    const nomeLivre = nomeDisponivel(dados.nome, animais, animalId);
+    const brincoLivre = brincoDisponivel(dados.brinco, animais, animalId);
+    if (!nomeLivre) setError('nome', { message: 'Já existe um animal com este nome.' });
+    if (!brincoLivre) setError('brinco', { message: 'Já existe um animal com este brinco.' });
+    if (!nomeLivre || !brincoLivre) return;
     setSalvo(true);
     aoSalvar(dados);
   });
@@ -80,38 +78,38 @@ export function FormularioAnimal({ valoresIniciais, animalId, tituloBotao, aoSal
       >
         <Card className="gap-5">
           <View className="flex-row gap-3">
-            <View className="w-32">
-              <Controller
-                control={control}
-                name="brinco"
-                render={({ field, fieldState }) => (
-                  <CampoTexto
-                    ref={field.ref}
-                    rotulo="Brinco *"
-                    placeholder="123"
-                    autoCapitalize="characters"
-                    autoCorrect={false}
-                    autoFocus={!edicao}
-                    returnKeyType="next"
-                    value={field.value}
-                    onChangeText={field.onChange}
-                    onBlur={field.onBlur}
-                    onSubmitEditing={() => nomeRef.current?.focus()}
-                    erro={fieldState.error?.message}
-                  />
-                )}
-              />
-            </View>
             <View className="flex-1">
               <Controller
                 control={control}
                 name="nome"
                 render={({ field, fieldState }) => (
                   <CampoTexto
-                    ref={nomeRef}
-                    rotulo="Nome"
-                    placeholder="Opcional"
+                    ref={field.ref}
+                    rotulo="Nome *"
+                    placeholder="Ex.: Mimosa"
                     autoCapitalize="words"
+                    autoFocus={!edicao}
+                    returnKeyType="next"
+                    value={field.value}
+                    onChangeText={field.onChange}
+                    onBlur={field.onBlur}
+                    onSubmitEditing={() => brincoRef.current?.focus()}
+                    erro={fieldState.error?.message}
+                  />
+                )}
+              />
+            </View>
+            <View className="w-32">
+              <Controller
+                control={control}
+                name="brinco"
+                render={({ field, fieldState }) => (
+                  <CampoTexto
+                    ref={brincoRef}
+                    rotulo="Brinco *"
+                    placeholder="123"
+                    autoCapitalize="characters"
+                    autoCorrect={false}
                     value={field.value}
                     onChangeText={field.onChange}
                     onBlur={field.onBlur}
@@ -274,7 +272,7 @@ export function FormularioAnimal({ valoresIniciais, animalId, tituloBotao, aoSal
         <Botao titulo={tituloBotao} icone="checkmark" onPress={salvar} carregando={salvo} />
         {!edicao ? (
           <Texto variante="legenda" tom="suave" className="text-center">
-            Só o brinco é obrigatório. Dá para completar depois.
+            Só nome e brinco são obrigatórios. Dá para completar depois.
           </Texto>
         ) : null}
       </ScrollView>

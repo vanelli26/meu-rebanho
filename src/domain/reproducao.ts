@@ -202,7 +202,11 @@ export const esquemaEvento = z
     }),
   })
   .superRefine((d, ctx) => {
-    if (d.tipo === 'parto' && d.cria.cadastrar && !d.cria.brinco) {
+    if (d.tipo !== 'parto' || !d.cria.cadastrar) return;
+    if (!d.cria.nome) {
+      ctx.addIssue({ code: 'custom', path: ['cria', 'nome'], message: 'Informe o nome da cria.' });
+    }
+    if (!d.cria.brinco) {
       ctx.addIssue({
         code: 'custom',
         path: ['cria', 'brinco'],

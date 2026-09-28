@@ -15,7 +15,7 @@ import { useSessaoPronta } from '@/auth/SessaoProvider';
 import { ESPACO_BARRA_ABAS } from '@/components/BarraAbas';
 import { LinhaLitros } from '@/components/producao/LinhaLitros';
 import { Aviso, Botao, CampoData, Card, Seletor, Texto } from '@/components/ui';
-import { buscarAnimais, type Animal } from '@/domain/animal';
+import { buscarAnimais, identificacao, type Animal } from '@/domain/animal';
 import {
   esquemaCabecalhoProducao,
   esquemaLitros,
@@ -232,7 +232,7 @@ function ListaOrdenha({
             <Aviso
               tipo="perigo"
               titulo={`${carencias.length} ${carencias.length === 1 ? 'vaca' : 'vacas'} em carência`}
-              mensagem={`Leite marcado para descarte: brinco ${carencias.map((a) => a.brinco).join(', ')}.`}
+              mensagem={`Leite marcado para descarte: ${carencias.map(identificacao).join(', ')}.`}
             />
           ) : null}
           {vacas.length === 0 ? (
@@ -258,8 +258,7 @@ function ListaOrdenha({
               ref={(campo) => {
                 campos.current[i] = campo;
               }}
-              brinco={vaca.brinco}
-              nome={vaca.nome}
+              nome={identificacao(vaca)}
               texto={item.texto}
               aoMudarTexto={(texto) => atualizar(vaca.id, { texto })}
               descartado={item.descartado}

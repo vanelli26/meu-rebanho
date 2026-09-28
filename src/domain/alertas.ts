@@ -1,6 +1,6 @@
 import { diasEntre, isoParaBR, type DataISO } from '@/lib/datas';
 
-import type { Animal } from './animal';
+import { compararNome, type Animal } from './animal';
 import type { ConfiguracoesFazenda } from './fazenda';
 import { diasEmLactacao, liberadaParaInseminar } from './lactacao';
 
@@ -145,6 +145,6 @@ export function gerarAlertas(
     (a, b) =>
       ORDEM_ALERTAS.indexOf(a.tipo) - ORDEM_ALERTAS.indexOf(b.tipo) ||
       a.data.localeCompare(b.data) ||
-      a.brinco.localeCompare(b.brinco, 'pt-BR', { numeric: true }),
+      compararNome(a, b),
   );
 }

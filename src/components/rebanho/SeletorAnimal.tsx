@@ -16,7 +16,7 @@ type Props = {
 
 const LIMITE = 6;
 
-/** Escolha rápida de um animal pelo brinco (teclado numérico) ou nome. */
+/** Escolha rápida de um animal pelo nome (ou brinco). */
 export function SeletorAnimal({ animais, selecionado, aoSelecionar, hoje, erro }: Props) {
   const [busca, setBusca] = useState('');
   const encontrados = useMemo(() => buscarAnimais(animais, busca), [animais, busca]);
@@ -71,17 +71,17 @@ export function SeletorAnimal({ animais, selecionado, aoSelecionar, hoje, erro }
           ))}
           {encontrados.length === 0 ? (
             <Texto tom="suave" className="py-2 text-center">
-              Nenhuma fêmea ativa com esse brinco ou nome.
+              Nenhuma fêmea ativa com esse nome.
             </Texto>
           ) : encontrados.length > LIMITE ? (
             <Texto variante="legenda" tom="suave" className="text-center">
-              E mais {encontrados.length - LIMITE}. Digite mais do brinco para filtrar.
+              E mais {encontrados.length - LIMITE}. Digite mais do nome para filtrar.
             </Texto>
           ) : null}
         </View>
       ) : (
         <Texto variante="legenda" tom="suave">
-          Digite o brinco para encontrar a vaca.
+          Digite o nome para encontrar a vaca.
         </Texto>
       )}
     </View>

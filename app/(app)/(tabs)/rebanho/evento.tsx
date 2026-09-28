@@ -12,7 +12,7 @@ import { ESPACO_BARRA_ABAS } from '@/components/BarraAbas';
 import { SeletorAnimal } from '@/components/rebanho/SeletorAnimal';
 import { ESTILO_EVENTO } from '@/components/reproducao/estiloEvento';
 import { Aviso, Botao, CampoData, CampoTexto, Card, Seletor, Texto } from '@/components/ui';
-import { brincoDisponivel, type Animal, type ResumoAnimal } from '@/domain/animal';
+import { brincoDisponivel, nomeDisponivel, type Animal, type ResumoAnimal } from '@/domain/animal';
 import {
   esquemaEvento,
   ROTULO_EVENTO,
@@ -93,9 +93,13 @@ export default function RegistrarEvento() {
       return;
     }
     const cria = form.tipo === 'parto' && form.cria.cadastrar ? form.cria : null;
-    if (cria && !brincoDisponivel(cria.brinco, animais)) {
-      setError('cria.brinco', { message: 'Já existe um animal com este brinco.' });
-      return;
+    if (cria) {
+      const nomeLivre = nomeDisponivel(cria.nome, animais);
+      const brincoLivre = brincoDisponivel(cria.brinco, animais);
+      if (!nomeLivre) setError('cria.nome', { message: 'Já existe um animal com este nome.' });
+      if (!brincoLivre)
+        setError('cria.brinco', { message: 'Já existe um animal com este brinco.' });
+      if (!nomeLivre || !brincoLivre) return;
     }
     setSalvo(true);
     registrarEvento(contexto, animal, eventos, { ...form, tipo: form.tipo }, cria);
@@ -316,6 +320,22 @@ function SecaoCria({
       {cadastrar ? (
         <>
           <View className="flex-row gap-3">
+            <View className="flex-1">
+              <Controller
+                control={control}
+                name="cria.nome"
+                render={({ field, fieldState }) => (
+                  <CampoTexto
+                    rotulo="Nome *"
+                    autoCapitalize="words"
+                    value={field.value}
+                    onChangeText={field.onChange}
+                    onBlur={field.onBlur}
+                    erro={fieldState.error?.message}
+                  />
+                )}
+              />
+            </View>
             <View className="w-32">
               <Controller
                 control={control}
@@ -325,23 +345,6 @@ function SecaoCria({
                     rotulo="Brinco *"
                     autoCapitalize="characters"
                     autoCorrect={false}
-                    value={field.value}
-                    onChangeText={field.onChange}
-                    onBlur={field.onBlur}
-                    erro={fieldState.error?.message}
-                  />
-                )}
-              />
-            </View>
-            <View className="flex-1">
-              <Controller
-                control={control}
-                name="cria.nome"
-                render={({ field, fieldState }) => (
-                  <CampoTexto
-                    rotulo="Nome"
-                    placeholder="Opcional"
-                    autoCapitalize="words"
                     value={field.value}
                     onChangeText={field.onChange}
                     onBlur={field.onBlur}

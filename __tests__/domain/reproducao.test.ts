@@ -207,9 +207,14 @@ describe('esquemaEvento', () => {
     }
   });
 
-  it('exige brinco quando cadastra a cria', () => {
+  it('exige nome e brinco quando cadastra a cria', () => {
     const r = esquemaEvento.safeParse({ ...valido, cria: { ...valido.cria, cadastrar: true } });
     expect(r.success).toBe(false);
-    if (!r.success) expect(r.error.issues[0].path).toEqual(['cria', 'brinco']);
+    if (!r.success) {
+      expect(r.error.issues.map((i) => i.path.join('.')).sort()).toEqual([
+        'cria.brinco',
+        'cria.nome',
+      ]);
+    }
   });
 });

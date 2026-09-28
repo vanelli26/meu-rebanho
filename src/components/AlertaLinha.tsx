@@ -3,6 +3,7 @@ import type { ComponentProps } from 'react';
 import { Pressable, View } from 'react-native';
 
 import type { Alerta, TipoAlerta } from '@/domain/alertas';
+import { identificacao } from '@/domain/animal';
 import { useTema, type NomeCor } from '@/lib/tema';
 
 import { Texto } from './ui/Texto';
@@ -53,8 +54,7 @@ export function AlertaLinha({
               className="text-[14px]"
               tom={alerta.atrasado ? 'perigo' : 'normal'}
             >
-              {alerta.brinco}
-              {alerta.nome ? ` · ${alerta.nome}` : ''} — {alerta.titulo}
+              {identificacao(alerta)} — {alerta.titulo}
             </Texto>
             <Texto variante="legenda" tom="suave">
               {alerta.detalhe}

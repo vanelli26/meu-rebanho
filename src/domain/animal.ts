@@ -99,15 +99,48 @@ export function situacaoAtual(
   return animal.resumo.situacao;
 }
 
-/** Compara brincos em ordem natural ("2" antes de "10"). */
-export function compararBrinco(a: string, b: string): number {
-  return a.localeCompare(b, 'pt-BR', { numeric: true, sensitivity: 'base' });
+const semAcento = (texto: string) =>
+  texto
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase();
+
+/** Normaliza o nome para comparação: sem acentos, caixa e espaços extras. */
+export function chaveNome(nome: string): string {
+  return semAcento(nome.trim().replace(/\s+/g, ' '));
 }
 
-const semAcento = (texto: string) => texto.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+/** `true` se nenhum outro animal da fazenda usa o nome (ignora o próprio `idAtual`). */
+export function nomeDisponivel(
+  nome: string,
+  animais: readonly Pick<Animal, 'id' | 'nome'>[],
+  idAtual?: string,
+): boolean {
+  const chave = chaveNome(nome);
+  return !animais.some((a) => a.id !== idAtual && chaveNome(a.nome) === chave);
+}
 
-/** Prenhes primeiro pela data prevista de parto; sem previsão vão para o fim, por brinco. */
-export function ordenarPorPrevisaoParto<T extends Pick<Animal, 'brinco' | 'resumo'>>(
+/**
+ * Nome que identifica o animal nas telas. Animais antigos, cadastrados quando o
+ * nome era opcional, aparecem pelo brinco.
+ */
+export function identificacao(animal: Pick<Animal, 'brinco' | 'nome'>): string {
+  return animal.nome.trim() || `Brinco ${animal.brinco}`;
+}
+
+/** Ordem alfabética pelo nome (identificação), com números em ordem natural. */
+export function compararNome(
+  a: Pick<Animal, 'brinco' | 'nome'>,
+  b: Pick<Animal, 'brinco' | 'nome'>,
+): number {
+  return identificacao(a).localeCompare(identificacao(b), 'pt-BR', {
+    numeric: true,
+    sensitivity: 'base',
+  });
+}
+
+/** Prenhes primeiro pela data prevista de parto; sem previsão vão para o fim, por nome. */
+export function ordenarPorPrevisaoParto<T extends Pick<Animal, 'brinco' | 'nome' | 'resumo'>>(
   animais: readonly T[],
 ): T[] {
   return [...animais].sort((a, b) => {
@@ -116,11 +149,14 @@ export function ordenarPorPrevisaoParto<T extends Pick<Animal, 'brinco' | 'resum
     if (pa && pb && pa !== pb) return pa.localeCompare(pb);
     if (pa && !pb) return -1;
     if (!pa && pb) return 1;
-    return compararBrinco(a.brinco, b.brinco);
+    return compararNome(a, b);
   });
 }
 
-/** Filtra por brinco ou nome (sem diferenciar acentos) e ordena pelo brinco. */
+/**
+ * Filtra por nome ou brinco (sem diferenciar acentos) e ordena pelo nome.
+ * Nomes que começam com o termo aparecem antes.
+ */
 export function buscarAnimais<T extends Pick<Animal, 'brinco' | 'nome'>>(
   animais: readonly T[],
   termo: string,
@@ -128,17 +164,11 @@ export function buscarAnimais<T extends Pick<Animal, 'brinco' | 'nome'>>(
   const busca = semAcento(termo.trim());
   const filtrados = busca
     ? animais.filter(
-        (a) => semAcento(a.brinco).includes(busca) || semAcento(a.nome).includes(busca),
+        (a) => semAcento(a.nome).includes(busca) || semAcento(a.brinco).includes(busca),
       )
     : [...animais];
-  // Brinco que começa com o termo aparece antes (busca por número no curral).
-  const comeca = (a: T) => (busca && semAcento(a.brinco).startsWith(busca) ? 0 : 1);
-  return filtrados.sort((a, b) => comeca(a) - comeca(b) || compararBrinco(a.brinco, b.brinco));
-}
-
-/** "123 · Mimosa" ou só "123". */
-export function identificacao(animal: Pick<Animal, 'brinco' | 'nome'>): string {
-  return animal.nome ? `${animal.brinco} · ${animal.nome}` : animal.brinco;
+  const comeca = (a: T) => (busca && semAcento(a.nome).startsWith(busca) ? 0 : 1);
+  return filtrados.sort((a, b) => comeca(a) - comeca(b) || compararNome(a, b));
 }
 
 // ---------------------------------------------------------------------------
@@ -154,7 +184,7 @@ const textoOpcional = (max: number) => z.string().trim().max(max, 'Texto muito l
 export const esquemaAnimal = z
   .object({
     brinco: z.string().trim().min(1, 'Informe o brinco.').max(20, 'Brinco muito longo.'),
-    nome: textoOpcional(60),
+    nome: z.string().trim().min(1, 'Informe o nome.').max(60, 'Nome muito longo.'),
     raca: textoOpcional(40),
     sexo: z.enum(['F', 'M']),
     dataNascimento: dataOpcional,

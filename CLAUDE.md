@@ -12,7 +12,7 @@ Uso principal: no campo/curral, no celular, com uma mão, muitas vezes sem inter
 ## 1. Princípios do produto
 
 1. **Funciona offline.** Depois do primeiro login, todas as telas funcionam sem rede, usando o cache persistente do Firestore. As gravações ficam na fila e sincronizam sozinhas.
-2. **Entrada rápida.** Registrar uma produção ou um evento deve levar poucos toques. Busca por brinco com teclado numérico.
+2. **Entrada rápida.** Registrar uma produção ou um evento deve levar poucos toques. Animais são identificados pelo **nome** nas telas e na busca; o brinco fica no cadastro.
 3. **Moderno, elegante e usável no campo.** Identidade "Campo premium" (verde-floresta, creme e dourado-trigo, fonte Plus Jakarta Sans), tema claro/escuro automático e tipografia compacta. Sem animações de entrada ou decorativas (atrapalham no uso real); só as transições nativas de navegação. Mesmo assim: alvos de toque ≥ 48dp e contraste legível sob sol.
 4. **Eventos são a fonte da verdade.** A situação da vaca é calculada a partir dos eventos por funções puras. O resultado é salvo no documento do animal como um _resumo_ para economizar leituras. Esse resumo nunca é editado à mão.
 5. **Isolamento por fazenda.** Um usuário só lê e escreve dados de fazendas das quais é membro, garantido pelas Security Rules.
@@ -86,7 +86,7 @@ src/
     converters.ts         # FirestoreDataConverter tipados por coleção
   auth/                   # Contexto de sessão, login/logout Google
   domain/                 # REGRAS DE NEGÓCIO PURAS (sem React, sem Firebase)
-    animal.ts             # Tipos, formulário, busca e brinco único
+    animal.ts             # Tipos, formulário, busca, nome e brinco únicos
     producao.ts           # Documento da ordenha, totais e médias
     reproducao.ts
     lactacao.ts
@@ -143,7 +143,9 @@ fazendas/{fazendaId}
 
 Dados cadastrais:
 
-- `brinco` (obrigatório, único na fazenda, validado no cliente), `nome`
+- `nome` (obrigatório, único na fazenda sem diferenciar acentos/caixa; é a identificação nas telas)
+- `brinco` (obrigatório, único na fazenda; aparece só no cadastro e nos dados do animal)
+- Validação de unicidade no cliente. Animais antigos sem nome aparecem como "Brinco N" (`identificacao()`).
 - `raca`, `sexo` (`F` | `M`), `dataNascimento`
 - `maeId`, `pai` (touro ou código do sêmen)
 - `origem` (`nascido` | `comprado`), `dataEntrada`
@@ -295,7 +297,7 @@ Todos os prazos vêm de `fazenda.configuracoes`.
 1. **Login**: logo, botão "Entrar com Google", aviso de que o primeiro acesso precisa de internet.
 2. **Criar fazenda**: nome, município, UF.
 3. **Painel**: vacas em lactação, produção de ontem, média de 7 dias, alertas com atalho para o animal, indicador de sincronização.
-4. **Rebanho**: lista com busca por brinco/nome e filtro por situação (o filtro "Prenhes" ordena pela previsão de parto); detalhe com linha do tempo, gráfico de produção e tratamentos. Não há aba de reprodução: eventos são registrados a partir do Rebanho, e as pendências reprodutivas aparecem nos alertas do Painel.
+4. **Rebanho**: lista ordenada e buscada pelo nome, com filtro por situação (o filtro "Prenhes" ordena pela previsão de parto); detalhe com linha do tempo, gráfico de produção e tratamentos. Não há aba de reprodução: eventos são registrados a partir do Rebanho, e as pendências reprodutivas aparecem nos alertas do Painel.
 5. **Lançar produção em lote**: escolher data e ordenha → lista das vacas em lactação → litros com teclado numérico e "próximo" automático → salvar em um documento.
 6. **Registrar evento reprodutivo** (`rebanho/evento`, pelo botão "Registrar evento" no detalhe da vaca): vaca → tipo → data (padrão hoje) → campos específicos. No parto, oferecer cadastro rápido da cria.
 7. **Tratamentos**: um animal ou vários de uma vez.

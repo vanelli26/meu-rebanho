@@ -10,14 +10,14 @@ import { ESTILO_EVENTO } from './estiloEvento';
 
 type Props = {
   eventos: readonly EventoReprodutivo[];
-  /** Brinco da cria, para exibir no parto. */
-  brincoCria?: (criaId: string) => string | null;
+  /** Nome da cria, para exibir no parto. */
+  nomeCria?: (criaId: string) => string | null;
   aoAbrirCria?: (criaId: string) => void;
   aoSegurar?: (evento: EventoReprodutivo) => void;
 };
 
 /** Eventos do mais recente para o mais antigo, ligados por uma linha vertical. */
-export function LinhaDoTempo({ eventos, brincoCria, aoAbrirCria, aoSegurar }: Props) {
+export function LinhaDoTempo({ eventos, nomeCria, aoAbrirCria, aoSegurar }: Props) {
   const { cores } = useTema();
   const ordenados = [...eventos].sort((a, b) => b.data.localeCompare(a.data));
 
@@ -26,7 +26,7 @@ export function LinhaDoTempo({ eventos, brincoCria, aoAbrirCria, aoSegurar }: Pr
       {ordenados.map((evento, i) => {
         const estilo = ESTILO_EVENTO[evento.tipo];
         const ultimo = i === ordenados.length - 1;
-        const cria = evento.criaId ? brincoCria?.(evento.criaId) : null;
+        const cria = evento.criaId ? nomeCria?.(evento.criaId) : null;
         const detalhes = [
           evento.touroSemen && `Touro/sêmen: ${evento.touroSemen}`,
           evento.responsavel && `Responsável: ${evento.responsavel}`,
@@ -68,7 +68,7 @@ export function LinhaDoTempo({ eventos, brincoCria, aoAbrirCria, aoSegurar }: Pr
                   className="mt-1 min-h-10 flex-row items-center gap-1 self-start rounded-full bg-primaria-suave px-3"
                 >
                   <Texto variante="legenda" tom="primaria">
-                    Cria: brinco {cria}
+                    Cria: {cria}
                   </Texto>
                   <Ionicons name="chevron-forward" size={14} color={cores.primaria} />
                 </Pressable>

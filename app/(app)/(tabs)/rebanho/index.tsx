@@ -90,8 +90,8 @@ export default function Rebanho() {
               </Texto>
               <Texto tom="suave" className="text-center">
                 {ativos || busca
-                  ? 'Confira o brinco digitado ou troque o filtro.'
-                  : 'Cadastre o primeiro animal pelo botão abaixo. Só o brinco é obrigatório.'}
+                  ? 'Confira o nome digitado ou troque o filtro.'
+                  : 'Cadastre o primeiro animal pelo botão abaixo.'}
               </Texto>
             </View>
           )

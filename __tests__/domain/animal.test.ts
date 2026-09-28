@@ -2,12 +2,14 @@ import {
   brincoDisponivel,
   buscarAnimais,
   chaveBrinco,
-  compararBrinco,
+  chaveNome,
+  compararNome,
   esquemaAnimal,
   FORMULARIO_ANIMAL_VAZIO,
   formularioDoAnimal,
   identificacao,
   montarDadosAnimal,
+  nomeDisponivel,
   ordenarPorPrevisaoParto,
   situacaoAtual,
   situacaoSemParto,
@@ -58,54 +60,94 @@ describe('situacaoSemParto e situacaoAtual', () => {
   });
 });
 
+describe('chaveNome e nomeDisponivel', () => {
+  it('ignora acentos, caixa e espaços extras', () => {
+    expect(chaveNome('  Pérola   Negra ')).toBe('perola negra');
+  });
+
+  it('detecta nome repetido, exceto no próprio animal', () => {
+    const animais = [
+      { id: 'a1', nome: 'Mimosa' },
+      { id: 'a2', nome: 'Pérola' },
+    ];
+    expect(nomeDisponivel('mimosa', animais)).toBe(false);
+    expect(nomeDisponivel('PEROLA', animais)).toBe(false);
+    expect(nomeDisponivel('Mimosa', animais, 'a1')).toBe(true);
+    expect(nomeDisponivel('Estrela', animais)).toBe(true);
+  });
+});
+
 describe('buscarAnimais', () => {
   const animais = [
     { brinco: '10', nome: 'Estrela' },
     { brinco: '2', nome: 'Mimosa' },
     { brinco: '102', nome: 'Pérola' },
-    { brinco: '31', nome: 'Malhada 10' },
+    { brinco: '31', nome: 'Malhada' },
   ];
 
-  it('sem termo, ordena pelo brinco em ordem natural', () => {
-    expect(buscarAnimais(animais, '').map((a) => a.brinco)).toEqual(['2', '10', '31', '102']);
+  it('sem termo, ordena pelo nome', () => {
+    expect(buscarAnimais(animais, '').map((a) => a.nome)).toEqual([
+      'Estrela',
+      'Malhada',
+      'Mimosa',
+      'Pérola',
+    ]);
   });
 
-  it('busca por brinco (prefixo primeiro) e por nome sem acento', () => {
-    expect(buscarAnimais(animais, '10').map((a) => a.brinco)).toEqual(['10', '102', '31']);
+  it('busca por nome sem acento (prefixo primeiro) e também por brinco', () => {
     expect(buscarAnimais(animais, 'perola').map((a) => a.nome)).toEqual(['Pérola']);
-    expect(buscarAnimais(animais, ' MIMO ').map((a) => a.nome)).toEqual(['Mimosa']);
+    expect(buscarAnimais(animais, ' MA ').map((a) => a.nome)).toEqual(['Malhada']);
+    expect(buscarAnimais(animais, 'm').map((a) => a.nome)).toEqual(['Malhada', 'Mimosa']);
+    expect(buscarAnimais(animais, '10').map((a) => a.nome)).toEqual(['Estrela', 'Pérola']);
+  });
+});
+
+describe('identificacao e compararNome', () => {
+  it('usa o nome; animal antigo sem nome aparece pelo brinco', () => {
+    expect(identificacao({ brinco: '12', nome: 'Mimosa' })).toBe('Mimosa');
+    expect(identificacao({ brinco: '12', nome: '' })).toBe('Brinco 12');
   });
 
-  it('compararBrinco usa ordem natural', () => {
-    expect(compararBrinco('9', '10')).toBeLessThan(0);
+  it('ordena alfabeticamente sem diferenciar caixa e com números em ordem natural', () => {
+    const a = (nome: string) => ({ brinco: '1', nome });
+    expect(compararNome(a('abelha'), a('Bela'))).toBeLessThan(0);
+    expect(compararNome(a('Vaca 9'), a('Vaca 10'))).toBeLessThan(0);
   });
 });
 
 describe('ordenarPorPrevisaoParto', () => {
-  it('ordena pela data prevista e deixa quem não tem previsão no fim', () => {
-    const a = (brinco: string, previsaoParto: string | null) => ({
-      brinco,
+  it('ordena pela data prevista e deixa quem não tem previsão no fim, por nome', () => {
+    const a = (nome: string, previsaoParto: string | null) => ({
+      brinco: '1',
+      nome,
       resumo: { previsaoParto } as Animal['resumo'],
     });
-    const lista = [a('3', null), a('1', '2026-11-20'), a('10', null), a('2', '2026-11-03')];
-    expect(ordenarPorPrevisaoParto(lista).map((x) => x.brinco)).toEqual(['2', '1', '3', '10']);
-  });
-});
-
-describe('identificacao', () => {
-  it('mostra brinco e nome quando houver', () => {
-    expect(identificacao({ brinco: '12', nome: 'Mimosa' })).toBe('12 · Mimosa');
-    expect(identificacao({ brinco: '12', nome: '' })).toBe('12');
+    const lista = [
+      a('Dália', null),
+      a('Bela', '2026-11-20'),
+      a('Clara', null),
+      a('Ana', '2026-11-03'),
+    ];
+    expect(ordenarPorPrevisaoParto(lista).map((x) => x.nome)).toEqual([
+      'Ana',
+      'Bela',
+      'Clara',
+      'Dália',
+    ]);
   });
 });
 
 describe('esquemaAnimal e montarDadosAnimal', () => {
-  it('aceita o mínimo: brinco', () => {
-    const r = esquemaAnimal.safeParse({ ...FORMULARIO_ANIMAL_VAZIO, brinco: ' 12 ' });
-    expect(r.success && r.data.brinco).toBe('12');
+  it('aceita o mínimo: nome e brinco', () => {
+    const r = esquemaAnimal.safeParse({
+      ...FORMULARIO_ANIMAL_VAZIO,
+      nome: ' Mimosa ',
+      brinco: ' 12 ',
+    });
+    expect(r.success && [r.data.nome, r.data.brinco]).toEqual(['Mimosa', '12']);
   });
 
-  it('exige brinco, data válida e data de saída quando inativo', () => {
+  it('exige nome, brinco, data válida e data de saída quando inativo', () => {
     const r = esquemaAnimal.safeParse({
       ...FORMULARIO_ANIMAL_VAZIO,
       dataNascimento: '2026-02-30',
@@ -117,6 +159,7 @@ describe('esquemaAnimal e montarDadosAnimal', () => {
         'brinco',
         'dataNascimento',
         'dataSaida',
+        'nome',
       ]);
     }
   });
@@ -125,6 +168,7 @@ describe('esquemaAnimal e montarDadosAnimal', () => {
     const r = esquemaAnimal.safeParse({
       ...FORMULARIO_ANIMAL_VAZIO,
       brinco: '1',
+      nome: 'Mimosa',
       dataNascimento: '2026-01-10',
       dataEntrada: '2026-01-01',
     });

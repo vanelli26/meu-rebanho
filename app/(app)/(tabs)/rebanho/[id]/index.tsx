@@ -75,7 +75,8 @@ export default function DetalheAnimal() {
     <>
       <Stack.Screen
         options={{
-          title: `Brinco ${animal.brinco}`,
+          // O nome já aparece em destaque logo abaixo.
+          title: '',
           headerRight: () => (
             <Pressable
               accessibilityRole="button"
@@ -98,14 +99,14 @@ export default function DetalheAnimal() {
         contentContainerStyle={{ paddingBottom: ESPACO_BARRA_ABAS + insets.bottom }}
       >
         <Card className="flex-row items-center gap-4">
-          <View className="h-20 min-w-20 items-center justify-center rounded-3xl bg-primaria px-3">
-            <Texto variante="numero" tom="sobre-primaria" numberOfLines={1} adjustsFontSizeToFit>
-              {animal.brinco}
+          <View className="h-16 w-16 items-center justify-center rounded-full bg-primaria">
+            <Texto variante="numero" tom="sobre-primaria">
+              {identificacao(animal).charAt(0).toUpperCase()}
             </Texto>
           </View>
           <View className="flex-1 gap-1.5">
             <Texto variante="titulo" numberOfLines={2}>
-              {animal.nome || `Brinco ${animal.brinco}`}
+              {identificacao(animal)}
             </Texto>
             {ativo ? (
               <SeloSituacao situacao={situacao} prenhe={r.prenhe} />
@@ -212,7 +213,10 @@ export default function DetalheAnimal() {
               <>
                 <LinhaDoTempo
                   eventos={eventos}
-                  brincoCria={(criaId) => animalPorId.get(criaId)?.brinco ?? null}
+                  nomeCria={(criaId) => {
+                    const cria = animalPorId.get(criaId);
+                    return cria ? identificacao(cria) : null;
+                  }}
                   aoAbrirCria={(criaId) => router.push(`/rebanho/${criaId}`)}
                   aoSegurar={confirmarExclusao}
                 />
@@ -230,6 +234,7 @@ export default function DetalheAnimal() {
           <Texto variante="subtitulo" className="px-5 pb-1 pt-5">
             Dados
           </Texto>
+          <Linha rotulo="Brinco" valor={animal.brinco} />
           <Linha rotulo="Sexo" valor={femea ? 'Fêmea' : 'Macho'} />
           {animal.dataNascimento ? (
             <Linha rotulo="Nascimento" valor={isoParaBR(animal.dataNascimento)} />
@@ -247,7 +252,7 @@ export default function DetalheAnimal() {
             />
           ) : null}
           {filhos.length ? (
-            <Linha rotulo="Crias" valor={filhos.map((f) => f.brinco).join(', ')} />
+            <Linha rotulo="Crias" valor={filhos.map(identificacao).join(', ')} />
           ) : null}
           {animal.motivoSaida ? (
             <Linha rotulo="Motivo da saída" valor={animal.motivoSaida} />

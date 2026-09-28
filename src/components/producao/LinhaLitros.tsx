@@ -9,7 +9,7 @@ import { fontes, useTema } from '@/lib/tema';
 import { Texto } from '../ui/Texto';
 
 type Props = {
-  brinco: string;
+  /** Nome que identifica a vaca (`identificacao`). */
   nome: string;
   texto: string;
   aoMudarTexto: (texto: string) => void;
@@ -22,9 +22,8 @@ type Props = {
   ref?: Ref<TextInput>;
 };
 
-/** Uma vaca na ordenha: brinco, litros (teclado numérico) e botão de descarte. */
+/** Uma vaca na ordenha: nome, litros (teclado numérico) e botão de descarte. */
 export function LinhaLitros({
-  brinco,
   nome,
   texto,
   aoMudarTexto,
@@ -44,14 +43,9 @@ export function LinhaLitros({
       className={`gap-1 rounded-2xl px-3 py-2 ${descartado ? 'bg-perigo-suave' : 'bg-superficie'}`}
     >
       <View className="min-h-14 flex-row items-center gap-3">
-        <View className="h-12 min-w-12 items-center justify-center rounded-xl bg-primaria-suave px-2">
-          <Texto variante="subtitulo" tom="primaria" className="font-extra" numberOfLines={1}>
-            {brinco}
-          </Texto>
-        </View>
         <View className="flex-1">
-          <Texto variante="rotulo" className="text-[14px]" numberOfLines={1}>
-            {nome || `Brinco ${brinco}`}
+          <Texto variante="subtitulo" className="text-[15px]" numberOfLines={1}>
+            {nome}
           </Texto>
           {descartado ? (
             <Texto variante="legenda" tom="perigo">
@@ -65,7 +59,7 @@ export function LinhaLitros({
         >
           <TextInput
             ref={ref}
-            accessibilityLabel={`Litros da vaca ${brinco}`}
+            accessibilityLabel={`Litros da ${nome}`}
             value={texto}
             onChangeText={(novo) => aoMudarTexto(mascaraDecimal(novo))}
             keyboardType="decimal-pad"
