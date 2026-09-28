@@ -30,7 +30,7 @@ const ATALHOS: Atalho[] = [
 
 export default function Painel() {
   const { conta, fazenda } = useSessaoPronta();
-  const { cores } = useTema();
+  const { cores, escuro } = useTema();
   const insets = useSafeAreaInsets();
   const primeiroNome = conta.nome.split(' ')[0] || 'produtor';
 
@@ -124,8 +124,10 @@ export default function Painel() {
             >
               <Pressable
                 onPress={() => router.navigate(atalho.destino)}
-                className="gap-3 rounded-3xl bg-superficie p-4 active:opacity-80"
-                style={{ boxShadow: '0px 4px 16px rgba(28, 31, 29, 0.06)' }}
+                className={`gap-3 rounded-3xl bg-superficie p-4 active:opacity-80 ${
+                  escuro ? 'border border-borda' : ''
+                }`}
+                style={escuro ? undefined : { boxShadow: '0px 4px 16px rgba(28, 31, 29, 0.06)' }}
               >
                 <View className="h-11 w-11 items-center justify-center rounded-2xl bg-primaria-suave">
                   <Ionicons name={atalho.icone} size={22} color={cores.primaria} />
