@@ -8,6 +8,7 @@ import { Avatar } from '@/components/Avatar';
 import { LinhaMenu } from '@/components/LinhaMenu';
 import { Card, Texto } from '@/components/ui';
 import { haGravacoesPendentes, sair } from '@/features/conta';
+import { usePreferenciaLembretes } from '@/features/lembretes';
 
 function confirmarSaida() {
   const sairAgora = () => {
@@ -45,6 +46,7 @@ function Grupo({ titulo, children }: { titulo: string; children: ReactNode }) {
 
 export default function Mais() {
   const { conta, fazenda } = useSessaoPronta();
+  const lembretes = usePreferenciaLembretes();
   const insets = useSafeAreaInsets();
 
   return (
@@ -94,7 +96,14 @@ export default function Mais() {
           cor="info"
           onPress={() => router.push('/exportar')}
         />
-        <LinhaMenu icone="notifications" titulo="Lembretes" cor="destaque" selo="Em breve" ultimo />
+        <LinhaMenu
+          icone="notifications"
+          titulo="Lembretes"
+          detalhe={lembretes.ativo ? `Todo dia às ${lembretes.hora}h` : 'Desligados'}
+          cor="destaque"
+          onPress={() => router.push('/lembretes')}
+          ultimo
+        />
       </Grupo>
 
       <Grupo titulo="Conta">

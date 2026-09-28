@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import { useSessao } from '@/auth/SessaoProvider';
 import { IndicadorSyncAtual } from '@/components/IndicadorSyncAtual';
 import { DadosFazendaProvider } from '@/features/DadosFazendaProvider';
+import { useAgendarLembretes } from '@/features/lembretes';
 import { useOpcoesCabecalho } from '@/lib/navegacao';
 
 const TELAS = {
@@ -10,6 +11,7 @@ const TELAS = {
   tratamento: 'Registrar tratamento',
   prazos: 'Prazos reprodutivos',
   exportar: 'Exportar planilha',
+  lembretes: 'Lembretes',
 };
 
 export default function AppLayout() {
@@ -19,6 +21,7 @@ export default function AppLayout() {
   if (estado !== 'pronto') return null;
   return (
     <DadosFazendaProvider>
+      <AgendadorLembretes />
       <Stack screenOptions={{ headerShown: false, animation: 'ios_from_right' }}>
         <Stack.Screen name="(tabs)" />
         {/* Telas fora das abas, abertas por Conta e fazenda ou pelo detalhe do animal. */}
@@ -37,4 +40,10 @@ export default function AppLayout() {
       </Stack>
     </DadosFazendaProvider>
   );
+}
+
+/** Mantém os lembretes do aparelho em dia com os dados da fazenda. */
+function AgendadorLembretes() {
+  useAgendarLembretes();
+  return null;
 }

@@ -81,6 +81,7 @@ app/
     tratamento.tsx        # Tratamento em um ou vários animais (fora das abas)
     prazos.tsx            # Prazos reprodutivos da fazenda (só o dono edita)
     exportar.tsx          # Planilhas CSV (animais, produção, eventos, tratamentos)
+    lembretes.tsx         # Notificação diária com as pendências (preferência do aparelho)
   _layout.tsx             # Guarda de rota: login → onboarding → app
 src/
   firebase/
@@ -96,6 +97,7 @@ src/
     carencia.ts
     resumoAnimal.ts       # Recalcula o resumo a partir dos eventos
     alertas.ts
+    lembretes.ts          # Texto e agenda das notificações a partir de gerarAlertas
     exportacao.ts         # CSV para Excel pt-BR: `;`, vírgula decimal, dd/MM/yyyy, BOM
   features/               # Hooks (useAnimais, useProducoes...) e ações de gravação
     DadosFazendaProvider.tsx  # Listeners de animais, de todos os eventos e de todos os tratamentos
@@ -306,6 +308,8 @@ Todos os prazos vêm de `fazenda.configuracoes`.
 - Observar retorno de cio (18–24 dias após inseminação sem diagnóstico).
 - Vacas liberadas para inseminar há mais de 30 dias sem inseminação.
 
+**Lembretes** (`lembretes.ts` + `features/lembretes.ts`): notificações locais, sem servidor. Para cada um dos próximos 7 dias, `gerarAlertas` com os resumos atuais e aquela data; dia sem pendência não notifica. Reagendados (cancela e agenda de novo) quando os dados, os prazos, a preferência ou o dia mudam, e cancelados ao sair da conta. A preferência (ligado, hora) fica num arquivo do aparelho, não no Firestore, porque a permissão de notificação também é do aparelho.
+
 ---
 
 ## 8. Telas
@@ -385,7 +389,7 @@ firebase deploy --only firestore:rules,firestore:indexes
 - [x] Tratamento em vários animais
 - [x] Gráficos de produção
 - [x] Exportar CSV
-- [ ] Notificações locais diárias com alertas
+- [x] Notificações locais diárias com alertas
 - [x] Tela de configurações dos prazos
 
 ### Fase 4 — Opcional
