@@ -4,6 +4,7 @@ import {
   esquemaEvento,
   ordenarEventos,
   servicoDoParto,
+  tiposEventoSugeridos,
   validarEventoNaData,
   type TipoEvento,
 } from '@/domain/reproducao';
@@ -153,6 +154,48 @@ describe('estadoReprodutivo', () => {
       config,
     );
     expect(e.ultimaSecagem).toBe('2026-06-01');
+  });
+});
+
+describe('tiposEventoSugeridos', () => {
+  const vazia = { prenhe: false, servicoSemDiagnostico: null };
+
+  it('vaca em lactação vazia: cio, serviço e secagem', () => {
+    expect(tiposEventoSugeridos('lactacao', vazia)).toEqual([
+      'cio',
+      'inseminacao',
+      'cobertura',
+      'secagem',
+    ]);
+  });
+
+  it('novilha ou seca vazia: cio e serviço', () => {
+    const esperado = ['cio', 'inseminacao', 'cobertura'];
+    expect(tiposEventoSugeridos('novilha', vazia)).toEqual(esperado);
+    expect(tiposEventoSugeridos('seca', vazia)).toEqual(esperado);
+  });
+
+  it('aguardando diagnóstico: diagnóstico, retorno de cio ou novo serviço', () => {
+    expect(
+      tiposEventoSugeridos('novilha', { prenhe: false, servicoSemDiagnostico: '2026-09-01' }),
+    ).toEqual(['cio', 'inseminacao', 'cobertura', 'diagnostico_positivo', 'diagnostico_negativo']);
+  });
+
+  it('prenhe: diagnóstico, parto e aborto; secagem só em lactação', () => {
+    const prenhe = { prenhe: true, servicoSemDiagnostico: null };
+    expect(tiposEventoSugeridos('seca', prenhe)).toEqual([
+      'diagnostico_positivo',
+      'diagnostico_negativo',
+      'parto',
+      'aborto',
+    ]);
+    expect(tiposEventoSugeridos('lactacao', prenhe)).toContain('secagem');
+    expect(tiposEventoSugeridos('lactacao', prenhe)).not.toContain('inseminacao');
+  });
+
+  it('bezerra e macho: nenhum', () => {
+    expect(tiposEventoSugeridos('bezerra', vazia)).toEqual([]);
+    expect(tiposEventoSugeridos('macho', vazia)).toEqual([]);
   });
 });
 

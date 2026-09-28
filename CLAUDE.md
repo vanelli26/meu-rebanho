@@ -275,6 +275,14 @@ Todos os prazos vêm de `fazenda.configuracoes`.
 - **IEP** = dias entre partos consecutivos.
 - **Liberada para inseminar** = em lactação e DEL ≥ `periodoVoluntarioEspera`.
 
+**Tipos de evento sugeridos** (`tiposEventoSugeridos`), pela situação reprodutiva e não só pela lactação (vaca em lactação é inseminada normalmente):
+
+- Prenhe: diagnóstico (reconfirmação), parto, aborto; secagem se em lactação.
+- Aguardando diagnóstico: diagnóstico, cio (retorno) e novo serviço.
+- Vazia: cio, inseminação, cobertura; secagem se em lactação.
+- Bezerra e macho: nenhum.
+- Os demais tipos ficam em "Mostrar outros tipos", para corrigir histórico incompleto.
+
 **Carência de leite:**
 
 - `carenciaLeiteAte` = maior (data do tratamento + `carenciaLeiteDias`) entre os tratamentos.

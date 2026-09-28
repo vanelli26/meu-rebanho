@@ -12,11 +12,19 @@ import { ESPACO_BARRA_ABAS } from '@/components/BarraAbas';
 import { SeletorAnimal } from '@/components/rebanho/SeletorAnimal';
 import { ESTILO_EVENTO } from '@/components/reproducao/estiloEvento';
 import { Aviso, Botao, CampoData, CampoTexto, Card, Seletor, Texto } from '@/components/ui';
-import { brincoDisponivel, nomeDisponivel, type Animal, type ResumoAnimal } from '@/domain/animal';
+import {
+  brincoDisponivel,
+  nomeDisponivel,
+  ROTULO_SITUACAO,
+  situacaoAtual,
+  type Animal,
+  type ResumoAnimal,
+} from '@/domain/animal';
 import {
   esquemaEvento,
   ROTULO_EVENTO,
   TIPOS_EVENTO,
+  tiposEventoSugeridos,
   validarEventoNaData,
   type EventoValidado,
   type FormularioEvento,
@@ -131,6 +139,8 @@ export default function RegistrarEvento() {
                 erro={fieldState.error?.message}
                 aoSelecionar={(a) => {
                   setValue('animalId', a?.id ?? '');
+                  // Os tipos sugeridos mudam com a vaca: começa a escolha de novo.
+                  setValue('tipo', null);
                   clearErrors('animalId');
                 }}
               />
@@ -146,6 +156,9 @@ export default function RegistrarEvento() {
                 name="tipo"
                 render={({ field, fieldState }) => (
                   <GradeTipos
+                    key={animal.id}
+                    animal={animal}
+                    hoje={dataDeISO(hoje)}
                     valor={field.value}
                     aoMudar={field.onChange}
                     erro={fieldState.error?.message}
@@ -243,23 +256,56 @@ export default function RegistrarEvento() {
   );
 }
 
+/** Descrição curta do momento da vaca, para explicar os tipos sugeridos. */
+function momentoDaVaca(animal: Animal, hoje: Date): string {
+  const situacao = situacaoAtual(animal, hoje);
+  const r = animal.resumo;
+  if (situacao === 'bezerra' || situacao === 'macho') return ROTULO_SITUACAO[situacao];
+  const reproducao = r.prenhe
+    ? 'prenhe'
+    : r.servicoSemDiagnostico
+      ? 'aguardando diagnóstico'
+      : 'vazia';
+  return `${ROTULO_SITUACAO[situacao]} · ${reproducao}`;
+}
+
+/**
+ * Mostra primeiro os tipos que fazem sentido para a situação da vaca. Os outros
+ * ficam a um toque, para histórico incompleto (ex.: vaca recém-cadastrada já em lactação).
+ */
 function GradeTipos({
+  animal,
+  hoje,
   valor,
   aoMudar,
   erro,
 }: {
+  animal: Animal;
+  hoje: Date;
   valor: TipoEvento | null;
   aoMudar: (tipo: TipoEvento) => void;
   erro?: string;
 }) {
   const { cores } = useTema();
+  const sugeridos = tiposEventoSugeridos(situacaoAtual(animal, hoje), animal.resumo);
+  const [todos, setTodos] = useState(sugeridos.length === 0);
+  const visiveis = todos
+    ? TIPOS_EVENTO
+    : TIPOS_EVENTO.filter((t) => sugeridos.includes(t) || t === valor);
+  const outros = TIPOS_EVENTO.length - sugeridos.length;
+
   return (
     <View className="gap-2" accessibilityRole="radiogroup">
-      <Texto variante="rotulo" tom="suave">
-        Tipo de evento
-      </Texto>
+      <View className="flex-row items-baseline justify-between gap-2">
+        <Texto variante="rotulo" tom="suave">
+          Tipo de evento
+        </Texto>
+        <Texto variante="legenda" tom="suave" className="flex-1 text-right" numberOfLines={1}>
+          {momentoDaVaca(animal, hoje)}
+        </Texto>
+      </View>
       <View className="flex-row flex-wrap gap-2">
-        {TIPOS_EVENTO.map((t) => {
+        {visiveis.map((t) => {
           const estilo = ESTILO_EVENTO[t];
           const ativo = valor === t;
           return (
@@ -284,6 +330,23 @@ function GradeTipos({
           );
         })}
       </View>
+      {sugeridos.length === 0 ? (
+        <Texto variante="legenda" tom="suave">
+          Nenhum evento reprodutivo é esperado agora. Todos os tipos estão liberados para corrigir o
+          histórico.
+        </Texto>
+      ) : outros > 0 ? (
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => setTodos((v) => !v)}
+          className="min-h-11 flex-row items-center gap-1 self-start active:opacity-70"
+        >
+          <Ionicons name={todos ? 'chevron-up' : 'chevron-down'} size={16} color={cores.primaria} />
+          <Texto variante="rotulo" tom="primaria">
+            {todos ? 'Mostrar só os sugeridos' : `Mostrar outros tipos (${outros})`}
+          </Texto>
+        </Pressable>
+      ) : null}
       {erro ? (
         <Texto variante="legenda" tom="perigo">
           {erro}

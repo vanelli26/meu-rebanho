@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import { diasEntre, ehDataISO, somarDias, type DataISO } from '@/lib/datas';
 
+import type { ResumoAnimal, Situacao } from './animal';
 import type { ConfiguracoesFazenda } from './fazenda';
 
 export type TipoEvento =
@@ -162,6 +163,34 @@ export function estadoReprodutivo(
     previsaoSecagem,
     intervalosEntrePartos: partos.slice(1).map((parto, i) => diasEntre(partos[i], parto)),
   };
+}
+
+/**
+ * Tipos de evento que fazem sentido para a situação atual da vaca, na ordem de
+ * `TIPOS_EVENTO`. Os demais continuam possíveis (histórico incompleto, vaca
+ * recém-cadastrada), mas a tela os mostra só a pedido.
+ *
+ * - Prenhe: parto, aborto e reconfirmação do diagnóstico (e secagem, se em lactação).
+ * - Serviço aguardando diagnóstico: diagnóstico, ou retorno de cio e novo serviço.
+ * - Vazia: cio e serviço (e secagem, se em lactação).
+ * - Bezerra e macho: nenhum.
+ */
+export function tiposEventoSugeridos(
+  situacao: Situacao,
+  resumo: Pick<ResumoAnimal, 'prenhe' | 'servicoSemDiagnostico'>,
+): TipoEvento[] {
+  if (situacao === 'macho' || situacao === 'bezerra') return [];
+  const lactacao = situacao === 'lactacao';
+  let tipos: TipoEvento[];
+  if (resumo.prenhe) {
+    tipos = ['diagnostico_positivo', 'diagnostico_negativo', 'parto', 'aborto'];
+  } else if (resumo.servicoSemDiagnostico) {
+    tipos = ['cio', 'inseminacao', 'cobertura', 'diagnostico_positivo', 'diagnostico_negativo'];
+  } else {
+    tipos = ['cio', 'inseminacao', 'cobertura'];
+  }
+  if (lactacao) tipos.push('secagem');
+  return TIPOS_EVENTO.filter((t) => tipos.includes(t));
 }
 
 /**
