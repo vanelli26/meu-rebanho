@@ -13,7 +13,7 @@ Uso principal: no campo/curral, no celular, com uma mão, muitas vezes sem inter
 
 1. **Funciona offline.** Depois do primeiro login, todas as telas funcionam sem rede, usando o cache persistente do Firestore. As gravações ficam na fila e sincronizam sozinhas.
 2. **Entrada rápida.** Registrar uma produção ou um evento deve levar poucos toques. Busca por brinco com teclado numérico.
-3. **Moderno, elegante e usável no campo.** Identidade "Campo premium" (verde-floresta, creme e dourado-trigo, fonte Plus Jakarta Sans), tema claro/escuro automático, transições e micro-animações. Mesmo assim: alvos de toque ≥ 48dp e contraste legível sob sol.
+3. **Moderno, elegante e usável no campo.** Identidade "Campo premium" (verde-floresta, creme e dourado-trigo, fonte Plus Jakarta Sans), tema claro/escuro automático e tipografia compacta. Sem animações de entrada ou decorativas (atrapalham no uso real); só as transições nativas de navegação. Mesmo assim: alvos de toque ≥ 48dp e contraste legível sob sol.
 4. **Eventos são a fonte da verdade.** A situação da vaca é calculada a partir dos eventos por funções puras. O resultado é salvo no documento do animal como um _resumo_ para economizar leituras. Esse resumo nunca é editado à mão.
 5. **Isolamento por fazenda.** Um usuário só lê e escreve dados de fazendas das quais é membro, garantido pelas Security Rules.
 
@@ -77,7 +77,7 @@ app/
       index.tsx           # Painel (resumo + alertas)
       rebanho/            # Lista (filtro "Prenhes" = partos previstos), detalhe, cadastro e registro de evento
       producao/           # Lançamento em lote e histórico
-      mais.tsx            # Sanidade, configurações, exportar, sair
+    mais.tsx              # Conta e fazenda (aberta pela foto no Painel, fora das abas)
   _layout.tsx             # Guarda de rota: login → onboarding → app
 src/
   firebase/
@@ -299,7 +299,7 @@ Todos os prazos vêm de `fazenda.configuracoes`.
 5. **Lançar produção em lote**: escolher data e ordenha → lista das vacas em lactação → litros com teclado numérico e "próximo" automático → salvar em um documento.
 6. **Registrar evento reprodutivo** (`rebanho/evento`, pelo detalhe da vaca ou pelo botão "Evento" da lista): vaca → tipo → data (padrão hoje) → campos específicos. No parto, oferecer cadastro rápido da cria.
 7. **Tratamentos**: um animal ou vários de uma vez.
-8. **Mais**: configurações da fazenda, exportar CSV, conta (foto, e-mail, sair).
+8. **Conta e fazenda** (`mais`, aberta ao tocar na foto do usuário no Painel; não é aba): configurações da fazenda, exportar CSV, conta (foto, e-mail, sair). Abas: Painel, Rebanho e Produção.
 
 ---
 

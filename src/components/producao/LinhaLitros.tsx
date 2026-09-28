@@ -50,7 +50,7 @@ export function LinhaLitros({
           </Texto>
         </View>
         <View className="flex-1">
-          <Texto variante="rotulo" className="text-[15px]" numberOfLines={1}>
+          <Texto variante="rotulo" className="text-[14px]" numberOfLines={1}>
             {nome || `Brinco ${brinco}`}
           </Texto>
           {descartado ? (
@@ -80,7 +80,7 @@ export function LinhaLitros({
             maxLength={5}
             style={{
               fontFamily: fontes.extra,
-              fontSize: 22,
+              fontSize: 20,
               color: cores.texto,
               textAlign: 'right',
             }}

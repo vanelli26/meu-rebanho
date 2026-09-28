@@ -2,7 +2,6 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import * as Haptics from 'expo-haptics';
 import type { ComponentProps } from 'react';
 import { ActivityIndicator, Pressable, View, type PressableProps } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
 
 import { useTema, type NomeCor } from '@/lib/tema';
 
@@ -37,13 +36,9 @@ export function Botao({
   disabled,
   className = '',
   onPress,
-  onPressIn,
-  onPressOut,
   ...props
 }: Props) {
   const { cores } = useTema();
-  const escala = useSharedValue(1);
-  const animacao = useAnimatedStyle(() => ({ transform: [{ scale: escala.value }] }));
 
   const estilo = estilos[variante];
   const corIcone = estilo.cor === 'branco' ? '#1C1F1D' : cores[estilo.cor];
@@ -54,14 +49,6 @@ export function Botao({
       accessibilityRole="button"
       accessibilityState={{ disabled: desativado, busy: carregando }}
       disabled={desativado}
-      onPressIn={(e) => {
-        escala.set(withSpring(0.96, { damping: 18, stiffness: 400 }));
-        onPressIn?.(e);
-      }}
-      onPressOut={(e) => {
-        escala.set(withSpring(1, { damping: 14, stiffness: 300 }));
-        onPressOut?.(e);
-      }}
       onPress={(e) => {
         void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
         onPress?.(e);
@@ -69,23 +56,25 @@ export function Botao({
       className={className}
       {...props}
     >
-      <Animated.View
-        style={animacao}
-        className={`flex-row items-center justify-center gap-2 rounded-2xl px-6 ${
-          compacto ? 'min-h-12' : 'min-h-14'
-        } ${estilo.fundo} ${desativado ? 'opacity-50' : ''}`}
-      >
-        {carregando ? (
-          <ActivityIndicator color={corIcone} />
-        ) : (
-          <View className="flex-row items-center gap-2">
-            {icone ? <Ionicons name={icone} size={20} color={corIcone} /> : null}
-            <Texto variante="subtitulo" tom={estilo.tom} className="text-[17px]">
-              {titulo}
-            </Texto>
-          </View>
-        )}
-      </Animated.View>
+      {({ pressed }) => (
+        <View
+          className={`flex-row items-center justify-center gap-2 rounded-2xl px-5 ${
+            compacto ? 'min-h-12' : 'min-h-[52px]'
+          } ${estilo.fundo}`}
+          style={{ opacity: desativado ? 0.5 : pressed ? 0.8 : 1 }}
+        >
+          {carregando ? (
+            <ActivityIndicator color={corIcone} />
+          ) : (
+            <View className="flex-row items-center gap-2">
+              {icone ? <Ionicons name={icone} size={20} color={corIcone} /> : null}
+              <Texto variante="subtitulo" tom={estilo.tom}>
+                {titulo}
+              </Texto>
+            </View>
+          )}
+        </View>
+      )}
     </Pressable>
   );
 }

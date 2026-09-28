@@ -50,7 +50,7 @@ export function LinhaDoTempo({ eventos, brincoCria, aoAbrirCria, aoSegurar }: Pr
             </View>
             <View className={`flex-1 gap-0.5 ${ultimo ? '' : 'pb-5'}`}>
               <View className="flex-row items-center justify-between gap-2">
-                <Texto variante="rotulo" className="text-[15px]">
+                <Texto variante="rotulo" className="text-[14px]">
                   {ROTULO_EVENTO[evento.tipo]}
                 </Texto>
                 <Texto variante="legenda" tom="suave">

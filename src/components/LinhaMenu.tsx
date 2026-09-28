@@ -53,7 +53,7 @@ export function LinhaMenu({
             <Texto
               variante="subtitulo"
               tom={cor === 'perigo' ? 'perigo' : 'normal'}
-              className="text-[16px]"
+              className="text-[15px]"
             >
               {titulo}
             </Texto>

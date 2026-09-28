@@ -6,7 +6,7 @@ export function useOpcoesCabecalho() {
   return {
     headerStyle: { backgroundColor: cores.fundo },
     headerTintColor: cores.texto,
-    headerTitleStyle: { fontFamily: fontes.negrito, fontSize: 20 },
+    headerTitleStyle: { fontFamily: fontes.negrito, fontSize: 17 },
     headerLargeTitleStyle: { fontFamily: fontes.extra },
     headerShadowVisible: false,
     headerBackButtonDisplayMode: 'minimal' as const,

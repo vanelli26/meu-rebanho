@@ -50,7 +50,7 @@ export function AlertaLinha({
           <View className="flex-1 gap-0.5">
             <Texto
               variante="rotulo"
-              className="text-[15px]"
+              className="text-[14px]"
               tom={alerta.atrasado ? 'perigo' : 'normal'}
             >
               {alerta.brinco}

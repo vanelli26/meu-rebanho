@@ -1,11 +1,9 @@
 import type { ReactNode } from 'react';
 import { Alert, ScrollView, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useSessaoPronta } from '@/auth/SessaoProvider';
 import { Avatar } from '@/components/Avatar';
-import { ESPACO_BARRA_ABAS } from '@/components/BarraAbas';
 import { LinhaMenu } from '@/components/LinhaMenu';
 import { Card, Texto } from '@/components/ui';
 import { haGravacoesPendentes, sair } from '@/features/conta';
@@ -33,27 +31,14 @@ function confirmarSaida() {
   ]);
 }
 
-function Grupo({
-  titulo,
-  indice,
-  children,
-}: {
-  titulo: string;
-  indice: number;
-  children: ReactNode;
-}) {
+function Grupo({ titulo, children }: { titulo: string; children: ReactNode }) {
   return (
-    <Animated.View
-      entering={FadeInDown.delay(60 * indice)
-        .springify()
-        .damping(18)}
-      className="gap-2"
-    >
+    <View className="gap-2">
       <Texto variante="legenda" tom="suave" className="px-2 uppercase tracking-widest">
         {titulo}
       </Texto>
       <Card className="gap-0 overflow-hidden p-0">{children}</Card>
-    </Animated.View>
+    </View>
   );
 }
 
@@ -64,17 +49,11 @@ export default function Mais() {
   return (
     <ScrollView
       className="bg-fundo"
-      contentContainerStyle={{
-        paddingTop: insets.top + 12,
-        paddingBottom: ESPACO_BARRA_ABAS + insets.bottom,
-      }}
-      contentContainerClassName="gap-6 px-4"
+      contentInsetAdjustmentBehavior="automatic"
+      contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+      contentContainerClassName="gap-6 px-4 pt-2"
     >
-      <Texto variante="display" className="px-1">
-        Mais
-      </Texto>
-
-      <Card indice={0} className="flex-row items-center gap-4">
+      <Card className="flex-row items-center gap-4">
         <Avatar nome={conta.nome} fotoUrl={conta.fotoUrl} tamanho={60} />
         <View className="flex-1">
           <Texto variante="subtitulo">{conta.nome}</Texto>
@@ -84,7 +63,7 @@ export default function Mais() {
         </View>
       </Card>
 
-      <Grupo titulo="Fazenda" indice={1}>
+      <Grupo titulo="Fazenda">
         <LinhaMenu
           icone="home"
           titulo={fazenda.nome}
@@ -93,13 +72,13 @@ export default function Mais() {
         <LinhaMenu icone="options" titulo="Prazos reprodutivos" selo="Em breve" ultimo />
       </Grupo>
 
-      <Grupo titulo="Ferramentas" indice={2}>
+      <Grupo titulo="Ferramentas">
         <LinhaMenu icone="medkit" titulo="Sanidade" cor="info" selo="Em breve" />
         <LinhaMenu icone="share-outline" titulo="Exportar planilha" cor="info" selo="Em breve" />
         <LinhaMenu icone="notifications" titulo="Lembretes" cor="destaque" selo="Em breve" ultimo />
       </Grupo>
 
-      <Grupo titulo="Conta" indice={3}>
+      <Grupo titulo="Conta">
         <LinhaMenu
           icone="log-out-outline"
           titulo="Sair"

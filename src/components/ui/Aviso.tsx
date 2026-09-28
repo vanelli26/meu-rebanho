@@ -1,7 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ComponentProps } from 'react';
 import { View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 
 import { useTema, type NomeCor } from '@/lib/tema';
 
@@ -29,20 +28,20 @@ export function Aviso({ tipo = 'info', titulo, mensagem }: Props) {
   const { cores } = useTema();
   const c = config[tipo];
   return (
-    <Animated.View entering={FadeInDown.springify().damping(18)}>
+    <View>
       <View accessibilityRole="alert" className={`flex-row gap-3 rounded-2xl p-4 ${c.fundo}`}>
         <Ionicons name={c.icone} size={22} color={cores[c.cor]} />
         <View className="flex-1 gap-1">
-          <Texto variante="rotulo" tom={c.cor as 'info'} className="text-[15px]">
+          <Texto variante="rotulo" tom={c.cor as 'info'} className="text-[14px]">
             {titulo}
           </Texto>
           {mensagem ? (
-            <Texto variante="legenda" className="text-[14px] leading-[20px]">
+            <Texto variante="legenda" className="text-[13px] leading-[18px]">
               {mensagem}
             </Texto>
           ) : null}
         </View>
       </View>
-    </Animated.View>
+    </View>
   );
 }

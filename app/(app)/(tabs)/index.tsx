@@ -3,7 +3,6 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useMemo } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useSessaoPronta } from '@/auth/SessaoProvider';
@@ -51,23 +50,25 @@ export default function Painel() {
       }}
       contentContainerClassName="gap-5 px-4"
     >
-      <Animated.View
-        entering={FadeInDown.springify().damping(18)}
-        className="flex-row items-center gap-3 px-1"
-      >
+      <View className="flex-row items-center gap-3 px-1">
         <View className="flex-1">
-          <Texto variante="legenda" tom="suave" className="text-[14px]">
+          <Texto variante="legenda" tom="suave" className="text-[13px]">
             {saudacao(new Date().getHours())},
           </Texto>
           <Texto variante="titulo">{primeiroNome}</Texto>
         </View>
         <IndicadorSyncAtual />
-        <Pressable accessibilityLabel="Conta" onPress={() => router.navigate('/mais')}>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Conta e configurações"
+          hitSlop={8}
+          onPress={() => router.push('/mais')}
+        >
           <Avatar nome={conta.nome} fotoUrl={conta.fotoUrl} />
         </Pressable>
-      </Animated.View>
+      </View>
 
-      <Animated.View entering={FadeInDown.delay(80).springify().damping(18)}>
+      <View>
         <LinearGradient
           colors={[marca.verdeClaro, marca.verdeEscuro]}
           start={{ x: 0, y: 0 }}
@@ -115,7 +116,7 @@ export default function Painel() {
             ))}
           </View>
         </LinearGradient>
-      </Animated.View>
+      </View>
 
       <View className="gap-3">
         <View className="flex-row items-baseline justify-between px-1">
@@ -127,7 +128,7 @@ export default function Painel() {
           ) : null}
         </View>
         {alertas.length ? (
-          <Card indice={2} className="gap-0 overflow-hidden p-0">
+          <Card className="gap-0 overflow-hidden p-0">
             {alertas.map((alerta, i) => (
               <AlertaLinha
                 key={`${alerta.tipo}-${alerta.animalId}`}
@@ -138,12 +139,12 @@ export default function Painel() {
             ))}
           </Card>
         ) : (
-          <Card indice={2} className="flex-row items-center gap-4">
+          <Card className="flex-row items-center gap-4">
             <View className="h-12 w-12 items-center justify-center rounded-full bg-sucesso-suave">
               <Ionicons name="checkmark-done" size={24} color={cores.sucesso} />
             </View>
             <View className="flex-1 gap-0.5">
-              <Texto variante="rotulo" className="text-[15px]">
+              <Texto variante="rotulo" className="text-[14px]">
                 Tudo em dia
               </Texto>
               <Texto variante="legenda" tom="suave">

@@ -43,7 +43,7 @@ export function LinhaAnimal({ animal, hoje, detalhe, onPress, selecionado }: Pro
         </Texto>
       </View>
       <View className="flex-1 gap-1">
-        <Texto variante="subtitulo" className="text-[16px]" numberOfLines={1}>
+        <Texto variante="subtitulo" className="text-[15px]" numberOfLines={1}>
           {animal.nome || `Brinco ${animal.brinco}`}
         </Texto>
         {inativo ? (

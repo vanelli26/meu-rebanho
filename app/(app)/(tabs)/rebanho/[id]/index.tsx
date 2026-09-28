@@ -2,7 +2,6 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useMemo, type ReactNode } from 'react';
 import { Alert, Pressable, ScrollView, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useSessaoPronta } from '@/auth/SessaoProvider';
@@ -98,7 +97,7 @@ export default function DetalheAnimal() {
         contentContainerClassName="gap-4 px-4 pt-2"
         contentContainerStyle={{ paddingBottom: ESPACO_BARRA_ABAS + insets.bottom }}
       >
-        <Card indice={0} className="flex-row items-center gap-4">
+        <Card className="flex-row items-center gap-4">
           <View className="h-20 min-w-20 items-center justify-center rounded-3xl bg-primaria px-3">
             <Texto variante="numero" tom="sobre-primaria" numberOfLines={1} adjustsFontSizeToFit>
               {animal.brinco}
@@ -133,17 +132,17 @@ export default function DetalheAnimal() {
         ) : null}
 
         {femea && ativo ? (
-          <Animated.View entering={FadeInDown.delay(60).springify().damping(18)}>
+          <View>
             <Botao
               titulo="Registrar evento"
               icone="add-circle"
               onPress={() => router.push(`/rebanho/evento?animalId=${animal.id}`)}
             />
-          </Animated.View>
+          </View>
         ) : null}
 
         {femea ? (
-          <Card indice={2}>
+          <Card>
             <Texto variante="subtitulo">Reprodução</Texto>
             <View className="flex-row flex-wrap gap-y-4">
               {del !== null ? <Info rotulo="Dias em lactação" valor={`${del}`} /> : null}
@@ -179,7 +178,7 @@ export default function DetalheAnimal() {
         ) : null}
 
         {ordenhas.length ? (
-          <Card indice={3}>
+          <Card>
             <View className="flex-row items-baseline justify-between">
               <Texto variante="subtitulo">Produção</Texto>
               <Texto variante="legenda" tom="suave">
@@ -197,7 +196,7 @@ export default function DetalheAnimal() {
                 <Texto
                   variante="rotulo"
                   tom={o.descartado ? 'perigo' : 'normal'}
-                  className="text-[16px]"
+                  className="text-[15px]"
                 >
                   {numeroParaTexto(o.litros)} L{o.descartado ? ' (descartado)' : ''}
                 </Texto>
@@ -207,7 +206,7 @@ export default function DetalheAnimal() {
         ) : null}
 
         {femea ? (
-          <Card indice={4}>
+          <Card>
             <Texto variante="subtitulo">Linha do tempo</Texto>
             {eventos.length ? (
               <>
@@ -227,7 +226,7 @@ export default function DetalheAnimal() {
           </Card>
         ) : null}
 
-        <Card indice={5} className="gap-0 p-0">
+        <Card className="gap-0 p-0">
           <Texto variante="subtitulo" className="px-5 pb-1 pt-5">
             Dados
           </Texto>
@@ -289,7 +288,7 @@ function Linha({
       <Texto tom="suave" className="w-28">
         {rotulo}
       </Texto>
-      <Texto variante="rotulo" className="flex-1 text-[15px]" tom={onPress ? 'primaria' : 'normal'}>
+      <Texto variante="rotulo" className="flex-1 text-[14px]" tom={onPress ? 'primaria' : 'normal'}>
         {valor}
       </Texto>
       {onPress ? <Ionicons name="chevron-forward" size={16} color={cores.primaria} /> : null}

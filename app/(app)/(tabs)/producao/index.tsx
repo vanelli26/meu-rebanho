@@ -4,7 +4,6 @@ import { ptBR } from 'date-fns/locale';
 import { router } from 'expo-router';
 import { useMemo } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useSessaoPronta } from '@/auth/SessaoProvider';
@@ -43,21 +42,21 @@ export default function Producao() {
       contentContainerClassName="gap-4 px-4 pt-2"
       contentContainerStyle={{ paddingBottom: ESPACO_BARRA_ABAS + insets.bottom }}
     >
-      <Animated.View entering={FadeInDown.springify().damping(18)}>
+      <View>
         <Botao
           titulo="Lançar ordenha"
           icone="water"
           onPress={() => router.push('/producao/lancar')}
         />
-      </Animated.View>
+      </View>
 
-      <Card indice={1} className="flex-row">
+      <Card className="flex-row">
         <Numero valor={hojeLancado || null} rotulo="Hoje" />
         <Numero valor={resumo.ontem} rotulo="Ontem" separador />
         <Numero valor={resumo.media7Dias} rotulo="Média 7 dias" separador />
       </Card>
 
-      <Animated.View entering={FadeInDown.delay(120).springify().damping(18)} className="gap-2">
+      <View className="gap-2">
         <Texto variante="subtitulo" className="px-1">
           Últimos {DIAS_HISTORICO} dias
         </Texto>
@@ -74,12 +73,12 @@ export default function Producao() {
           dias.map(([data, ordenhas]) => (
             <Card key={data} className="gap-2 p-4">
               <View className="flex-row items-baseline justify-between">
-                <Texto variante="rotulo" className="text-[15px] capitalize">
+                <Texto variante="rotulo" className="text-[14px] capitalize">
                   {data === hoje
                     ? 'Hoje'
                     : format(dataDeISO(data), 'EEEE, dd/MM', { locale: ptBR })}
                 </Texto>
-                <Texto variante="rotulo" tom="primaria" className="text-[16px]">
+                <Texto variante="rotulo" tom="primaria" className="text-[15px]">
                   {numeroParaTexto(ordenhas.reduce((t, o) => t + o.totalLitros, 0))} L
                 </Texto>
               </View>
@@ -112,7 +111,7 @@ export default function Producao() {
             </Card>
           ))
         )}
-      </Animated.View>
+      </View>
     </ScrollView>
   );
 }

@@ -2,7 +2,6 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { FlatList, Pressable, View } from 'react-native';
-import Animated, { FadeIn, ZoomIn } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { ESPACO_BARRA_ABAS } from '@/components/BarraAbas';
@@ -71,12 +70,6 @@ export default function Rebanho() {
           <View className="gap-3 pb-2 pt-2">
             <CampoBusca valor={busca} aoMudar={setBusca} />
             <Seletor opcoes={FILTROS} valor={filtro} aoMudar={setFiltro} rolavel />
-            <Texto variante="legenda" tom="suave" className="px-1">
-              {carregando
-                ? 'Carregando…'
-                : `${lista.length} ${lista.length === 1 ? 'animal' : 'animais'}` +
-                  (filtro === 'todos' && !busca ? ` ativos de ${animais.length} cadastrados` : '')}
-            </Texto>
           </View>
         }
         renderItem={({ item }) => (
@@ -89,7 +82,7 @@ export default function Rebanho() {
         )}
         ListEmptyComponent={
           carregando ? null : (
-            <Animated.View entering={FadeIn} className="items-center gap-3 px-6 py-12">
+            <View className="items-center gap-3 px-6 py-12">
               <View className="h-20 w-20 items-center justify-center rounded-full bg-primaria-suave">
                 <Ionicons name={ativos ? 'search' : 'paw'} size={34} color={cores.primaria} />
               </View>
@@ -101,13 +94,12 @@ export default function Rebanho() {
                   ? 'Confira o brinco digitado ou troque o filtro.'
                   : 'Cadastre o primeiro animal pelo botão abaixo. Só o brinco é obrigatório.'}
               </Texto>
-            </Animated.View>
+            </View>
           )
         }
       />
 
-      <Animated.View
-        entering={ZoomIn.delay(200).springify().damping(14)}
+      <View
         className="flex-row gap-3"
         style={{ position: 'absolute', right: 20, bottom: ESPACO_BARRA_ABAS + insets.bottom - 12 }}
       >
@@ -137,7 +129,7 @@ export default function Rebanho() {
             Novo
           </Texto>
         </Pressable>
-      </Animated.View>
+      </View>
     </View>
   );
 }

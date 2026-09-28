@@ -17,13 +17,13 @@ export function SeloSituacao({ situacao, prenhe }: { situacao: Situacao; prenhe?
   return (
     <View className="flex-row gap-1.5">
       <View className={`rounded-full px-2.5 py-0.5 ${estilo.fundo}`}>
-        <Texto variante="legenda" tom={estilo.tom} className="text-[12px]">
+        <Texto variante="legenda" tom={estilo.tom} className="text-[11px]">
           {ROTULO_SITUACAO[situacao]}
         </Texto>
       </View>
       {prenhe ? (
         <View className="rounded-full bg-perigo-suave px-2.5 py-0.5">
-          <Texto variante="legenda" tom="perigo" className="text-[12px]">
+          <Texto variante="legenda" tom="perigo" className="text-[11px]">
             Prenhe
           </Texto>
         </View>

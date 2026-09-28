@@ -39,7 +39,7 @@ export function Seletor<T extends string>({
           ativo ? 'border-primaria bg-primaria' : 'border-borda bg-superficie'
         }`}
       >
-        <Texto variante="rotulo" tom={ativo ? 'sobre-primaria' : 'normal'} className="text-[15px]">
+        <Texto variante="rotulo" tom={ativo ? 'sobre-primaria' : 'normal'} className="text-[14px]">
           {opcao.rotulo}
         </Texto>
       </Pressable>

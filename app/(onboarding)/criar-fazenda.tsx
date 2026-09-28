@@ -4,7 +4,6 @@ import { StatusBar } from 'expo-status-bar';
 import { useRef } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { KeyboardAvoidingView, Platform, ScrollView, View, type TextInput } from 'react-native';
-import Animated, { FadeInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useSessao } from '@/auth/SessaoProvider';
@@ -46,7 +45,7 @@ export default function CriarFazenda() {
           style={{ paddingTop: insets.top + 24, paddingBottom: 72, overflow: 'hidden' }}
         >
           <Paisagem altura={120} />
-          <Animated.View entering={FadeInDown.springify().damping(16)} className="gap-4 px-6">
+          <View className="gap-4 px-6">
             <SeloLogo tamanho={64} />
             <View className="gap-1">
               <Texto variante="subtitulo" tom="dourado">
@@ -56,11 +55,11 @@ export default function CriarFazenda() {
                 Vamos cadastrar{'\n'}sua fazenda
               </Texto>
             </View>
-          </Animated.View>
+          </View>
         </LinearGradient>
 
         <View className="-mt-12 gap-4 px-4">
-          <Card indice={1} className="gap-5">
+          <Card className="gap-5">
             <Controller
               control={control}
               name="nome"
@@ -126,7 +125,7 @@ export default function CriarFazenda() {
             </View>
           </Card>
 
-          <Animated.View entering={FadeInDown.delay(200).springify()} className="gap-3">
+          <View className="gap-3">
             <Botao
               titulo="Criar fazenda"
               icone="arrow-forward"
@@ -140,7 +139,7 @@ export default function CriarFazenda() {
                 Dá para mudar esses dados depois, em Mais.
               </Texto>
             )}
-          </Animated.View>
+          </View>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

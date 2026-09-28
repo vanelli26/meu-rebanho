@@ -19,13 +19,13 @@ type Tom =
   | 'grafite';
 
 const variantes: Record<Variante, string> = {
-  display: 'font-extra text-[32px] leading-[38px] tracking-tight',
-  titulo: 'font-negrito text-[24px] leading-[30px] tracking-tight',
-  subtitulo: 'font-semi text-[18px] leading-[24px]',
-  corpo: 'font-regular text-[16px] leading-[23px]',
-  rotulo: 'font-semi text-[14px] leading-[19px]',
-  legenda: 'font-medio text-[13px] leading-[18px]',
-  numero: 'font-extra text-[28px] leading-[32px] tracking-tight',
+  display: 'font-extra text-[26px] leading-[32px] tracking-tight',
+  titulo: 'font-negrito text-[20px] leading-[26px] tracking-tight',
+  subtitulo: 'font-semi text-[16px] leading-[21px]',
+  corpo: 'font-regular text-[15px] leading-[21px]',
+  rotulo: 'font-semi text-[13px] leading-[18px]',
+  legenda: 'font-medio text-[12px] leading-[16px]',
+  numero: 'font-extra text-[22px] leading-[26px] tracking-tight',
 };
 
 const tons: Record<Tom, string> = {

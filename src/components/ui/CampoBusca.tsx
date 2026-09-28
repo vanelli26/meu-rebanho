@@ -34,7 +34,7 @@ export function CampoBusca({ valor, aoMudar, placeholder = 'Brinco ou nome', ...
         keyboardType={numerico ? 'number-pad' : 'default'}
         autoCorrect={false}
         returnKeyType="search"
-        style={{ fontFamily: fontes.medio, fontSize: 17, color: cores.texto }}
+        style={{ fontFamily: fontes.medio, fontSize: 16, color: cores.texto }}
         className="flex-1 py-3"
         {...props}
       />

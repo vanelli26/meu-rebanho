@@ -273,7 +273,7 @@ function GradeTipos({
               }`}
             >
               <Ionicons name={estilo.icone} size={20} color={cores[estilo.cor]} />
-              <Texto variante="rotulo" className="flex-1 text-[14px]" numberOfLines={2}>
+              <Texto variante="rotulo" className="flex-1 text-[13px]" numberOfLines={2}>
                 {ROTULO_EVENTO[t]}
               </Texto>
             </Pressable>

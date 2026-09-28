@@ -4,7 +4,6 @@ import * as Haptics from 'expo-haptics';
 import type { BottomTabBarProps } from 'expo-router/js-tabs';
 import { useState, type ComponentProps } from 'react';
 import { Platform, Pressable, View } from 'react-native';
-import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useTecladoVisivel } from '@/lib/teclado';
@@ -18,13 +17,12 @@ const ICONES: Record<string, [NomeIcone, NomeIcone]> = {
   index: ['home-outline', 'home'],
   rebanho: ['paw-outline', 'paw'],
   producao: ['water-outline', 'water'],
-  mais: ['grid-outline', 'grid'],
 };
 
 const MARGEM = 16;
 const ALTURA = 68;
 
-/** Barra de abas flutuante com indicador que desliza até a aba ativa. */
+/** Barra de abas flutuante; a aba ativa fica destacada. */
 export function BarraAbas({ state, descriptors, navigation }: BottomTabBarProps) {
   const { cores, escuro } = useTema();
   const insets = useSafeAreaInsets();
@@ -33,22 +31,15 @@ export function BarraAbas({ state, descriptors, navigation }: BottomTabBarProps)
   // No Android a barra subiria junto com o teclado e cobriria os campos.
   const tecladoVisivel = useTecladoVisivel();
 
-  const indicador = useAnimatedStyle(() => ({
-    width: larguraAba - 12,
-    transform: [
-      { translateX: withSpring(state.index * larguraAba + 6, { damping: 20, stiffness: 220 }) },
-    ],
-  }));
-
   const conteudo = (
     <View
       className="flex-1 flex-row items-center"
       onLayout={(e) => setLargura(e.nativeEvent.layout.width)}
     >
       {largura > 0 ? (
-        <Animated.View
+        <View
           className="absolute h-[52px] rounded-[22px] bg-primaria-suave"
-          style={indicador}
+          style={{ width: larguraAba - 12, left: state.index * larguraAba + 6 }}
         />
       ) : null}
       {state.routes.map((rota, i) => {

@@ -1,7 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { useState, type ComponentProps, type Ref } from 'react';
 import { TextInput, View, type TextInputProps } from 'react-native';
-import Animated, { FadeIn, FadeOut } from 'react-native-reanimated';
 
 import { fontes, useTema } from '@/lib/tema';
 
@@ -53,17 +52,17 @@ export function CampoTexto({
             setFocado(false);
             onBlur?.(e);
           }}
-          style={{ fontFamily: fontes.medio, fontSize: 17, color: cores.texto }}
+          style={{ fontFamily: fontes.medio, fontSize: 16, color: cores.texto }}
           className="flex-1 py-3"
           {...props}
         />
       </View>
       {erro ? (
-        <Animated.View entering={FadeIn.duration(180)} exiting={FadeOut.duration(120)}>
+        <View>
           <Texto variante="legenda" tom="perigo">
             {erro}
           </Texto>
-        </Animated.View>
+        </View>
       ) : ajuda ? (
         <Texto variante="legenda" tom="suave">
           {ajuda}
