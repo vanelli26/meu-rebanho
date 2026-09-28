@@ -1,22 +1,50 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
-import { Text, View } from 'react-native';
+import { useEffect } from 'react';
+import { View } from 'react-native';
+import Animated, {
+  FadeIn,
+  FadeOut,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated';
+
+import { useTema } from '@/lib/tema';
+
+import { Texto } from './Texto';
 
 type Props = {
   /** `true` quando há gravações locais ainda não confirmadas pelo servidor. */
   pendente: boolean;
 };
 
-/** Ícone discreto no topo indicando gravações aguardando sincronização. */
+/** Selo discreto no topo indicando gravações aguardando sincronização. */
 export function IndicadorSync({ pendente }: Props) {
+  const { cores } = useTema();
+  const pulso = useSharedValue(1);
+
+  useEffect(() => {
+    pulso.set(pendente ? withRepeat(withTiming(0.35, { duration: 800 }), -1, true) : 1);
+  }, [pendente, pulso]);
+
+  const animacao = useAnimatedStyle(() => ({ opacity: pulso.value }));
+
   if (!pendente) return null;
   return (
-    <View
-      accessibilityRole="text"
-      accessibilityLabel="Dados aguardando sincronização"
-      className="flex-row items-center gap-1 rounded-full bg-atencao-fundo px-3 py-1"
-    >
-      <Ionicons name="cloud-upload-outline" size={18} color="#7A4A00" />
-      <Text className="text-sm font-semibold text-atencao">Pendente</Text>
-    </View>
+    <Animated.View entering={FadeIn} exiting={FadeOut}>
+      <View
+        accessibilityRole="text"
+        accessibilityLabel="Dados aguardando sincronização"
+        className="flex-row items-center gap-1.5 rounded-full bg-destaque-suave px-3 py-1.5"
+      >
+        <Animated.View style={animacao}>
+          <Ionicons name="cloud-upload" size={15} color={cores.atencao} />
+        </Animated.View>
+        <Texto variante="legenda" tom="atencao">
+          Sincronizando
+        </Texto>
+      </View>
+    </Animated.View>
   );
 }

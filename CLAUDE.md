@@ -13,7 +13,7 @@ Uso principal: no campo/curral, no celular, com uma mão, muitas vezes sem inter
 
 1. **Funciona offline.** Depois do primeiro login, todas as telas funcionam sem rede, usando o cache persistente do Firestore. As gravações ficam na fila e sincronizam sozinhas.
 2. **Entrada rápida.** Registrar uma produção ou um evento deve levar poucos toques. Busca por brinco com teclado numérico.
-3. **Legível no campo.** Botões grandes (mín. 48dp), fonte grande, alto contraste, tema claro por padrão.
+3. **Moderno, elegante e usável no campo.** Identidade "Campo premium" (verde-floresta, creme e dourado-trigo, fonte Plus Jakarta Sans), tema claro/escuro automático, transições e micro-animações. Mesmo assim: alvos de toque ≥ 48dp e contraste legível sob sol.
 4. **Eventos são a fonte da verdade.** A situação da vaca é calculada a partir dos eventos por funções puras. O resultado é salvo no documento do animal como um _resumo_ para economizar leituras. Esse resumo nunca é editado à mão.
 5. **Isolamento por fazenda.** Um usuário só lê e escreve dados de fazendas das quais é membro, garantido pelas Security Rules.
 
@@ -295,6 +295,8 @@ Todos os prazos vêm de `fazenda.configuracoes`.
 
 - TypeScript `strict`; sem `any`. Tipos das coleções em `src/firebase/converters.ts`.
 - Interface 100% em **pt-BR**. Datas `dd/MM/yyyy`, vírgula decimal.
+- Cores só por tokens (`bg-primaria`, `text-texto-suave`...; `useTema()` fora do className). Nunca hex solto, exceto cores fixas da marca (`marca` em `src/lib/tema.ts`).
+- Texto sempre com `<Texto variante tom>`, não `Text` direto. Logo em `src/components/marca/`; fonte do desenho: `assets/images/marca.svg`.
 - Campos do Firestore em camelCase português (`dataNascimento`, `carenciaLeiteAte`).
 - Telas nunca importam do Firebase; usam hooks de `src/features/`.
 - Validar todo formulário com schema zod.

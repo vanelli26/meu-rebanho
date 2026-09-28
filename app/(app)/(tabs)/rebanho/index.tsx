@@ -1,5 +1,11 @@
 import { EmBreve } from '@/components/EmBreve';
 
 export default function Tela() {
-  return <EmBreve titulo="Rebanho" descricao="Cadastro, busca e detalhe dos animais (Fase 2)." />;
+  return (
+    <EmBreve
+      icone="paw-outline"
+      titulo="Rebanho"
+      descricao="Cadastre, busque e acompanhe cada animal, com linha do tempo e produção."
+    />
+  );
 }

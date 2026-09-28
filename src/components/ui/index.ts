@@ -5,3 +5,4 @@ export { CampoData } from './CampoData';
 export { CampoNumero } from './CampoNumero';
 export { CampoTexto } from './CampoTexto';
 export { IndicadorSync } from './IndicadorSync';
+export { Texto } from './Texto';

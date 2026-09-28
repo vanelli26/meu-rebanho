@@ -1,46 +1,35 @@
+// Mesmos nomes de `paletas` em src/lib/tema.ts (os valores ficam lá).
+const NOMES = [
+  'fundo', 'superficie', 'superficie2', 'borda', 'texto', 'textoSuave',
+  'primaria', 'primariaForte', 'primariaSuave', 'sobrePrimaria',
+  'destaque', 'destaqueSuave', 'perigo', 'perigoSuave', 'atencao', 'atencaoSuave',
+  'sucesso', 'sucessoSuave', 'info', 'infoSuave',
+];
+
+/** Cada cor lê a variável CSS aplicada em app/_layout.tsx (tema claro/escuro). */
+const cores = Object.fromEntries(
+  NOMES.map((nome) => {
+    const kebab = nome.replace(/[A-Z0-9]/g, (c) => `-${c.toLowerCase()}`);
+    return [kebab, `rgb(var(--${kebab}) / <alpha-value>)`];
+  }),
+);
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ['./app/**/*.{ts,tsx}', './src/**/*.{ts,tsx}'],
   presets: [require('nativewind/preset')],
   theme: {
     extend: {
-      // Tema claro de alto contraste para uso sob sol forte.
-      colors: {
-        fundo: '#FFFFFF',
-        superficie: '#F2F4F3',
-        borda: '#5C6360',
-        texto: '#111412',
-        'texto-suave': '#3D4441',
-        primaria: {
-          DEFAULT: '#0B5D1E',
-          escura: '#073F14',
-          contraste: '#FFFFFF',
-        },
-        perigo: {
-          DEFAULT: '#A4161A',
-          fundo: '#FDE8E8',
-        },
-        atencao: {
-          DEFAULT: '#7A4A00',
-          fundo: '#FFF1CC',
-        },
-        info: {
-          DEFAULT: '#0B3D91',
-          fundo: '#E3ECFB',
-        },
-        sucesso: {
-          DEFAULT: '#0B5D1E',
-          fundo: '#E2F3E6',
-        },
+      colors: cores,
+      fontFamily: {
+        regular: ['PlusJakartaSans_400Regular'],
+        medio: ['PlusJakartaSans_500Medium'],
+        semi: ['PlusJakartaSans_600SemiBold'],
+        negrito: ['PlusJakartaSans_700Bold'],
+        extra: ['PlusJakartaSans_800ExtraBold'],
       },
-      fontSize: {
-        base: ['18px', '26px'],
-        lg: ['20px', '28px'],
-        xl: ['24px', '32px'],
-        '2xl': ['28px', '36px'],
-      },
-      minHeight: {
-        toque: '56px',
+      borderRadius: {
+        '4xl': '32px',
       },
     },
   },

@@ -1,22 +1,162 @@
-import { ScrollView, Text } from 'react-native';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router, type Href } from 'expo-router';
+import type { ComponentProps } from 'react';
+import { Pressable, ScrollView, View } from 'react-native';
+import Animated, { FadeInDown } from 'react-native-reanimated';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useSessaoPronta } from '@/auth/SessaoProvider';
-import { Card } from '@/components/ui';
+import { Avatar } from '@/components/Avatar';
+import { ESPACO_BARRA_ABAS } from '@/components/BarraAbas';
+import { IndicadorSyncAtual } from '@/components/IndicadorSyncAtual';
+import { Logo } from '@/components/marca/Logo';
+import { Card, Texto } from '@/components/ui';
+import { saudacao } from '@/lib/saudacao';
+import { marca, useTema } from '@/lib/tema';
+
+type Atalho = {
+  icone: ComponentProps<typeof Ionicons>['name'];
+  titulo: string;
+  destino: Href;
+};
+
+const ATALHOS: Atalho[] = [
+  { icone: 'water', titulo: 'Lançar produção', destino: '/producao' },
+  { icone: 'heart', titulo: 'Evento reprodutivo', destino: '/reproducao' },
+  { icone: 'add-circle', titulo: 'Novo animal', destino: '/rebanho' },
+  { icone: 'medkit', titulo: 'Tratamento', destino: '/mais' },
+];
 
 export default function Painel() {
-  const { fazenda } = useSessaoPronta();
+  const { conta, fazenda } = useSessaoPronta();
+  const { cores } = useTema();
+  const insets = useSafeAreaInsets();
+  const primeiroNome = conta.nome.split(' ')[0] || 'produtor';
+
   return (
-    <ScrollView contentContainerClassName="gap-4 p-4">
-      <Text className="text-2xl font-bold text-texto">{fazenda.nome}</Text>
-      <Text className="text-lg text-texto-suave">
-        {fazenda.municipio} – {fazenda.uf}
-      </Text>
-      <Card>
-        <Text className="text-xl font-bold text-texto">Resumo e alertas</Text>
-        <Text className="text-base text-texto-suave">
-          Vacas em lactação, produção e alertas aparecem aqui na Fase 2.
-        </Text>
-      </Card>
+    <ScrollView
+      className="bg-fundo"
+      contentContainerStyle={{
+        paddingTop: insets.top + 12,
+        paddingBottom: ESPACO_BARRA_ABAS + insets.bottom,
+      }}
+      contentContainerClassName="gap-5 px-4"
+    >
+      <Animated.View
+        entering={FadeInDown.springify().damping(18)}
+        className="flex-row items-center gap-3 px-1"
+      >
+        <View className="flex-1">
+          <Texto variante="legenda" tom="suave" className="text-[14px]">
+            {saudacao(new Date().getHours())},
+          </Texto>
+          <Texto variante="titulo">{primeiroNome}</Texto>
+        </View>
+        <IndicadorSyncAtual />
+        <Pressable accessibilityLabel="Conta" onPress={() => router.navigate('/mais')}>
+          <Avatar nome={conta.nome} fotoUrl={conta.fotoUrl} />
+        </Pressable>
+      </Animated.View>
+
+      <Animated.View entering={FadeInDown.delay(80).springify().damping(18)}>
+        <LinearGradient
+          colors={[marca.verdeClaro, marca.verdeEscuro]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={{
+            borderRadius: 28,
+            padding: 22,
+            overflow: 'hidden',
+            boxShadow: '0px 12px 32px rgba(23, 58, 44, 0.28)',
+          }}
+        >
+          <View style={{ position: 'absolute', right: -30, bottom: -36, opacity: 0.12 }}>
+            <Logo tamanho={180} corTraco={marca.creme} corChifre={marca.creme} />
+          </View>
+          <Texto variante="legenda" className="uppercase tracking-widest text-[#C9A227]">
+            Sua fazenda
+          </Texto>
+          <Texto variante="titulo" className="mt-1 text-[#F7F4EC]">
+            {fazenda.nome}
+          </Texto>
+          <View className="mt-1 flex-row items-center gap-1">
+            <Ionicons name="location" size={14} color="#F7F4ECB3" />
+            <Texto variante="legenda" className="text-[#F7F4EC]/70">
+              {fazenda.municipio} – {fazenda.uf}
+            </Texto>
+          </View>
+
+          <View className="mt-6 flex-row">
+            {[
+              { valor: '—', rotulo: 'Em lactação' },
+              { valor: '— L', rotulo: 'Ontem' },
+              { valor: '— L', rotulo: 'Média 7 dias' },
+            ].map((item, i) => (
+              <View
+                key={item.rotulo}
+                className={`flex-1 gap-0.5 ${i > 0 ? 'border-l border-[#F7F4EC]/15 pl-4' : ''}`}
+              >
+                <Texto variante="numero" className="text-[#F7F4EC]">
+                  {item.valor}
+                </Texto>
+                <Texto variante="legenda" className="text-[#F7F4EC]/70">
+                  {item.rotulo}
+                </Texto>
+              </View>
+            ))}
+          </View>
+        </LinearGradient>
+      </Animated.View>
+
+      <View className="gap-3">
+        <Texto variante="subtitulo" className="px-1">
+          Acesso rápido
+        </Texto>
+        <View className="flex-row flex-wrap gap-3">
+          {ATALHOS.map((atalho, i) => (
+            <Animated.View
+              key={atalho.titulo}
+              entering={FadeInDown.delay(160 + i * 50)
+                .springify()
+                .damping(18)}
+              style={{ width: '48%', flexGrow: 1 }}
+            >
+              <Pressable
+                onPress={() => router.navigate(atalho.destino)}
+                className="gap-3 rounded-3xl bg-superficie p-4 active:opacity-80"
+                style={{ boxShadow: '0px 4px 16px rgba(28, 31, 29, 0.06)' }}
+              >
+                <View className="h-11 w-11 items-center justify-center rounded-2xl bg-primaria-suave">
+                  <Ionicons name={atalho.icone} size={22} color={cores.primaria} />
+                </View>
+                <Texto variante="rotulo" className="text-[15px]">
+                  {atalho.titulo}
+                </Texto>
+              </Pressable>
+            </Animated.View>
+          ))}
+        </View>
+      </View>
+
+      <View className="gap-3">
+        <Texto variante="subtitulo" className="px-1">
+          Alertas
+        </Texto>
+        <Card indice={6} className="flex-row items-center gap-4">
+          <View className="h-12 w-12 items-center justify-center rounded-full bg-sucesso-suave">
+            <Ionicons name="checkmark-done" size={24} color={cores.sucesso} />
+          </View>
+          <View className="flex-1 gap-0.5">
+            <Texto variante="rotulo" className="text-[15px]">
+              Tudo em dia
+            </Texto>
+            <Texto variante="legenda" tom="suave">
+              Partos, secagens e carências aparecem aqui quando houver animais cadastrados.
+            </Texto>
+          </View>
+        </Card>
+      </View>
     </ScrollView>
   );
 }
