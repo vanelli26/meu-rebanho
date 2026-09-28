@@ -43,5 +43,11 @@ service cloud.firestore {
         allow read, write: if membro(fazendaId);
       }
     }
+
+    // Eventos de todos os animais, lidos por grupo de coleção (a consulta filtra
+    // por fazendaId). Mantém o histórico no cache para recalcular resumos offline.
+    match /{caminho=**}/eventos/{eventoId} {
+      allow read: if membro(resource.data.fazendaId);
+    }
   }
 }

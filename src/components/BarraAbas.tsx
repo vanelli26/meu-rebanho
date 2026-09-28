@@ -7,6 +7,7 @@ import { Platform, Pressable, View } from 'react-native';
 import Animated, { useAnimatedStyle, withSpring } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
+import { useTecladoVisivel } from '@/lib/teclado';
 import { useTema } from '@/lib/tema';
 
 import { Texto } from './ui/Texto';
@@ -30,6 +31,8 @@ export function BarraAbas({ state, descriptors, navigation }: BottomTabBarProps)
   const insets = useSafeAreaInsets();
   const [largura, setLargura] = useState(0);
   const larguraAba = largura / state.routes.length;
+  // No Android a barra subiria junto com o teclado e cobriria os campos.
+  const tecladoVisivel = useTecladoVisivel();
 
   const indicador = useAnimatedStyle(() => ({
     width: larguraAba - 12,
@@ -94,6 +97,8 @@ export function BarraAbas({ state, descriptors, navigation }: BottomTabBarProps)
       })}
     </View>
   );
+
+  if (tecladoVisivel && Platform.OS === 'android') return null;
 
   return (
     <View

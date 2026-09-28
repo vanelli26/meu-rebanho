@@ -1,8 +1,10 @@
 export { Aviso } from './Aviso';
 export { Botao } from './Botao';
 export { Card } from './Card';
+export { CampoBusca } from './CampoBusca';
 export { CampoData } from './CampoData';
 export { CampoNumero } from './CampoNumero';
 export { CampoTexto } from './CampoTexto';
 export { IndicadorSync } from './IndicadorSync';
+export { Seletor, type Opcao } from './Seletor';
 export { Texto } from './Texto';

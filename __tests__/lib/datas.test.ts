@@ -1,4 +1,14 @@
-import { brParaISO, isoParaBR, mascaraDataBR, paraDataISO } from '@/lib/datas';
+import {
+  brParaISO,
+  diasEntre,
+  ehDataISO,
+  idadeTexto,
+  isoParaBR,
+  isoParaDiaMes,
+  mascaraDataBR,
+  paraDataISO,
+  somarDias,
+} from '@/lib/datas';
 
 describe('datas', () => {
   it('converte Date local para ISO', () => {
@@ -24,5 +34,33 @@ describe('datas', () => {
     expect(mascaraDataBR('270')).toBe('27/0');
     expect(mascaraDataBR('27092026')).toBe('27/09/2026');
     expect(mascaraDataBR('27/09/20269')).toBe('27/09/2026');
+  });
+});
+
+describe('somarDias, diasEntre, ehDataISO e isoParaDiaMes', () => {
+  it('soma dias atravessando meses e anos', () => {
+    expect(somarDias('2026-12-30', 3)).toBe('2027-01-02');
+    expect(somarDias('2026-03-01', -1)).toBe('2026-02-28');
+  });
+
+  it('conta dias corridos', () => {
+    expect(diasEntre('2026-09-01', '2026-09-28')).toBe(27);
+    expect(diasEntre('2026-09-28', '2026-09-01')).toBe(-27);
+  });
+
+  it('valida datas ISO e formata dia/mês', () => {
+    expect(ehDataISO('2026-02-28')).toBe(true);
+    expect(ehDataISO('2026-02-30')).toBe(false);
+    expect(isoParaDiaMes('2026-09-05')).toBe('05/09');
+  });
+});
+
+describe('idadeTexto', () => {
+  it('usa dias, meses ou anos e meses', () => {
+    expect(idadeTexto('2026-09-27', '2026-09-28')).toBe('1 dia');
+    expect(idadeTexto('2026-09-10', '2026-09-28')).toBe('18 dias');
+    expect(idadeTexto('2026-04-28', '2026-09-28')).toBe('5 meses');
+    expect(idadeTexto('2025-09-28', '2026-09-28')).toBe('1 ano');
+    expect(idadeTexto('2024-06-01', '2026-09-28')).toBe('2 anos e 3 meses');
   });
 });

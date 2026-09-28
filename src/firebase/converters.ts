@@ -5,7 +5,10 @@ import type {
   Timestamp,
 } from '@react-native-firebase/firestore';
 
+import type { Animal, ResumoAnimal } from '@/domain/animal';
 import type { ConfiguracoesFazenda, Papel } from '@/domain/fazenda';
+import type { Ordenha, ProducaoOrdenha, RegistroProducao } from '@/domain/producao';
+import type { EventoReprodutivo, TipoEvento } from '@/domain/reproducao';
 
 /** `usuarios/{uid}` */
 export type Usuario = {
@@ -67,5 +70,71 @@ export const fazendaConverter = conversorLeitura<Fazenda>((snapshot) => {
     configuracoes: d.configuracoes,
     createdAt: d.createdAt ?? null,
     updatedAt: d.updatedAt ?? null,
+  };
+});
+
+const RESUMO_VAZIO: ResumoAnimal = {
+  situacao: 'novilha',
+  prenhe: false,
+  ultimoParto: null,
+  ultimaCobertura: null,
+  ultimaSecagem: null,
+  previsaoParto: null,
+  previsaoSecagem: null,
+  servicoSemDiagnostico: null,
+  carenciaLeiteAte: null,
+  numeroPartos: 0,
+};
+
+/** `fazendas/{fazendaId}/animais/{animalId}` */
+export const animalConverter = conversorLeitura<Animal>((snapshot) => {
+  const d = snapshot.data();
+  return {
+    id: snapshot.id,
+    brinco: d.brinco ?? '',
+    nome: d.nome ?? '',
+    raca: d.raca ?? '',
+    sexo: d.sexo === 'M' ? 'M' : 'F',
+    dataNascimento: d.dataNascimento ?? null,
+    maeId: d.maeId ?? null,
+    pai: d.pai ?? '',
+    origem: d.origem ?? 'nascido',
+    dataEntrada: d.dataEntrada ?? null,
+    status: d.status ?? 'ativo',
+    dataSaida: d.dataSaida ?? null,
+    motivoSaida: d.motivoSaida ?? '',
+    observacoes: d.observacoes ?? '',
+    resumo: { ...RESUMO_VAZIO, ...(d.resumo ?? {}) },
+  };
+});
+
+/** Evento com o animal a que pertence (lido por grupo de coleção). */
+export type EventoDoAnimal = EventoReprodutivo & { animalId: string };
+
+/** `fazendas/{fazendaId}/animais/{animalId}/eventos/{eventoId}` */
+export const eventoConverter = conversorLeitura<EventoDoAnimal>((snapshot) => {
+  const d = snapshot.data();
+  return {
+    id: snapshot.id,
+    animalId: snapshot.ref.parent.parent?.id ?? '',
+    data: d.data,
+    tipo: d.tipo as TipoEvento,
+    touroSemen: d.touroSemen ?? '',
+    responsavel: d.responsavel ?? '',
+    criaId: d.criaId ?? null,
+    observacoes: d.observacoes ?? '',
+  };
+});
+
+/** `fazendas/{fazendaId}/producao/{data_ordenha}` */
+export const producaoConverter = conversorLeitura<ProducaoOrdenha>((snapshot) => {
+  const d = snapshot.data();
+  return {
+    id: snapshot.id,
+    data: d.data,
+    ordenha: d.ordenha as Ordenha,
+    registros: (d.registros ?? {}) as Record<string, RegistroProducao>,
+    totalLitros: d.totalLitros ?? 0,
+    totalDescartado: d.totalDescartado ?? 0,
   };
 });
