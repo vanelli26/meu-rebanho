@@ -4,7 +4,18 @@ import {
   initializeTestEnvironment,
   type RulesTestEnvironment,
 } from '@firebase/rules-unit-testing';
-import { doc, getDoc, setDoc, updateDoc, deleteDoc, writeBatch } from 'firebase/firestore';
+import {
+  collectionGroup,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  query,
+  setDoc,
+  updateDoc,
+  where,
+  writeBatch,
+} from 'firebase/firestore';
 import { readFileSync } from 'node:fs';
 
 let env: RulesTestEnvironment;
@@ -180,5 +191,45 @@ describe('subcoleções da fazenda', () => {
 
   it('subcoleção de fazenda inexistente é negada', async () => {
     await assertFails(getDoc(doc(dbDe(DONO), 'fazendas', 'nao-existe', 'animais', 'a1')));
+  });
+});
+
+describe('eventos por grupo de coleção', () => {
+  beforeEach(async () => {
+    await semear();
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      const db = ctx.firestore();
+      await setDoc(doc(db, 'fazendas', 'fazenda-2'), fazendaValida(OUTRO));
+      await setDoc(doc(db, 'fazendas', FAZENDA, 'animais', 'a1', 'eventos', 'e1'), {
+        tipo: 'parto',
+        fazendaId: FAZENDA,
+      });
+      await setDoc(doc(db, 'fazendas', 'fazenda-2', 'animais', 'b1', 'eventos', 'e2'), {
+        tipo: 'cio',
+        fazendaId: 'fazenda-2',
+      });
+    });
+  });
+
+  const eventosDe = (uid: string, fazendaId: string) =>
+    getDocs(query(collectionGroup(dbDe(uid), 'eventos'), where('fazendaId', '==', fazendaId)));
+
+  it('membro lista os eventos da própria fazenda', async () => {
+    const snap = await assertSucceeds(eventosDe(DONO, FAZENDA));
+    expect(snap.docs.map((d) => d.id)).toEqual(['e1']);
+  });
+
+  it('não lista eventos de fazenda da qual não é membro', async () => {
+    await assertFails(eventosDe(DONO, 'fazenda-2'));
+  });
+
+  it('consulta sem filtro pela fazenda é negada', async () => {
+    await assertFails(getDocs(collectionGroup(dbDe(DONO), 'eventos')));
+  });
+
+  it('anônimo não lista', async () => {
+    await assertFails(
+      getDocs(query(collectionGroup(dbAnonimo(), 'eventos'), where('fazendaId', '==', FAZENDA))),
+    );
   });
 });
