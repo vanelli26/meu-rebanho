@@ -231,7 +231,8 @@ service cloud.firestore {
       allow update: if logado() && resource.data.membros[request.auth.uid] == "dono";
       allow delete: if false;
 
-      match /{sub=**} {
+      // Não usar /{sub=**}: no rules_version 2 ele casa também com o próprio doc da fazenda.
+      match /{colecao}/{resto=**} {
         allow read, write: if membro(fazendaId);
       }
     }
@@ -309,7 +310,7 @@ npx expo start --dev-client                  # desenvolvimento (precisa do dev b
 eas build -p android --profile development   # gerar dev build
 eas build -p android --profile preview       # APK para uso real
 npm test                                     # testes de domínio e componentes
-firebase emulators:exec "npm run test:rules" # testes das Security Rules
+npm run test:rules:emulador                  # testes das Security Rules (sobe o emulador)
 firebase deploy --only firestore:rules,firestore:indexes
 ```
 
@@ -329,11 +330,11 @@ firebase deploy --only firestore:rules,firestore:indexes
 
 ### Fase 1 — Conta e fazenda
 
-- [ ] Login com Google e contexto de sessão
-- [ ] Guarda de rotas (login → criar fazenda → app)
-- [ ] Criação da fazenda com configurações padrão
-- [ ] `firestore.rules` + testes no emulador
-- [ ] Logout com aviso de gravações pendentes
+- [x] Login com Google e contexto de sessão
+- [x] Guarda de rotas (login → criar fazenda → app)
+- [x] Criação da fazenda com configurações padrão
+- [x] `firestore.rules` + testes no emulador
+- [x] Logout com aviso de gravações pendentes
 
 ### Fase 2 — MVP de manejo
 

@@ -55,7 +55,10 @@ npm run typecheck
 npm run lint
 npm run format
 npm test
+npm run test:rules:emulador   # Security Rules no emulador (precisa de Java)
 ```
+
+Publicar regras e índices: `firebase deploy --only firestore:rules,firestore:indexes`
 
 ## Build para uso real
 
