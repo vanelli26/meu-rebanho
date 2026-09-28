@@ -87,7 +87,13 @@ export default function Mais() {
           cor="info"
           onPress={() => router.push('/tratamento')}
         />
-        <LinhaMenu icone="share-outline" titulo="Exportar planilha" cor="info" selo="Em breve" />
+        <LinhaMenu
+          icone="share-outline"
+          titulo="Exportar planilha"
+          detalhe="Animais, produção, eventos e tratamentos"
+          cor="info"
+          onPress={() => router.push('/exportar')}
+        />
         <LinhaMenu icone="notifications" titulo="Lembretes" cor="destaque" selo="Em breve" ultimo />
       </Grupo>
 

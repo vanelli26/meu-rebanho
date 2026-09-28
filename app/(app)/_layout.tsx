@@ -9,6 +9,7 @@ const TELAS = {
   mais: 'Conta e fazenda',
   tratamento: 'Registrar tratamento',
   prazos: 'Prazos reprodutivos',
+  exportar: 'Exportar planilha',
 };
 
 export default function AppLayout() {

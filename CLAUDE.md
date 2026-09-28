@@ -80,6 +80,7 @@ app/
     mais.tsx              # Conta e fazenda (aberta pela foto no Painel, fora das abas)
     tratamento.tsx        # Tratamento em um ou vários animais (fora das abas)
     prazos.tsx            # Prazos reprodutivos da fazenda (só o dono edita)
+    exportar.tsx          # Planilhas CSV (animais, produção, eventos, tratamentos)
   _layout.tsx             # Guarda de rota: login → onboarding → app
 src/
   firebase/
@@ -95,6 +96,7 @@ src/
     carencia.ts
     resumoAnimal.ts       # Recalcula o resumo a partir dos eventos
     alertas.ts
+    exportacao.ts         # CSV para Excel pt-BR: `;`, vírgula decimal, dd/MM/yyyy, BOM
   features/               # Hooks (useAnimais, useProducoes...) e ações de gravação
     DadosFazendaProvider.tsx  # Listeners de animais, de todos os eventos e de todos os tratamentos
   components/ui/
@@ -382,7 +384,7 @@ firebase deploy --only firestore:rules,firestore:indexes
 - [x] Marcação automática de leite descartado
 - [x] Tratamento em vários animais
 - [x] Gráficos de produção
-- [ ] Exportar CSV
+- [x] Exportar CSV
 - [ ] Notificações locais diárias com alertas
 - [x] Tela de configurações dos prazos
 
