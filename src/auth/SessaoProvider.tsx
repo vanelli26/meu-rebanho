@@ -49,11 +49,13 @@ export function SessaoProvider({ children }: { children: ReactNode }) {
 function useLeitura<T>(ref: DocumentReference<T> | null, rotulo: string): Leitura<T> {
   const caminho = ref?.path ?? null;
   const [estado, setEstado] = useState<{ caminho: string; leitura: Leitura<T> } | null>(null);
+  const [tentativa, setTentativa] = useState(0);
 
   useEffect(() => {
     if (!ref) return;
     const salvar = (leitura: Leitura<T>) => setEstado({ caminho: ref.path, leitura });
-    return onSnapshot(
+    let cancelarRetentativa: ReturnType<typeof setTimeout> | undefined;
+    const pararDeOuvir = onSnapshot(
       ref,
       { includeMetadataChanges: true },
       (snap) => {
@@ -64,13 +66,20 @@ function useLeitura<T>(ref: DocumentReference<T> | null, rotulo: string): Leitur
         else salvar({ tipo: 'ok', dados: null });
       },
       (erro) => {
+        // O listener morre após um erro. Em vez de concluir que o documento não
+        // existe (o que levaria a criar outra fazenda), mostra "Conectando" e tenta de novo.
         console.error(`[sessão] Falha ao ler ${rotulo}:`, erro);
-        salvar({ tipo: 'ok', dados: null });
+        salvar({ tipo: 'sem-rede' });
+        cancelarRetentativa = setTimeout(() => setTentativa((t) => t + 1), 5000);
       },
     );
+    return () => {
+      pararDeOuvir();
+      clearTimeout(cancelarRetentativa);
+    };
     // O caminho identifica o documento; a referência muda a cada render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [caminho, rotulo]);
+  }, [caminho, rotulo, tentativa]);
 
   return estado && estado.caminho === caminho ? estado.leitura : ESPERANDO;
 }

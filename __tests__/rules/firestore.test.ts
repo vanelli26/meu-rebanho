@@ -101,6 +101,14 @@ describe('fazendas: criação', () => {
     await assertFails(setDoc(doc(dbDe(DONO), 'fazendas', 'nova'), dados));
   });
 
+  it('escuta fazenda que ainda não chegou ao servidor', async () => {
+    await assertSucceeds(getDoc(doc(dbDe(DONO), 'fazendas', 'ainda-nao-existe')));
+  });
+
+  it('anônimo não lê fazenda inexistente', async () => {
+    await assertFails(getDoc(doc(dbAnonimo(), 'fazendas', 'ainda-nao-existe')));
+  });
+
   it('anônimo não cria', async () => {
     await assertFails(setDoc(doc(dbAnonimo(), 'fazendas', 'nova'), fazendaValida()));
   });

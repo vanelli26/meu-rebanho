@@ -25,7 +25,9 @@ service cloud.firestore {
         && request.resource.data.nome is string
         && request.resource.data.nome.size() > 0;
 
-      allow read: if logado() && request.auth.uid in resource.data.membros;
+      // resource == null: o app escuta a fazenda recém-criada antes de ela chegar
+      // ao servidor. Ler um documento inexistente não expõe nada.
+      allow read: if logado() && (resource == null || request.auth.uid in resource.data.membros);
 
       // O dono edita, mas não pode trocar o dono nem se remover.
       allow update: if logado()
