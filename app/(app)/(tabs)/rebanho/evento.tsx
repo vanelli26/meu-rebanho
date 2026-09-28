@@ -101,7 +101,7 @@ export default function RegistrarEvento() {
     registrarEvento(contexto, animal, eventos, { ...form, tipo: form.tipo }, cria);
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     if (router.canGoBack()) router.back();
-    else router.replace('/reproducao');
+    else router.replace('/rebanho');
   });
 
   return (

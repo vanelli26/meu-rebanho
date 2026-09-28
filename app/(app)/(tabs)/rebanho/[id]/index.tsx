@@ -137,7 +137,7 @@ export default function DetalheAnimal() {
             <Botao
               titulo="Registrar evento"
               icone="add-circle"
-              onPress={() => router.push(`/reproducao/registrar?animalId=${animal.id}`)}
+              onPress={() => router.push(`/rebanho/evento?animalId=${animal.id}`)}
             />
           </Animated.View>
         ) : null}

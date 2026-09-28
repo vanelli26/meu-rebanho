@@ -106,6 +106,20 @@ export function compararBrinco(a: string, b: string): number {
 
 const semAcento = (texto: string) => texto.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
+/** Prenhes primeiro pela data prevista de parto; sem previsão vão para o fim, por brinco. */
+export function ordenarPorPrevisaoParto<T extends Pick<Animal, 'brinco' | 'resumo'>>(
+  animais: readonly T[],
+): T[] {
+  return [...animais].sort((a, b) => {
+    const pa = a.resumo.previsaoParto;
+    const pb = b.resumo.previsaoParto;
+    if (pa && pb && pa !== pb) return pa.localeCompare(pb);
+    if (pa && !pb) return -1;
+    if (!pa && pb) return 1;
+    return compararBrinco(a.brinco, b.brinco);
+  });
+}
+
 /** Filtra por brinco ou nome (sem diferenciar acentos) e ordena pelo brinco. */
 export function buscarAnimais<T extends Pick<Animal, 'brinco' | 'nome'>>(
   animais: readonly T[],

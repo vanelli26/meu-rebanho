@@ -75,9 +75,8 @@ app/
   (app)/
     (tabs)/
       index.tsx           # Painel (resumo + alertas)
-      rebanho/            # Lista, detalhe e cadastro
+      rebanho/            # Lista (filtro "Prenhes" = partos previstos), detalhe, cadastro e registro de evento
       producao/           # Lançamento em lote e histórico
-      reproducao/         # Eventos e calendário
       mais.tsx            # Sanidade, configurações, exportar, sair
   _layout.tsx             # Guarda de rota: login → onboarding → app
 src/
@@ -296,9 +295,9 @@ Todos os prazos vêm de `fazenda.configuracoes`.
 1. **Login**: logo, botão "Entrar com Google", aviso de que o primeiro acesso precisa de internet.
 2. **Criar fazenda**: nome, município, UF.
 3. **Painel**: vacas em lactação, produção de ontem, média de 7 dias, alertas com atalho para o animal, indicador de sincronização.
-4. **Rebanho**: lista com busca por brinco/nome e filtro por situação; detalhe com linha do tempo, gráfico de produção e tratamentos.
+4. **Rebanho**: lista com busca por brinco/nome e filtro por situação (o filtro "Prenhes" ordena pela previsão de parto); detalhe com linha do tempo, gráfico de produção e tratamentos. Não há aba de reprodução: eventos são registrados a partir do Rebanho, e as pendências reprodutivas aparecem nos alertas do Painel.
 5. **Lançar produção em lote**: escolher data e ordenha → lista das vacas em lactação → litros com teclado numérico e "próximo" automático → salvar em um documento.
-6. **Registrar evento reprodutivo**: vaca → tipo → data (padrão hoje) → campos específicos. No parto, oferecer cadastro rápido da cria.
+6. **Registrar evento reprodutivo** (`rebanho/evento`, pelo detalhe da vaca ou pelo botão "Evento" da lista): vaca → tipo → data (padrão hoje) → campos específicos. No parto, oferecer cadastro rápido da cria.
 7. **Tratamentos**: um animal ou vários de uma vez.
 8. **Mais**: configurações da fazenda, exportar CSV, conta (foto, e-mail, sair).
 

@@ -8,8 +8,10 @@ import {
   formularioDoAnimal,
   identificacao,
   montarDadosAnimal,
+  ordenarPorPrevisaoParto,
   situacaoAtual,
   situacaoSemParto,
+  type Animal,
 } from '@/domain/animal';
 
 const hoje = new Date(2026, 8, 28);
@@ -76,6 +78,17 @@ describe('buscarAnimais', () => {
 
   it('compararBrinco usa ordem natural', () => {
     expect(compararBrinco('9', '10')).toBeLessThan(0);
+  });
+});
+
+describe('ordenarPorPrevisaoParto', () => {
+  it('ordena pela data prevista e deixa quem não tem previsão no fim', () => {
+    const a = (brinco: string, previsaoParto: string | null) => ({
+      brinco,
+      resumo: { previsaoParto } as Animal['resumo'],
+    });
+    const lista = [a('3', null), a('1', '2026-11-20'), a('10', null), a('2', '2026-11-03')];
+    expect(ordenarPorPrevisaoParto(lista).map((x) => x.brinco)).toEqual(['2', '1', '3', '10']);
   });
 });
 
