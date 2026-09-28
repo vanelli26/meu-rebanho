@@ -54,7 +54,6 @@ export default function Rebanho() {
   }, [animais, filtro, busca, hoje]);
 
   const ativos = animais.filter((a) => a.status === 'ativo').length;
-  const temFemeas = animais.some((a) => a.status === 'ativo' && a.sexo === 'F');
 
   return (
     <View className="flex-1 bg-fundo">
@@ -100,23 +99,8 @@ export default function Rebanho() {
       />
 
       <View
-        className="flex-row gap-3"
         style={{ position: 'absolute', right: 20, bottom: ESPACO_BARRA_ABAS + insets.bottom - 12 }}
       >
-        {temFemeas ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel="Registrar evento reprodutivo"
-            onPress={() => router.push('/rebanho/evento')}
-            className="h-16 flex-row items-center gap-2 rounded-full border-[1.5px] border-primaria bg-superficie px-5 active:opacity-80"
-            style={{ boxShadow: '0px 8px 24px rgba(23, 58, 44, 0.18)' }}
-          >
-            <Ionicons name="heart" size={22} color={cores.primaria} />
-            <Texto variante="subtitulo" tom="primaria">
-              Evento
-            </Texto>
-          </Pressable>
-        ) : null}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel="Novo animal"

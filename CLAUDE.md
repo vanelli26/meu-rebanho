@@ -297,7 +297,7 @@ Todos os prazos vêm de `fazenda.configuracoes`.
 3. **Painel**: vacas em lactação, produção de ontem, média de 7 dias, alertas com atalho para o animal, indicador de sincronização.
 4. **Rebanho**: lista com busca por brinco/nome e filtro por situação (o filtro "Prenhes" ordena pela previsão de parto); detalhe com linha do tempo, gráfico de produção e tratamentos. Não há aba de reprodução: eventos são registrados a partir do Rebanho, e as pendências reprodutivas aparecem nos alertas do Painel.
 5. **Lançar produção em lote**: escolher data e ordenha → lista das vacas em lactação → litros com teclado numérico e "próximo" automático → salvar em um documento.
-6. **Registrar evento reprodutivo** (`rebanho/evento`, pelo detalhe da vaca ou pelo botão "Evento" da lista): vaca → tipo → data (padrão hoje) → campos específicos. No parto, oferecer cadastro rápido da cria.
+6. **Registrar evento reprodutivo** (`rebanho/evento`, pelo botão "Registrar evento" no detalhe da vaca): vaca → tipo → data (padrão hoje) → campos específicos. No parto, oferecer cadastro rápido da cria.
 7. **Tratamentos**: um animal ou vários de uma vez.
 8. **Conta e fazenda** (`mais`, aberta ao tocar na foto do usuário no Painel; não é aba): configurações da fazenda, exportar CSV, conta (foto, e-mail, sair). Abas: Painel, Rebanho e Produção.
 
