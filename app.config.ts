@@ -59,6 +59,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     ['@react-native-firebase/app', { ios: { disableSPM: true } }],
     '@react-native-firebase/auth',
     '@react-native-google-signin/google-signin',
+    './plugins/withCaminhoComEspaco',
   ],
   owner: 'vanelli',
   extra: {

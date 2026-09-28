@@ -84,6 +84,8 @@ export function BarraAbas({ state, descriptors, navigation }: BottomTabBarProps)
               tom={ativa ? 'primaria' : 'suave'}
               className={`text-[11px] ${ativa ? 'font-negrito' : ''}`}
               numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.8}
             >
               {titulo}
             </Texto>

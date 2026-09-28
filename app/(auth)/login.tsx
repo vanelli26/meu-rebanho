@@ -37,11 +37,11 @@ export default function Login() {
             entering={FadeInDown.delay(150).duration(600)}
             className="items-center gap-2"
           >
-            <Texto variante="display" className="text-[40px] leading-[46px] text-[#F7F4EC]">
+            <Texto variante="display" tom="creme" className="text-[40px] leading-[46px]">
               Meu Rebanho
             </Texto>
             <View className="h-1 w-12 rounded-full bg-[#C9A227]" />
-            <Texto className="mt-2 text-center text-[17px] leading-[25px] text-[#F7F4EC]/80">
+            <Texto tom="creme-suave" className="mt-2 text-center text-[17px] leading-[25px]">
               Seu gado leiteiro na palma da mão.{'\n'}No curral, mesmo sem internet.
             </Texto>
           </Animated.View>
@@ -60,7 +60,7 @@ export default function Login() {
           />
           {erro ? <Aviso tipo="perigo" titulo={erro} /> : null}
           <Animated.View entering={FadeIn.delay(600)}>
-            <Texto variante="legenda" className="text-center text-[#F7F4EC]/70">
+            <Texto variante="legenda" tom="creme-suave" className="text-center">
               O primeiro acesso precisa de internet.{'\n'}Depois, tudo funciona offline.
             </Texto>
           </Animated.View>

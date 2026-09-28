@@ -74,15 +74,15 @@ export default function Painel() {
           <View style={{ position: 'absolute', right: -30, bottom: -36, opacity: 0.12 }}>
             <Logo tamanho={180} corTraco={marca.creme} corChifre={marca.creme} />
           </View>
-          <Texto variante="legenda" className="uppercase tracking-widest text-[#C9A227]">
+          <Texto variante="legenda" tom="dourado" className="uppercase tracking-widest">
             Sua fazenda
           </Texto>
-          <Texto variante="titulo" className="mt-1 text-[#F7F4EC]">
+          <Texto variante="titulo" tom="creme" className="mt-1">
             {fazenda.nome}
           </Texto>
           <View className="mt-1 flex-row items-center gap-1">
             <Ionicons name="location" size={14} color="#F7F4ECB3" />
-            <Texto variante="legenda" className="text-[#F7F4EC]/70">
+            <Texto variante="legenda" tom="creme-suave">
               {fazenda.municipio} – {fazenda.uf}
             </Texto>
           </View>
@@ -97,10 +97,10 @@ export default function Painel() {
                 key={item.rotulo}
                 className={`flex-1 gap-0.5 ${i > 0 ? 'border-l border-[#F7F4EC]/15 pl-4' : ''}`}
               >
-                <Texto variante="numero" className="text-[#F7F4EC]">
+                <Texto variante="numero" tom="creme">
                   {item.valor}
                 </Texto>
-                <Texto variante="legenda" className="text-[#F7F4EC]/70">
+                <Texto variante="legenda" tom="creme-suave">
                   {item.rotulo}
                 </Texto>
               </View>

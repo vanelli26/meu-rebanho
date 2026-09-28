@@ -6,17 +6,17 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-na
 
 import { useTema, type NomeCor } from '@/lib/tema';
 
-import { Texto } from './Texto';
+import { Texto, type TomTexto } from './Texto';
 
 type Variante = 'primaria' | 'destaque' | 'secundaria' | 'fantasma' | 'perigo' | 'claro';
 
-const estilos: Record<Variante, { fundo: string; texto: string; cor: NomeCor | 'branco' }> = {
-  primaria: { fundo: 'bg-primaria', texto: 'text-sobre-primaria', cor: 'sobrePrimaria' },
-  destaque: { fundo: 'bg-destaque', texto: 'text-primaria-forte', cor: 'primariaForte' },
-  secundaria: { fundo: 'bg-primaria-suave', texto: 'text-primaria', cor: 'primaria' },
-  fantasma: { fundo: 'bg-transparent', texto: 'text-primaria', cor: 'primaria' },
-  perigo: { fundo: 'bg-perigo-suave', texto: 'text-perigo', cor: 'perigo' },
-  claro: { fundo: 'bg-white', texto: 'text-[#1C1F1D]', cor: 'branco' },
+const estilos: Record<Variante, { fundo: string; tom: TomTexto; cor: NomeCor | 'branco' }> = {
+  primaria: { fundo: 'bg-primaria', tom: 'sobre-primaria', cor: 'sobrePrimaria' },
+  destaque: { fundo: 'bg-destaque', tom: 'primaria-forte', cor: 'primariaForte' },
+  secundaria: { fundo: 'bg-primaria-suave', tom: 'primaria', cor: 'primaria' },
+  fantasma: { fundo: 'bg-transparent', tom: 'primaria', cor: 'primaria' },
+  perigo: { fundo: 'bg-perigo-suave', tom: 'perigo', cor: 'perigo' },
+  claro: { fundo: 'bg-white', tom: 'grafite', cor: 'branco' },
 };
 
 type Props = Omit<PressableProps, 'children'> & {
@@ -80,7 +80,7 @@ export function Botao({
         ) : (
           <View className="flex-row items-center gap-2">
             {icone ? <Ionicons name={icone} size={20} color={corIcone} /> : null}
-            <Texto variante="subtitulo" className={`${estilo.texto} text-[17px]`}>
+            <Texto variante="subtitulo" tom={estilo.tom} className="text-[17px]">
               {titulo}
             </Texto>
           </View>

@@ -47,10 +47,10 @@ export default function CriarFazenda() {
           <Animated.View entering={FadeInDown.springify().damping(16)} className="gap-4 px-6">
             <SeloLogo tamanho={64} />
             <View className="gap-1">
-              <Texto variante="subtitulo" className="text-[#C9A227]">
+              <Texto variante="subtitulo" tom="dourado">
                 {primeiroNome ? `Olá, ${primeiroNome}!` : 'Bem-vindo!'}
               </Texto>
-              <Texto variante="display" className="text-[#F7F4EC]">
+              <Texto variante="display" tom="creme">
                 Vamos cadastrar{'\n'}sua fazenda
               </Texto>
             </View>
