@@ -134,7 +134,8 @@ export default function Painel() {
                 key={`${alerta.tipo}-${alerta.animalId}`}
                 alerta={alerta}
                 ultimo={i === alertas.length - 1}
-                onPress={() => router.push(`/rebanho/${alerta.animalId}`)}
+                // withAnchor: a lista do Rebanho fica embaixo, para o botão voltar.
+                onPress={() => router.push(`/rebanho/${alerta.animalId}`, { withAnchor: true })}
               />
             ))}
           </Card>

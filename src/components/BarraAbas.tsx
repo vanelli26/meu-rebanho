@@ -60,9 +60,20 @@ export function BarraAbas({ state, descriptors, navigation }: BottomTabBarProps)
                 target: rota.key,
                 canPreventDefault: true,
               });
-              if (!ativa && !evento.defaultPrevented) {
-                void Haptics.selectionAsync();
+              if (evento.defaultPrevented) return;
+              void Haptics.selectionAsync();
+              if (!ativa) {
                 navigation.navigate(rota.name, rota.params);
+                return;
+              }
+              // Tocar na aba ativa volta ao início dela (ex.: do detalhe para a lista).
+              const pilha = rota.state;
+              if (!pilha) return;
+              if (pilha.key && (pilha.index ?? 0) > 0) {
+                navigation.dispatch({ type: 'POP_TO_TOP', target: pilha.key });
+              } else if (pilha.routes[pilha.index ?? 0]?.name !== 'index') {
+                // Aberta direto num detalhe, sem a lista embaixo: vai para a lista.
+                navigation.navigate(rota.name, { screen: 'index' });
               }
             }}
             className="h-full flex-1 items-center justify-center gap-0.5"
