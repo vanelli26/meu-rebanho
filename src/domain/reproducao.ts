@@ -164,6 +164,17 @@ export function estadoReprodutivo(
   };
 }
 
+/**
+ * Último serviço (inseminação/cobertura) até a data do parto: dele vem o pai da cria.
+ */
+export function servicoDoParto<T extends Pick<EventoReprodutivo, 'data' | 'tipo'>>(
+  eventos: readonly T[],
+  dataParto: DataISO,
+): T | null {
+  const servicos = ordenarEventos(eventos).filter((e) => ehServico(e.tipo) && e.data <= dataParto);
+  return servicos.at(-1) ?? null;
+}
+
 // ---------------------------------------------------------------------------
 // Formulário
 
@@ -172,7 +183,10 @@ const texto = (max: number) => z.string().trim().max(max, 'Texto muito longo.');
 export const esquemaEvento = z
   .object({
     animalId: z.string().min(1, 'Escolha o animal.'),
-    tipo: z.enum(TIPOS_EVENTO as [TipoEvento, ...TipoEvento[]], { error: 'Escolha o tipo.' }),
+    tipo: z
+      .enum(TIPOS_EVENTO as [TipoEvento, ...TipoEvento[]])
+      .nullable()
+      .refine((v): v is TipoEvento => v !== null, 'Escolha o tipo.'),
     data: z
       .string({ error: 'Informe a data.' })
       .nullable()

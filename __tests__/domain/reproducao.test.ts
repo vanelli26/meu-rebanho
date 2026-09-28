@@ -3,6 +3,7 @@ import {
   estadoReprodutivo,
   esquemaEvento,
   ordenarEventos,
+  servicoDoParto,
   validarEventoNaData,
   type TipoEvento,
 } from '@/domain/reproducao';
@@ -155,6 +156,18 @@ describe('estadoReprodutivo', () => {
   });
 });
 
+describe('servicoDoParto', () => {
+  it('pega o último serviço até a data do parto', () => {
+    const eventos = [
+      { ...ev('2025-01-01', 'inseminacao'), touroSemen: 'A' },
+      { ...ev('2025-01-22', 'cobertura'), touroSemen: 'B' },
+      { ...ev('2025-11-01', 'inseminacao'), touroSemen: 'C' },
+    ];
+    expect(servicoDoParto(eventos, '2025-10-30')?.touroSemen).toBe('B');
+    expect(servicoDoParto(eventos, '2024-12-01')).toBeNull();
+  });
+});
+
 describe('validarEventoNaData', () => {
   const vaca = { sexo: 'F' as const, dataNascimento: '2023-01-01' };
 
@@ -186,11 +199,12 @@ describe('esquemaEvento', () => {
     expect(esquemaEvento.safeParse(valido).success).toBe(true);
   });
 
-  it('exige data e animal', () => {
-    const r = esquemaEvento.safeParse({ ...valido, data: null, animalId: '' });
+  it('exige data, animal e tipo', () => {
+    const r = esquemaEvento.safeParse({ ...valido, data: null, animalId: '', tipo: null });
     expect(r.success).toBe(false);
-    if (!r.success)
-      expect(r.error.issues.map((i) => i.path[0]).sort()).toEqual(['animalId', 'data']);
+    if (!r.success) {
+      expect(r.error.issues.map((i) => i.path[0]).sort()).toEqual(['animalId', 'data', 'tipo']);
+    }
   });
 
   it('exige brinco quando cadastra a cria', () => {

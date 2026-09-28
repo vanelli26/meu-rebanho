@@ -2,7 +2,7 @@ import { doc, serverTimestamp, writeBatch } from '@react-native-firebase/firesto
 
 import type { Animal, DadosAnimal, Sexo } from '@/domain/animal';
 import type { ConfiguracoesFazenda } from '@/domain/fazenda';
-import type { EventoReprodutivo, TipoEvento } from '@/domain/reproducao';
+import { servicoDoParto, type EventoReprodutivo, type TipoEvento } from '@/domain/reproducao';
 import { calcularResumo } from '@/domain/resumoAnimal';
 import { db } from '@/firebase/init';
 import { animalRef, eventosRef, novoEventoRef, novoIdAnimal } from '@/firebase/paths';
@@ -47,7 +47,7 @@ export function registrarEvento(
       sexo: cria.sexo,
       dataNascimento: evento.data,
       maeId: animal.id,
-      pai: evento.touroSemen.trim(),
+      pai: servicoDoParto(eventosAtuais, evento.data)?.touroSemen ?? '',
       origem: 'nascido',
       dataEntrada: evento.data,
       status: 'ativo',
