@@ -1,5 +1,6 @@
 import { Stack } from 'expo-router';
 
+import { CabecalhoDireita } from '@/components/BotaoConta';
 import { IndicadorSyncAtual } from '@/components/IndicadorSyncAtual';
 import { useOpcoesCabecalho } from '@/lib/navegacao';
 
@@ -10,7 +11,14 @@ export default function Layout() {
   const opcoes = useOpcoesCabecalho();
   return (
     <Stack screenOptions={{ ...opcoes, headerRight: () => <IndicadorSyncAtual /> }}>
-      <Stack.Screen name="index" options={{ title: 'Produção', headerLargeTitle: true }} />
+      <Stack.Screen
+        name="index"
+        options={{
+          title: 'Produção',
+          headerLargeTitle: true,
+          headerRight: () => <CabecalhoDireita />,
+        }}
+      />
       <Stack.Screen name="lancar" options={{ title: 'Lançar ordenha' }} />
     </Stack>
   );

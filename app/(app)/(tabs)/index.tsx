@@ -2,13 +2,13 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useMemo } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useSessaoPronta } from '@/auth/SessaoProvider';
 import { AlertaLinha } from '@/components/AlertaLinha';
-import { Avatar } from '@/components/Avatar';
 import { ESPACO_BARRA_ABAS } from '@/components/BarraAbas';
+import { BotaoConta } from '@/components/BotaoConta';
 import { IndicadorSyncAtual } from '@/components/IndicadorSyncAtual';
 import { Logo } from '@/components/marca/Logo';
 import { Card, Texto } from '@/components/ui';
@@ -58,14 +58,7 @@ export default function Painel() {
           <Texto variante="titulo">{primeiroNome}</Texto>
         </View>
         <IndicadorSyncAtual />
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Conta e configurações"
-          hitSlop={8}
-          onPress={() => router.push('/mais')}
-        >
-          <Avatar nome={conta.nome} fotoUrl={conta.fotoUrl} />
-        </Pressable>
+        <BotaoConta />
       </View>
 
       <View>
