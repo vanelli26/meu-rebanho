@@ -18,10 +18,9 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   orientation: 'portrait',
   icon: './assets/images/icon.png',
   scheme: 'meurebanho',
-  userInterfaceStyle: 'light',
+  userInterfaceStyle: 'automatic',
   ios: {
     bundleIdentifier: PACKAGE,
-    icon: './assets/expo.icon',
     ...(existsSync(GOOGLE_SERVICE_INFO_PLIST) && {
       googleServicesFile: GOOGLE_SERVICE_INFO_PLIST,
     }),
@@ -29,7 +28,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   android: {
     package: PACKAGE,
     adaptiveIcon: {
-      backgroundColor: '#FFFFFF',
+      backgroundColor: '#1F4D3A',
       foregroundImage: './assets/images/android-icon-foreground.png',
       backgroundImage: './assets/images/android-icon-background.png',
       monochromeImage: './assets/images/android-icon-monochrome.png',
@@ -44,9 +43,10 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     [
       'expo-splash-screen',
       {
-        backgroundColor: '#FFFFFF',
+        backgroundColor: '#1F4D3A',
         image: './assets/images/splash-icon.png',
-        imageWidth: 76,
+        imageWidth: 160,
+        dark: { backgroundColor: '#0F1F18', image: './assets/images/splash-icon.png' },
       },
     ],
     [
@@ -55,7 +55,8 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         ios: { useFrameworks: 'static' },
       },
     ],
-    '@react-native-firebase/app',
+    // SPM do Firebase + frameworks estáticos gera símbolos duplicados no iOS.
+    ['@react-native-firebase/app', { ios: { disableSPM: true } }],
     '@react-native-firebase/auth',
     '@react-native-google-signin/google-signin',
   ],
