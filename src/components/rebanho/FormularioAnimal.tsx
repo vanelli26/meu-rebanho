@@ -13,6 +13,7 @@ import {
 } from '@/domain/animal';
 import { useAnimais } from '@/features/animais';
 
+import { ESPACO_BARRA_ABAS } from '../BarraAbas';
 import { Botao, CampoData, CampoTexto, Card, Seletor, Texto, type Opcao } from '../ui';
 
 const OPCOES_SEXO: Opcao<'F' | 'M'>[] = [
@@ -75,7 +76,7 @@ export function FormularioAnimal({ valoresIniciais, animalId, tituloBotao, aoSal
         keyboardShouldPersistTaps="handled"
         contentInsetAdjustmentBehavior="automatic"
         contentContainerClassName="gap-4 px-4 pt-2"
-        contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+        contentContainerStyle={{ paddingBottom: ESPACO_BARRA_ABAS + insets.bottom }}
       >
         <Card className="gap-5">
           <View className="flex-row gap-3">

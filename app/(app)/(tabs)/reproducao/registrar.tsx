@@ -8,6 +8,7 @@ import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'rea
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useSessaoPronta } from '@/auth/SessaoProvider';
+import { ESPACO_BARRA_ABAS } from '@/components/BarraAbas';
 import { SeletorAnimal } from '@/components/rebanho/SeletorAnimal';
 import { ESTILO_EVENTO } from '@/components/reproducao/estiloEvento';
 import { Aviso, Botao, CampoData, CampoTexto, Card, Seletor, Texto } from '@/components/ui';
@@ -112,7 +113,7 @@ export default function RegistrarEvento() {
         keyboardShouldPersistTaps="handled"
         contentInsetAdjustmentBehavior="automatic"
         contentContainerClassName="gap-4 px-4 pt-2"
-        contentContainerStyle={{ paddingBottom: insets.bottom + 24 }}
+        contentContainerStyle={{ paddingBottom: ESPACO_BARRA_ABAS + insets.bottom }}
       >
         <Card>
           <Controller
