@@ -79,6 +79,7 @@ app/
       producao/           # Lançamento em lote e histórico
       financas/           # Resumo do mês, preço do leite (vigências), despesas (só o dono)
     mais.tsx              # Conta e fazenda (aberta pela foto no Painel, fora das abas)
+    fazenda.tsx           # Nome, município e UF (só o dono edita)
     tratamento.tsx        # Tratamento em um ou vários animais (fora das abas)
     prazos.tsx            # Prazos reprodutivos da fazenda (só o dono edita)
     exportar.tsx          # Planilhas CSV (animais, produção, eventos, tratamentos; despesas e resultado por animal para o dono)
@@ -104,6 +105,7 @@ src/
     rateio.ts             # Rateio por cabeça-dia e resultado por animal
     analiseMes.ts         # Tudo do financeiro de um mês (receita, despesas, rateio, animais)
     sugestoes.ts          # Sugestões de gestão a partir das análises mensais
+    primeirosPassos.ts    # Guia do Painel enquanto não há vaca em lactação
     exportacao.ts         # CSV para Excel pt-BR: `;`, vírgula decimal, dd/MM/yyyy, BOM
   features/               # Hooks (useAnimais, useProducoes...) e ações de gravação
     DadosFazendaProvider.tsx  # Listeners de animais, de todos os eventos e de todos os tratamentos
@@ -357,14 +359,14 @@ Todos os prazos vêm de `fazenda.configuracoes`.
 
 1. **Login**: logo, botão "Entrar com Google", aviso de que o primeiro acesso precisa de internet.
 2. **Criar fazenda**: nome, município, UF.
-3. **Painel**: vacas em lactação, produção de ontem, média de 7 dias, alertas com atalho para o animal, indicador de sincronização.
+3. **Painel**: vacas em lactação, produção de ontem, média de 7 dias, alertas com atalho para o animal, indicador de sincronização. Fazenda nova (sem vaca em lactação): guia de primeiros passos com atalhos.
 4. **Rebanho**: lista ordenada e buscada pelo nome, com filtro por situação (o filtro "Prenhes" ordena pela previsão de parto); detalhe com linha do tempo, gráfico de produção da vaca (30 dias) e tratamentos. Não há aba de reprodução: eventos são registrados a partir do Rebanho, e as pendências reprodutivas aparecem nos alertas do Painel.
 5. **Produção**: gráfico do leite no tanque por dia (30 dias, `serieDiaria`, barras sem animação; toque na barra mostra o dia) e histórico por dia.
-   **Lançar produção em lote**: escolher data e ordenha → lista das vacas em lactação → litros com teclado numérico e "próximo" automático → salvar em um documento.
+   **Lançar produção em lote**: escolher data e ordenha → lista das vacas em lactação → litros com teclado numérico e "próximo" automático (com os litros da ordenha anterior do mesmo turno como referência) → salvar em um documento.
 6. **Registrar evento reprodutivo** (`rebanho/evento`, pelo botão "Registrar evento" no detalhe da vaca): vaca → tipo → data (padrão hoje) → campos específicos. No parto, oferecer cadastro rápido da cria.
 7. **Tratamentos** (`tratamento`, pelo botão no detalhe do animal ou por "Tratamento em lote" em Conta e fazenda): um animal ou vários de uma vez (atalhos "Em lactação" e "Todo o rebanho"). No detalhe, lista de tratamentos (segurar para excluir) e avisos de carência de leite e carne.
 8. **Conta e fazenda** (`mais`, aberta ao tocar na foto do usuário no Painel; não é aba): prazos reprodutivos (`prazos`: limites em `LIMITES_PRAZOS`; salvar recalcula o resumo de todos os animais em batches), tratamento em lote, exportar CSV, lembretes, conta (foto, e-mail, sair). Abas: Painel, Rebanho, Produção e Finanças.
-9. **Finanças** (aba, só o dono): mês selecionável com receita do leite, preço médio, leite descartado em R$ e preço vigente; histórico de preços (`financas/precos`, segurar para excluir) e novo preço (`financas/preco`, avisa qual preço perde a vigência). Resultado do mês, custo por litro × preço médio, despesas por categoria e lançamentos; `financas/despesa` lança ou edita (`?id=`) com categoria, valor, quantidade, e para quem é. `financas/animais` lista a margem de cada animal no mês (pior ou melhor primeiro); o detalhe do animal tem o card "Financeiro" do mês (só o dono).
+9. **Finanças** (aba, só o dono): mês selecionável com receita do leite, preço médio, leite descartado em R$ e preço vigente; histórico de preços (`financas/precos`, segurar para excluir) e novo preço (`financas/preco`, avisa qual preço perde a vigência). Resultado do mês, custo por litro × preço médio, despesas por categoria e lançamentos; `financas/despesa` lança, edita (`?id=`) ou copia com a data de hoje (`?copiar=`) com categoria, valor, quantidade, e para quem é. `financas/animais` lista a margem de cada animal no mês (pior ou melhor primeiro); o detalhe do animal tem o card "Financeiro" do mês (só o dono).
 
 ---
 
@@ -379,6 +381,8 @@ Todos os prazos vêm de `fazenda.configuracoes`.
 - Validar todo formulário com schema zod.
 - Toda função em `src/domain/` tem teste. Toda mudança em `firestore.rules` tem teste no emulador.
 - Commits pequenos, mensagem em português no imperativo.
+- Formulários usam `useConfirmarDescarte(formState.isDirty)` (`src/lib/confirmarDescarte.ts`) para perguntar antes de sair com dados não salvos; chame `liberar()` logo antes de voltar após salvar.
+- Alvos de toque com no mínimo `min-h-12` (48dp).
 
 ---
 

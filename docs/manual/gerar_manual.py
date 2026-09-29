@@ -379,6 +379,9 @@ h += itens(
     "animal de volta para a lista).",
     "O selo <b>Sincronizando</b> no topo aparece enquanto há dados aguardando envio para a internet.",
 )
+h += caixa("info", "Não perca o que digitou",
+           "Se você preencheu um formulário e tentar voltar sem salvar, o app pergunta se quer "
+           "<b>descartar</b> ou <b>continuar aqui</b>.")
 h += caixa("dica", "Tela sempre em dia",
            "Você não precisa \"atualizar\" nenhuma tela. Tudo o que você grava aparece na hora, "
            "e o que outra pessoa gravar aparece sozinho quando houver internet.")
@@ -419,6 +422,11 @@ h += itens(
 )
 h += [p("Logo abaixo, para o dono, aparece a <b>principal sugestão financeira</b> (ver capítulo 9). "
         "Tocar nela abre a aba Finanças.")]
+h += caixa("dica", "Fazenda nova: primeiros passos",
+           "Enquanto não houver nenhuma vaca em lactação, o Painel mostra um guia com atalhos: "
+           "cadastrar os animais, registrar o último parto das vacas em lactação, lançar a "
+           "primeira ordenha e cadastrar o preço do leite. O guia some sozinho quando a primeira "
+           "vaca entra em lactação.")
 h += secao("Alertas")
 h += [p("Os alertas mostram o que precisa da sua atenção, do mais urgente para o menos urgente. "
         "<b>Toque em um alerta para abrir o animal</b> e registrar o que foi feito.")]
@@ -475,6 +483,8 @@ h += tabela(
         ["Raça", "Livre (ex.: Holandesa, Jersey, Girolando)."],
         ["Pai (touro ou código do sêmen)", "Preenchido automaticamente quando a cria é "
          "cadastrada no parto, a partir do último serviço da mãe."],
+        ["Mãe", "Opcional: busque a mãe pelo nome. Na cria cadastrada no parto, já vem "
+         "preenchida."],
         ["Origem", "<b>Nasceu aqui</b> ou <b>Comprado</b>. Comprado pede a data de entrada na "
          "fazenda, usada no rateio de despesas."],
         ["Situação no rebanho", "Ativo, vendido, morto ou descartado. Os três últimos pedem a "
@@ -602,7 +612,8 @@ h += passos(
     "Confira a <b>data</b> e a <b>ordenha</b> (Manhã, Tarde ou Única). Antes do meio-dia o app "
     "sugere Manhã; depois, Tarde.",
     "Aparecem todas as <b>vacas em lactação</b>. Digite os litros de cada uma com o teclado "
-    "numérico e toque em <b>próximo</b> no teclado para ir à seguinte.",
+    "numérico e toque em <b>próximo</b> no teclado para ir à seguinte. Sob o nome aparece "
+    "<b>Anterior: X L</b>, os litros da vaca na ordenha anterior do mesmo turno, para conferir.",
     "Vacas em carência já vêm marcadas <b>Em carência · descartar</b>. Toque na marcação para "
     "descartar ou não o leite de qualquer vaca (mastite, colostro...).",
     "O rodapé mostra o <b>total no tanque</b>, quantas vacas foram lançadas e os litros "
@@ -709,7 +720,9 @@ h += tabela(
 h += [p("Opções de <b>para quem é</b>: Todo o rebanho, Vacas em lactação, Vacas secas, Bezerras "
         "e novilhas, ou Animais escolhidos. Para ração e volumoso das vacas em lactação dá para "
         "escolher dividir <b>Igual por cabeça</b> ou <b>Pelos litros</b> de cada vaca.")]
-h += [p("Toque num lançamento da lista do mês para editar ou excluir.")]
+h += [p("Toque num lançamento da lista do mês para editar ou excluir. Para despesas que se "
+        "repetem (mão de obra, energia), abra a do mês anterior e toque em <b>Lançar de novo com "
+        "a data de hoje</b>: o formulário vem preenchido.")]
 h += secao("Resultado do mês")
 h += tabela(
     ["Indicador", "Como é calculado"],
@@ -789,7 +802,9 @@ h += caixa("dica", "Para os números ficarem certos",
 
 # 10 ------------------------------------------------------------------------
 h += capitulo(10, "Conta e fazenda", "Prazos, lembretes, planilhas e conta")
-h += [p("Toque na <b>sua foto</b> no topo do Painel, do Rebanho ou da Produção.")]
+h += [p("Toque na <b>sua foto</b> no topo do Painel, do Rebanho ou da Produção. Tocar no "
+        "<b>nome da fazenda</b> abre os dados dela (nome, município e UF), que o dono pode "
+        "corrigir.")]
 h += secao("Prazos reprodutivos")
 h += [p("Os prazos alimentam as previsões e os alertas. Só o dono altera. Ao salvar, a situação "
         "de todas as vacas é recalculada. <b>Voltar ao padrão</b> restaura os valores abaixo.")]
