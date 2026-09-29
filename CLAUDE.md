@@ -335,6 +335,14 @@ Todos os prazos vêm de `fazenda.configuracoes`.
 
 **Resultado do mês** (`despesas.ts`): resultado = receita − despesas; **custo por litro** = despesas / litros produzidos (entregues + descartados); preço médio = receita / litros entregues com preço; % alimentação = (ração + volumoso) / despesas; ponto de equilíbrio = litros/dia que pagariam as despesas no preço médio.
 
+**Rateio e resultado por animal** (`rateio.ts`), por competência (mês da despesa), até hoje no mês corrente:
+
+- Grupo `animais`: partes iguais entre os escolhidos.
+- Demais grupos: por **cabeça-dia**. Cada animal recebe a parte dos dias do mês em que estava na fazenda (`presenteNaData`: entrada/nascimento até a véspera da saída) e no grupo (`situacaoNaData`: partos, secagens e idade até aquele dia).
+- `porLitros` (lactação): proporcional aos litros de cada vaca no mês, inclusive descartados; sem produção lançada, volta para cabeça-dia.
+- Grupo sem nenhum animal no mês: valor fica "sem rateio" (entra no resultado do mês, em nenhum animal).
+- Resultado do animal: receita (litros entregues × preço vigente) − custo rateado = margem. O leite descartado aparece à parte.
+
 **Lembretes** (`lembretes.ts` + `features/lembretes.ts`): notificações locais, sem servidor. Para cada um dos próximos 7 dias, `gerarAlertas` com os resumos atuais e aquela data; dia sem pendência não notifica. Reagendados (cancela e agenda de novo) quando os dados, os prazos, a preferência ou o dia mudam, e cancelados ao sair da conta. A preferência (ligado, hora) fica num arquivo do aparelho, não no Firestore, porque a permissão de notificação também é do aparelho.
 
 ---
@@ -350,7 +358,7 @@ Todos os prazos vêm de `fazenda.configuracoes`.
 6. **Registrar evento reprodutivo** (`rebanho/evento`, pelo botão "Registrar evento" no detalhe da vaca): vaca → tipo → data (padrão hoje) → campos específicos. No parto, oferecer cadastro rápido da cria.
 7. **Tratamentos** (`tratamento`, pelo botão no detalhe do animal ou por "Tratamento em lote" em Conta e fazenda): um animal ou vários de uma vez (atalhos "Em lactação" e "Todo o rebanho"). No detalhe, lista de tratamentos (segurar para excluir) e avisos de carência de leite e carne.
 8. **Conta e fazenda** (`mais`, aberta ao tocar na foto do usuário no Painel; não é aba): prazos reprodutivos (`prazos`: limites em `LIMITES_PRAZOS`; salvar recalcula o resumo de todos os animais em batches), tratamento em lote, exportar CSV, lembretes, conta (foto, e-mail, sair). Abas: Painel, Rebanho, Produção e Finanças.
-9. **Finanças** (aba, só o dono): mês selecionável com receita do leite, preço médio, leite descartado em R$ e preço vigente; histórico de preços (`financas/precos`, segurar para excluir) e novo preço (`financas/preco`, avisa qual preço perde a vigência). Resultado do mês, custo por litro × preço médio, despesas por categoria e lançamentos; `financas/despesa` lança ou edita (`?id=`) com categoria, valor, quantidade, e para quem é.
+9. **Finanças** (aba, só o dono): mês selecionável com receita do leite, preço médio, leite descartado em R$ e preço vigente; histórico de preços (`financas/precos`, segurar para excluir) e novo preço (`financas/preco`, avisa qual preço perde a vigência). Resultado do mês, custo por litro × preço médio, despesas por categoria e lançamentos; `financas/despesa` lança ou edita (`?id=`) com categoria, valor, quantidade, e para quem é. `financas/animais` lista a margem de cada animal no mês (pior ou melhor primeiro); o detalhe do animal tem o card "Financeiro" do mês (só o dono).
 
 ---
 
@@ -432,7 +440,7 @@ firebase deploy --only firestore:rules,firestore:indexes
 - [x] Preço do leite com vigência e receita do mês (aba Finanças)
 - [x] Despesas por categoria, resumo do mês e custo por litro
 - [x] Custo no tratamento (vira despesa do animal no mesmo batch)
-- [ ] Rateio por cabeça-dia (ração de lactação: opção pelos litros) e resultado por animal
+- [x] Rateio por cabeça-dia (ração de lactação: opção pelos litros) e resultado por animal
 - [ ] Sugestões automáticas (vaca no prejuízo, custo subindo, preço desatualizado...)
 - [ ] CSV financeiro
 

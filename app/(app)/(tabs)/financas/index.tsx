@@ -108,6 +108,25 @@ export default function Financas() {
         ) : null}
       </Card>
 
+      <Pressable
+        accessibilityRole="button"
+        onPress={() => router.push(`/financas/animais?mes=${mes}`)}
+        className="active:opacity-70"
+      >
+        <Card className="flex-row items-center gap-3">
+          <View className="h-11 w-11 items-center justify-center rounded-full bg-primaria-suave">
+            <Ionicons name="podium-outline" size={20} color={cores.primaria} />
+          </View>
+          <View className="flex-1">
+            <Texto variante="subtitulo">Resultado por animal</Texto>
+            <Texto variante="legenda" tom="suave">
+              Receita, custo rateado e margem de cada vaca
+            </Texto>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={cores.textoSuave} />
+        </Card>
+      </Pressable>
+
       <Botao
         titulo="Lançar despesa"
         icone="add-circle"

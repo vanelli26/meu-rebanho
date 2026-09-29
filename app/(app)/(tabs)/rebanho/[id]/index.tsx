@@ -19,6 +19,7 @@ import {
   ROTULO_TRATAMENTO,
   type Tratamento,
 } from '@/domain/carencia';
+import { ROTULO_CATEGORIA, type CategoriaDespesa } from '@/domain/despesas';
 import { diasEmLactacao, iepMedio, liberadaParaInseminar } from '@/domain/lactacao';
 import { producaoDoAnimal, ROTULO_ORDENHA, serieDiaria } from '@/domain/producao';
 import { estadoReprodutivo, ROTULO_EVENTO, type EventoReprodutivo } from '@/domain/reproducao';
@@ -27,10 +28,12 @@ import { useContextoGravacao } from '@/features/contexto';
 import { useDadosFazenda } from '@/features/DadosFazendaProvider';
 import { excluirEvento } from '@/features/eventos';
 import { useFinanceiro } from '@/features/FinanceiroProvider';
+import { useResultadoMes } from '@/features/resultado';
 import { useHoje } from '@/features/hoje';
 import { useProducoes } from '@/features/producao';
 import { excluirTratamento } from '@/features/tratamentos';
-import { dataDeISO, idadeTexto, isoParaBR, isoParaDiaMes } from '@/lib/datas';
+import { dataDeISO, idadeTexto, isoParaBR, isoParaDiaMes, mesDe, nomeDoMes } from '@/lib/datas';
+import { formatarReais } from '@/lib/dinheiro';
 import { numeroParaTexto } from '@/lib/numeros';
 import { useTema } from '@/lib/tema';
 
@@ -40,10 +43,11 @@ export default function DetalheAnimal() {
   const contexto = useContextoGravacao();
   const { carregando, animal, eventos, tratamentos } = useAnimal(id);
   const { animalPorId } = useDadosFazenda();
-  const { despesas } = useFinanceiro();
+  const { disponivel: financeiro, despesas } = useFinanceiro();
   const { cores } = useTema();
   const insets = useSafeAreaInsets();
   const hoje = useHoje();
+  const resultadoMes = useResultadoMes(mesDe(hoje));
   const { producoes } = useProducoes(fazenda.id, hoje, 30);
 
   const estado = useMemo(
@@ -62,6 +66,7 @@ export default function DetalheAnimal() {
   if (!animal) return carregando ? null : <NaoEncontrado />;
 
   const r = animal.resumo;
+  const resultado = resultadoMes.resultados.find((x) => x.animalId === animal.id);
   const situacao = situacaoAtual(animal, dataDeISO(hoje));
   const femea = animal.sexo === 'F';
   const ativo = animal.status === 'ativo';
@@ -266,6 +271,47 @@ export default function DetalheAnimal() {
           </Card>
         ) : null}
 
+        {financeiro && resultado ? (
+          <Pressable
+            accessibilityRole="button"
+            onPress={() => router.push(`/financas/animais?mes=${mesDe(hoje)}`)}
+            className="active:opacity-70"
+          >
+            <Card>
+              <View className="flex-row items-baseline justify-between">
+                <Texto variante="subtitulo">Financeiro</Texto>
+                <Texto variante="legenda" tom="suave" className="capitalize">
+                  {nomeDoMes(mesDe(hoje))}
+                </Texto>
+              </View>
+              <View className="flex-row flex-wrap gap-y-4">
+                <Info rotulo="Receita do leite" valor={formatarReais(resultado.receita)} />
+                <Info rotulo="Custo rateado" valor={formatarReais(resultado.custo)} />
+                <Info
+                  rotulo="Margem"
+                  valor={formatarReais(resultado.margem)}
+                  destaque={resultado.margem >= 0}
+                  perigo={resultado.margem < 0}
+                />
+                {resultado.valorDescartado ? (
+                  <Info
+                    rotulo="Leite descartado"
+                    valor={formatarReais(resultado.valorDescartado)}
+                  />
+                ) : null}
+              </View>
+              {Object.keys(resultado.porCategoria).length ? (
+                <Texto variante="legenda" tom="suave">
+                  {(Object.entries(resultado.porCategoria) as [CategoriaDespesa, number][])
+                    .sort(([, a], [, b]) => b - a)
+                    .map(([c, v]) => `${ROTULO_CATEGORIA[c]} ${formatarReais(v)}`)
+                    .join(' · ')}
+                </Texto>
+              ) : null}
+            </Card>
+          </Pressable>
+        ) : null}
+
         {femea ? (
           <Card>
             <Texto variante="subtitulo">Linha do tempo</Texto>
@@ -369,13 +415,23 @@ export default function DetalheAnimal() {
   );
 }
 
-function Info({ rotulo, valor, destaque }: { rotulo: string; valor: string; destaque?: boolean }) {
+function Info({
+  rotulo,
+  valor,
+  destaque,
+  perigo,
+}: {
+  rotulo: string;
+  valor: string;
+  destaque?: boolean;
+  perigo?: boolean;
+}) {
   return (
     <View className="w-1/2 gap-0.5 pr-2">
       <Texto variante="legenda" tom="suave">
         {rotulo}
       </Texto>
-      <Texto variante="subtitulo" tom={destaque ? 'primaria' : 'normal'}>
+      <Texto variante="subtitulo" tom={perigo ? 'perigo' : destaque ? 'primaria' : 'normal'}>
         {valor}
       </Texto>
     </View>
