@@ -1,8 +1,10 @@
 import type { Animal } from '@/domain/animal';
 import {
   csvAnimais,
+  csvDespesas,
   csvEventos,
   csvProducao,
+  csvResultadoAnimais,
   csvTratamentos,
   gerarCSV,
   nomeArquivo,
@@ -152,5 +154,64 @@ describe('csvEventos e csvTratamentos', () => {
     expect(linhas(csvTratamentos(tratamentos, porId))[1]).toBe(
       '10/09/2026;Estrela;7;Antibiótico;Mastite Plus;10 mL;Intramamária;4;7;',
     );
+  });
+});
+
+describe('csvDespesas e csvResultadoAnimais', () => {
+  it('despesas em reais, com o destino do rateio', () => {
+    const base = {
+      descricao: '',
+      quantidade: null,
+      unidade: null,
+      animalIds: [] as string[],
+      porLitros: false,
+      tratamentoId: null,
+    };
+    const csv = csvDespesas(
+      [
+        {
+          ...base,
+          id: 'd2',
+          data: '2026-09-10',
+          categoria: 'tratamentos',
+          valor: 3550,
+          grupo: 'animais',
+          animalIds: ['a1', 'a2'],
+        },
+        {
+          ...base,
+          id: 'd1',
+          data: '2026-09-01',
+          categoria: 'racao',
+          valor: 123456,
+          grupo: 'lactacao',
+          porLitros: true,
+          quantidade: 1000,
+          unidade: 'kg',
+          descricao: 'Ração 22%',
+        },
+      ],
+      porId,
+    );
+    expect(linhas(csv).slice(1)).toEqual([
+      '01/09/2026;Ração e concentrado;Ração 22%;1234,56;1000;kg;Vacas em lactação;Pelos litros',
+      '10/09/2026;Tratamentos;;35,5;;;Mimosa, Estrela;Partes iguais',
+    ]);
+  });
+
+  it('resultado da pior para a melhor margem', () => {
+    const r = (animalId: string, margem: number) => ({
+      animalId,
+      litros: 10,
+      receita: 2000,
+      valorDescartado: 0,
+      custo: 2000 - margem,
+      porCategoria: {},
+      margem,
+    });
+    expect(linhas(csvResultadoAnimais([r('a1', 500), r('a2', -1234)], porId)).slice(1)).toEqual([
+      'Estrela;7;10;20;0;32,34;-12,34',
+      'Mimosa;12;10;20;0;15;5',
+    ]);
   });
 });

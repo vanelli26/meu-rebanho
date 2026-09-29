@@ -2,6 +2,8 @@ import { isoParaBR, type DataISO } from '@/lib/datas';
 
 import { compararNome, identificacao, ROTULO_SITUACAO, ROTULO_STATUS, type Animal } from './animal';
 import { ROTULO_TRATAMENTO, type Tratamento } from './carencia';
+import { ROTULO_CATEGORIA, ROTULO_GRUPO, type Despesa } from './despesas';
+import type { ResultadoAnimal } from './rateio';
 import { ORDENHAS, ROTULO_ORDENHA, type ProducaoOrdenha } from './producao';
 import { ROTULO_EVENTO, type EventoReprodutivo } from './reproducao';
 
@@ -22,7 +24,8 @@ export function gerarCSV(cabecalho: readonly string[], linhas: readonly Celula[]
   return `﻿${conteudo}\r\n`;
 }
 
-export type TipoExportacao = 'animais' | 'producao' | 'eventos' | 'tratamentos';
+export type TipoExportacao =
+  'animais' | 'producao' | 'eventos' | 'tratamentos' | 'despesas' | 'resultado';
 
 export function nomeArquivo(tipo: TipoExportacao, hoje: DataISO): string {
   return `meu-rebanho-${tipo}-${hoje}.csv`;
@@ -174,6 +177,69 @@ export function csvTratamentos(
       'Carência leite (dias)',
       'Carência carne (dias)',
       'Observações',
+    ],
+    linhas,
+  );
+}
+
+const reais = (centavos: number) => Math.round(centavos) / 100;
+
+/** Todas as despesas, da mais antiga para a mais nova. Valores em reais. */
+export function csvDespesas(despesas: readonly Despesa[], animais: AnimaisPorId): string {
+  const linhas = [...despesas]
+    .sort((a, b) => a.data.localeCompare(b.data))
+    .map((d) => [
+      isoParaBR(d.data),
+      ROTULO_CATEGORIA[d.categoria],
+      d.descricao || null,
+      reais(d.valor),
+      d.quantidade,
+      d.quantidade ? d.unidade : null,
+      d.grupo === 'animais'
+        ? d.animalIds.map((id) => nomeDe(animais, id)).join(', ')
+        : ROTULO_GRUPO[d.grupo],
+      d.porLitros ? 'Pelos litros' : d.grupo === 'animais' ? 'Partes iguais' : 'Cabeça-dia',
+    ]);
+  return gerarCSV(
+    [
+      'Data',
+      'Categoria',
+      'Descrição',
+      'Valor (R$)',
+      'Quantidade',
+      'Unidade',
+      'Para quem',
+      'Rateio',
+    ],
+    linhas,
+  );
+}
+
+/** Resultado de cada animal no período, da pior para a melhor margem. Valores em reais. */
+export function csvResultadoAnimais(
+  resultados: readonly ResultadoAnimal[],
+  animais: AnimaisPorId,
+): string {
+  const linhas = [...resultados]
+    .sort((a, b) => a.margem - b.margem)
+    .map((r) => [
+      nomeDe(animais, r.animalId),
+      animais.get(r.animalId)?.brinco ?? '',
+      r.litros,
+      reais(r.receita),
+      reais(r.valorDescartado),
+      reais(r.custo),
+      reais(r.margem),
+    ]);
+  return gerarCSV(
+    [
+      'Animal',
+      'Brinco',
+      'Litros',
+      'Receita (R$)',
+      'Leite descartado (R$)',
+      'Custo rateado (R$)',
+      'Margem (R$)',
     ],
     linhas,
   );

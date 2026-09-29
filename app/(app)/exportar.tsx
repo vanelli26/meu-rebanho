@@ -7,16 +7,22 @@ import { useSessaoPronta } from '@/auth/SessaoProvider';
 import { Botao, Card, Seletor, Texto } from '@/components/ui';
 import {
   csvAnimais,
+  csvDespesas,
   csvEventos,
   csvProducao,
+  csvResultadoAnimais,
   csvTratamentos,
   nomeArquivo,
   type TipoExportacao,
 } from '@/domain/exportacao';
+import { SeletorMes } from '@/components/financas/SeletorMes';
+import { useAnaliseMes } from '@/features/analise';
 import { useDadosFazenda } from '@/features/DadosFazendaProvider';
 import { compartilharCSV } from '@/features/exportacao';
+import { useFinanceiro } from '@/features/FinanceiroProvider';
 import { useHoje } from '@/features/hoje';
 import { useProducoes } from '@/features/producao';
+import { mesDe } from '@/lib/datas';
 import { useTema } from '@/lib/tema';
 
 const PERIODOS = [
@@ -35,13 +41,17 @@ export default function Exportar() {
   const [periodo, setPeriodo] = useState<Periodo>('30');
   const { carregando, producoes } = useProducoes(fazenda.id, hoje, Number(periodo));
   const [gerando, setGerando] = useState<TipoExportacao | null>(null);
+  const financeiro = useFinanceiro();
+  const [mes, setMes] = useState(() => mesDe(hoje));
+  const { analise } = useAnaliseMes(mes);
 
   const eventos = [...eventosPorAnimal.values()].flat();
   const tratamentos = [...tratamentosPorAnimal.values()].flat();
 
   const compartilhar = (tipo: TipoExportacao, gerar: () => string) => {
     setGerando(tipo);
-    compartilharCSV(nomeArquivo(tipo, hoje), gerar())
+    const nome = tipo === 'resultado' ? nomeArquivo(tipo, mes) : nomeArquivo(tipo, hoje);
+    compartilharCSV(nome, gerar())
       .catch((erro: unknown) => {
         console.error('[exportação] Falha ao compartilhar:', erro);
         Alert.alert('Não foi possível compartilhar', 'Tente de novo em instantes.');
@@ -102,6 +112,33 @@ export default function Exportar() {
         desativado={!tratamentos.length}
         onPress={() => compartilhar('tratamentos', () => csvTratamentos(tratamentos, animalPorId))}
       />
+
+      {financeiro.disponivel ? (
+        <>
+          <Item
+            icone="receipt-outline"
+            titulo="Despesas"
+            detalhe={`${financeiro.despesas.length} ${financeiro.despesas.length === 1 ? 'lançamento' : 'lançamentos'}, com o rateio`}
+            gerando={gerando === 'despesas'}
+            desativado={!financeiro.despesas.length}
+            onPress={() =>
+              compartilhar('despesas', () => csvDespesas(financeiro.despesas, animalPorId))
+            }
+          />
+          <Item
+            icone="podium-outline"
+            titulo="Resultado por animal"
+            detalhe="Receita, custo rateado e margem de cada animal no mês"
+            gerando={gerando === 'resultado'}
+            desativado={!analise.animais.length}
+            onPress={() =>
+              compartilhar('resultado', () => csvResultadoAnimais(analise.animais, animalPorId))
+            }
+          >
+            <SeletorMes mes={mes} aoMudar={setMes} mesAtual={mesDe(hoje)} />
+          </Item>
+        </>
+      ) : null}
     </ScrollView>
   );
 }

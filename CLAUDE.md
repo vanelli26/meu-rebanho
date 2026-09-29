@@ -81,7 +81,7 @@ app/
     mais.tsx              # Conta e fazenda (aberta pela foto no Painel, fora das abas)
     tratamento.tsx        # Tratamento em um ou vários animais (fora das abas)
     prazos.tsx            # Prazos reprodutivos da fazenda (só o dono edita)
-    exportar.tsx          # Planilhas CSV (animais, produção, eventos, tratamentos)
+    exportar.tsx          # Planilhas CSV (animais, produção, eventos, tratamentos; despesas e resultado por animal para o dono)
     lembretes.tsx         # Notificação diária com as pendências (preferência do aparelho)
   _layout.tsx             # Guarda de rota: login → onboarding → app
 src/
@@ -448,7 +448,7 @@ firebase deploy --only firestore:rules,firestore:indexes
 - [x] Custo no tratamento (vira despesa do animal no mesmo batch)
 - [x] Rateio por cabeça-dia (ração de lactação: opção pelos litros) e resultado por animal
 - [x] Sugestões automáticas (vaca no prejuízo, custo subindo, preço desatualizado...)
-- [ ] CSV financeiro
+- [x] CSV financeiro
 
 ---
 
