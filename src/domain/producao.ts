@@ -137,6 +137,28 @@ export function serieDiaria(
   });
 }
 
+/**
+ * Litros de cada vaca na ordenha anterior do mesmo turno (até 7 dias antes), para
+ * servir de referência ao digitar. Vaca sem registro nesse período fica de fora.
+ */
+export function litrosOrdenhaAnterior(
+  producoes: readonly Pick<ProducaoOrdenha, 'data' | 'ordenha' | 'registros'>[],
+  data: DataISO,
+  ordenha: Ordenha,
+): Record<string, number> {
+  const limite = somarDias(data, -7);
+  const anteriores = producoes
+    .filter((p) => p.ordenha === ordenha && p.data < data && p.data >= limite)
+    .sort((a, b) => b.data.localeCompare(a.data));
+  const litros: Record<string, number> = {};
+  for (const p of anteriores) {
+    for (const [id, r] of Object.entries(p.registros)) {
+      if (!(id in litros)) litros[id] = r.litros;
+    }
+  }
+  return litros;
+}
+
 /** Sugere a ordenha pela hora: antes do meio-dia, manhã; depois, tarde. */
 export function ordenhaSugerida(hora: number): Ordenha {
   return hora < 12 ? 'manha' : 'tarde';

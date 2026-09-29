@@ -1,6 +1,7 @@
 import {
   esquemaLitros,
   idOrdenha,
+  litrosOrdenhaAnterior,
   montarProducao,
   ordenhaSugerida,
   producaoDoAnimal,
@@ -144,5 +145,26 @@ describe('serieDiaria', () => {
       5,
       null,
     ]);
+  });
+});
+
+describe('litrosOrdenhaAnterior', () => {
+  const o = (data: string, ordenha: 'manha' | 'tarde', registros: Record<string, number>) => ({
+    data,
+    ordenha,
+    registros: Object.fromEntries(
+      Object.entries(registros).map(([id, litros]) => [id, { litros, descartado: false }]),
+    ),
+  });
+
+  it('pega o mesmo turno mais recente de cada vaca, até 7 dias antes', () => {
+    const producoes = [
+      o('2026-09-28', 'manha', { a: 12 }),
+      o('2026-09-27', 'manha', { a: 10, b: 8 }),
+      o('2026-09-28', 'tarde', { c: 5 }),
+      o('2026-09-20', 'manha', { d: 9 }),
+      o('2026-09-29', 'manha', { a: 99 }),
+    ];
+    expect(litrosOrdenhaAnterior(producoes, '2026-09-29', 'manha')).toEqual({ a: 12, b: 8 });
   });
 });

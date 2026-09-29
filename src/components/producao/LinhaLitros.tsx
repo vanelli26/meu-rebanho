@@ -3,7 +3,7 @@ import * as Haptics from 'expo-haptics';
 import type { Ref } from 'react';
 import { Pressable, TextInput, View } from 'react-native';
 
-import { mascaraDecimal } from '@/lib/numeros';
+import { mascaraDecimal, numeroParaTexto } from '@/lib/numeros';
 import { fontes, useTema } from '@/lib/tema';
 
 import { Texto } from '../ui/Texto';
@@ -19,6 +19,8 @@ type Props = {
   erro?: string;
   ultimo: boolean;
   aoAvancar: () => void;
+  /** Litros da ordenha anterior do mesmo turno, mostrados como referência. */
+  anterior?: number | null;
   ref?: Ref<TextInput>;
 };
 
@@ -33,6 +35,7 @@ export function LinhaLitros({
   erro,
   ultimo,
   aoAvancar,
+  anterior = null,
   ref,
 }: Props) {
   const { cores } = useTema();
@@ -51,6 +54,10 @@ export function LinhaLitros({
             <Texto variante="legenda" tom="perigo">
               {emCarencia ? 'Em carência · descartar' : 'Descartado'}
             </Texto>
+          ) : anterior !== null ? (
+            <Texto variante="legenda" tom="suave">
+              Anterior: {numeroParaTexto(anterior)} L
+            </Texto>
           ) : null}
         </View>
         <View
@@ -64,7 +71,7 @@ export function LinhaLitros({
             onChangeText={(novo) => aoMudarTexto(mascaraDecimal(novo))}
             keyboardType="decimal-pad"
             inputMode="decimal"
-            placeholder="0"
+            placeholder={anterior !== null ? numeroParaTexto(anterior) : '0'}
             placeholderTextColor={cores.textoSuave + '66'}
             selectionColor={cores.primaria}
             returnKeyType={ultimo ? 'done' : 'next'}

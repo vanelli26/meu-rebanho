@@ -19,6 +19,7 @@ import { buscarAnimais, identificacao, type Animal } from '@/domain/animal';
 import {
   esquemaCabecalhoProducao,
   esquemaLitros,
+  litrosOrdenhaAnterior,
   montarProducao,
   ORDENHAS,
   ordenhaSugerida,
@@ -30,7 +31,7 @@ import { emCarenciaLeiteNaData } from '@/domain/carencia';
 import { useContextoGravacao } from '@/features/contexto';
 import { useDadosFazenda } from '@/features/DadosFazendaProvider';
 import { useHoje } from '@/features/hoje';
-import { salvarProducao, useOrdenha } from '@/features/producao';
+import { salvarProducao, useOrdenha, useProducoes } from '@/features/producao';
 import { dataDeISO, ehDataISO, isoParaBR, type DataISO } from '@/lib/datas';
 import { numeroParaTexto, textoParaNumero } from '@/lib/numeros';
 import { useConfirmarDescarte } from '@/lib/confirmarDescarte';
@@ -138,6 +139,11 @@ function ListaOrdenha({
 }) {
   const contexto = useContextoGravacao();
   const { animais, tratamentosPorAnimal } = useDadosFazenda();
+  const { producoes: recentes } = useProducoes(contexto.fazendaId, data, 8);
+  const anteriores = useMemo(
+    () => litrosOrdenhaAnterior(recentes, data, ordenha),
+    [recentes, data, ordenha],
+  );
   const insets = useSafeAreaInsets();
   const tecladoVisivel = useTecladoVisivel();
   const campos = useRef<(TextInput | null)[]>([]);
@@ -270,6 +276,7 @@ function ListaOrdenha({
                 campos.current[i] = campo;
               }}
               nome={identificacao(vaca)}
+              anterior={anteriores[vaca.id] ?? null}
               texto={item.texto}
               aoMudarTexto={(texto) => atualizar(vaca.id, { texto })}
               descartado={item.descartado}
