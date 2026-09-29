@@ -20,6 +20,7 @@ export default function Layout() {
       />
       <Stack.Screen name="precos" options={{ title: 'Preço do leite' }} />
       <Stack.Screen name="preco" options={{ title: 'Novo preço' }} />
+      <Stack.Screen name="despesa" options={{ title: 'Lançar despesa' }} />
     </Stack>
   );
 }

@@ -9,6 +9,7 @@ import type { Animal, ResumoAnimal } from '@/domain/animal';
 import type { Tratamento, TipoTratamento } from '@/domain/carencia';
 import type { ConfiguracoesFazenda, Papel } from '@/domain/fazenda';
 import type { Ordenha, ProducaoOrdenha, RegistroProducao } from '@/domain/producao';
+import type { CategoriaDespesa, Despesa, GrupoDestino, Unidade } from '@/domain/despesas';
 import type { PrecoLeite } from '@/domain/precoLeite';
 import type { EventoReprodutivo, TipoEvento } from '@/domain/reproducao';
 
@@ -169,5 +170,23 @@ export const precoLeiteConverter = conversorLeitura<PrecoLeite>((snapshot) => {
     inicio: d.inicio ?? snapshot.id,
     valorLitro: d.valorLitro ?? 0,
     observacao: d.observacao ?? '',
+  };
+});
+
+/** `fazendas/{fazendaId}/despesas/{despesaId}` */
+export const despesaConverter = conversorLeitura<Despesa>((snapshot) => {
+  const d = snapshot.data();
+  return {
+    id: snapshot.id,
+    data: d.data,
+    categoria: (d.categoria ?? 'outros') as CategoriaDespesa,
+    descricao: d.descricao ?? '',
+    valor: d.valor ?? 0,
+    quantidade: d.quantidade ?? null,
+    unidade: (d.unidade ?? null) as Unidade | null,
+    grupo: (d.grupo ?? 'rebanho') as GrupoDestino,
+    animalIds: d.animalIds ?? [],
+    porLitros: d.porLitros ?? false,
+    tratamentoId: d.tratamentoId ?? null,
   };
 });

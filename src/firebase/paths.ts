@@ -11,6 +11,7 @@ import type { DataISO } from '@/lib/datas';
 
 import {
   animalConverter,
+  despesaConverter,
   eventoConverter,
   fazendaConverter,
   precoLeiteConverter,
@@ -82,3 +83,10 @@ export const precoLeiteRef = (fazendaId: string, inicio: DataISO) =>
   doc(precosLeiteRef(fazendaId), inicio);
 export const precosLeiteLeituraRef = (fazendaId: string) =>
   precosLeiteRef(fazendaId).withConverter(precoLeiteConverter);
+
+export const despesasRef = (fazendaId: string) => collection(db, 'fazendas', fazendaId, 'despesas');
+export const despesaRef = (fazendaId: string, despesaId: string) =>
+  doc(despesasRef(fazendaId), despesaId);
+export const novoIdDespesa = (fazendaId: string) => doc(despesasRef(fazendaId)).id;
+export const despesasLeituraRef = (fazendaId: string) =>
+  despesasRef(fazendaId).withConverter(despesaConverter);
