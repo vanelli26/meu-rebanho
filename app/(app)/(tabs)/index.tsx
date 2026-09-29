@@ -13,6 +13,7 @@ import { IndicadorSyncAtual } from '@/components/IndicadorSyncAtual';
 import { Logo } from '@/components/marca/Logo';
 import { Card, Texto } from '@/components/ui';
 import { gerarAlertas } from '@/domain/alertas';
+import { primeirosPassos } from '@/domain/primeirosPassos';
 import { resumoProducao } from '@/domain/producao';
 import { useSugestoes } from '@/features/analise';
 import { useAnimais } from '@/features/animais';
@@ -21,6 +22,13 @@ import { useProducoes } from '@/features/producao';
 import { numeroParaTexto } from '@/lib/numeros';
 import { saudacao } from '@/lib/saudacao';
 import { marca, useTema } from '@/lib/tema';
+
+const ROTA_PASSO = {
+  animais: '/rebanho/novo',
+  partos: '/rebanho',
+  ordenha: '/producao/lancar',
+  preco: '/financas/preco',
+} as const;
 
 export default function Painel() {
   const { conta, fazenda } = useSessaoPronta();
@@ -31,6 +39,7 @@ export default function Painel() {
   const { carregando, animais } = useAnimais();
   const { producoes } = useProducoes(fazenda.id, hoje, 8);
   const { sugestoes } = useSugestoes();
+  const passos = primeirosPassos(animais, fazenda.membros[conta.uid] === 'dono');
 
   const emLactacao = animais.filter(
     (a) => a.status === 'ativo' && a.resumo.situacao === 'lactacao',
@@ -136,6 +145,56 @@ export default function Painel() {
             <Ionicons name="chevron-forward" size={18} color={cores.textoSuave} />
           </Card>
         </Pressable>
+      ) : null}
+
+      {passos && !carregando ? (
+        <View className="gap-2">
+          <Texto variante="subtitulo" className="px-1">
+            Primeiros passos
+          </Texto>
+          <Card className="gap-0 p-0">
+            {passos.map((passo, i) => (
+              <Pressable
+                key={passo.id}
+                accessibilityRole="button"
+                // withAnchor: a lista da aba fica embaixo, para o botão voltar.
+                onPress={() => router.push(ROTA_PASSO[passo.id], { withAnchor: true })}
+                className={`min-h-16 flex-row items-center gap-3 px-4 py-3 active:opacity-70 ${
+                  i ? 'border-t border-borda' : ''
+                }`}
+              >
+                <View
+                  className={`h-8 w-8 items-center justify-center rounded-full ${
+                    passo.feito ? 'bg-sucesso-suave' : 'bg-destaque-suave'
+                  }`}
+                >
+                  {passo.feito ? (
+                    <Ionicons name="checkmark" size={18} color={cores.sucesso} />
+                  ) : (
+                    <Texto variante="rotulo" className="text-[13px]">
+                      {i + 1}
+                    </Texto>
+                  )}
+                </View>
+                <View className="flex-1 gap-0.5">
+                  <Texto
+                    variante="rotulo"
+                    tom={passo.feito ? 'suave' : 'normal'}
+                    className={`text-[14px] ${passo.feito ? 'line-through' : ''}`}
+                  >
+                    {passo.titulo}
+                  </Texto>
+                  {!passo.feito ? (
+                    <Texto variante="legenda" tom="suave">
+                      {passo.detalhe}
+                    </Texto>
+                  ) : null}
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={cores.textoSuave} />
+              </Pressable>
+            ))}
+          </Card>
+        </View>
       ) : null}
 
       <View className="gap-3">
