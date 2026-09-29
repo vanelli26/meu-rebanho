@@ -339,7 +339,7 @@ function GradeTipos({
         <Pressable
           accessibilityRole="button"
           onPress={() => setTodos((v) => !v)}
-          className="min-h-11 flex-row items-center gap-1 self-start active:opacity-70"
+          className="min-h-12 flex-row items-center gap-1 self-start active:opacity-70"
         >
           <Ionicons name={todos ? 'chevron-up' : 'chevron-down'} size={16} color={cores.primaria} />
           <Texto variante="rotulo" tom="primaria">

@@ -35,7 +35,7 @@ export function SeletorAnimal({ animais, selecionado, aoSelecionar, hoje, erro }
         />
         <Pressable
           onPress={() => aoSelecionar(null)}
-          className="min-h-10 justify-center self-start"
+          className="min-h-12 justify-center self-start"
         >
           <Texto variante="rotulo" tom="primaria">
             Trocar animal

@@ -260,7 +260,7 @@ export default function RegistrarTratamento() {
                   <Pressable
                     key={via}
                     onPress={() => field.onChange(via)}
-                    className={`min-h-10 justify-center rounded-full px-3 active:opacity-70 ${
+                    className={`min-h-12 justify-center rounded-full px-4 active:opacity-70 ${
                       field.value === via ? 'bg-primaria-suave' : 'bg-superficie-2'
                     }`}
                   >

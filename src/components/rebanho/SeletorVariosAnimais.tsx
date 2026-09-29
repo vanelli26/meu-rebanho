@@ -39,7 +39,7 @@ export function SeletorVariosAnimais({ animais, selecionados, aoMudar, hoje, err
           Animais
         </Texto>
         {selecionados.length ? (
-          <Pressable onPress={() => aoMudar([])} className="min-h-10 justify-center">
+          <Pressable onPress={() => aoMudar([])} className="min-h-12 justify-center">
             <Texto variante="rotulo" tom="primaria">
               Limpar ({selecionados.length})
             </Texto>
@@ -55,7 +55,7 @@ export function SeletorVariosAnimais({ animais, selecionados, aoMudar, hoje, err
               accessibilityRole="button"
               accessibilityLabel={`Remover ${identificacao(a)}`}
               onPress={() => alternar(a.id)}
-              className="min-h-10 flex-row items-center gap-1.5 rounded-full bg-primaria-suave pl-3 pr-2 active:opacity-70"
+              className="min-h-12 flex-row items-center gap-1.5 rounded-full bg-primaria-suave pl-3 pr-2 active:opacity-70"
             >
               <Texto variante="rotulo" tom="primaria" className="text-[13px]">
                 {identificacao(a)}
@@ -133,7 +133,7 @@ function Atalho({
       accessibilityRole="button"
       disabled={desativado}
       onPress={onPress}
-      className={`min-h-11 justify-center rounded-full border-[1.5px] border-borda bg-superficie px-4 active:opacity-70 ${
+      className={`min-h-12 justify-center rounded-full border-[1.5px] border-borda bg-superficie px-4 active:opacity-70 ${
         desativado ? 'opacity-40' : ''
       }`}
     >

@@ -126,6 +126,7 @@ export default function DetalheAnimal() {
             <Pressable
               accessibilityRole="button"
               accessibilityLabel="Editar animal"
+              hitSlop={6}
               onPress={() => router.push(`/rebanho/${animal.id}/editar`)}
               className="h-11 flex-row items-center gap-1 rounded-full bg-primaria-suave px-4 active:opacity-70"
             >

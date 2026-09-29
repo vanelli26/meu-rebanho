@@ -59,7 +59,7 @@ export function CampoData({ valor, aoMudar, hoje = new Date(), ...props }: Props
               accessibilityRole="button"
               accessibilityState={{ selected: ativo }}
               onPress={() => escolher(data)}
-              className={`min-h-11 justify-center rounded-full px-5 active:opacity-70 ${
+              className={`min-h-12 justify-center rounded-full px-5 active:opacity-70 ${
                 ativo ? 'bg-primaria' : 'bg-superficie-2'
               }`}
             >

@@ -65,7 +65,7 @@ export function LinhaDoTempo({ eventos, nomeCria, aoAbrirCria, aoSegurar }: Prop
               {evento.criaId && cria ? (
                 <Pressable
                   onPress={() => aoAbrirCria?.(evento.criaId as string)}
-                  className="mt-1 min-h-10 flex-row items-center gap-1 self-start rounded-full bg-primaria-suave px-3"
+                  className="mt-1 min-h-12 flex-row items-center gap-1 self-start rounded-full bg-primaria-suave px-3"
                 >
                   <Texto variante="legenda" tom="primaria">
                     Cria: {cria}
