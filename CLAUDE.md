@@ -409,7 +409,7 @@ firebase deploy --only firestore:rules,firestore:indexes
 - [x] Instalar e configurar React Native Firebase (app, auth, firestore) com config plugins
 - [x] `src/firebase/init.ts` com cache ilimitado
 - [ ] Configurar `eas.json` e gerar o primeiro dev build Android
-- [x] Componentes base: Botao, CampoTexto, CampoNumero, CampoData, Card, Aviso, IndicadorSync
+- [x] Componentes base: Botao, CampoTexto, CampoNumero, CampoData (calendário próprio, sem digitação; atalhos Hoje/Ontem; `maximo` padrão hoje), Card, Aviso, IndicadorSync
 
 ### Fase 1 — Conta e fazenda
 

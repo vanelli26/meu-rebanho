@@ -379,6 +379,11 @@ h += itens(
     "animal de volta para a lista).",
     "O selo <b>Sincronizando</b> no topo aparece enquanto há dados aguardando envio para a internet.",
 )
+h += caixa("dica", "Datas",
+           "Toda data tem os atalhos <b>Hoje</b> e <b>Ontem</b>. Para outra data, toque no campo "
+           "e escolha no <b>calendário</b>. Tocar no nome do mês permite pular direto para outro "
+           "mês ou ano, útil para datas de nascimento antigas. Datas futuras ficam bloqueadas, "
+           "exceto no preço do leite.")
 h += caixa("info", "Não perca o que digitou",
            "Se você preencheu um formulário e tentar voltar sem salvar, o app pergunta se quer "
            "<b>descartar</b> ou <b>continuar aqui</b>.")

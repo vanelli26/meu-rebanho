@@ -1,16 +1,15 @@
 import {
-  brParaISO,
   diasEntre,
   ehDataISO,
   idadeTexto,
   isoParaBR,
   isoParaDiaMes,
   limitesDoMes,
-  mascaraDataBR,
   mesDe,
   nomeDoMes,
   paraDataISO,
   somarDias,
+  semanasDoMes,
   somarMeses,
 } from '@/lib/datas';
 
@@ -23,21 +22,6 @@ describe('datas', () => {
     expect(isoParaBR('2026-09-27')).toBe('27/09/2026');
     expect(isoParaBR('2026-02-30')).toBe('');
     expect(isoParaBR('lixo')).toBe('');
-  });
-
-  it('converte BR para ISO e rejeita datas inexistentes', () => {
-    expect(brParaISO('27/09/2026')).toBe('2026-09-27');
-    expect(brParaISO('29/02/2024')).toBe('2024-02-29');
-    expect(brParaISO('29/02/2026')).toBeNull();
-    expect(brParaISO('27/9/2026')).toBeNull();
-    expect(brParaISO('')).toBeNull();
-  });
-
-  it('aplica máscara dd/MM/yyyy', () => {
-    expect(mascaraDataBR('2')).toBe('2');
-    expect(mascaraDataBR('270')).toBe('27/0');
-    expect(mascaraDataBR('27092026')).toBe('27/09/2026');
-    expect(mascaraDataBR('27/09/20269')).toBe('27/09/2026');
   });
 });
 
@@ -75,5 +59,31 @@ describe('meses', () => {
     expect(limitesDoMes('2026-02')).toEqual({ inicio: '2026-02-01', fim: '2026-02-28' });
     expect(somarMeses('2026-01', -1)).toBe('2025-12');
     expect(nomeDoMes('2026-09')).toBe('setembro de 2026');
+  });
+});
+
+describe('semanasDoMes', () => {
+  it('começa no domingo e completa as semanas com null', () => {
+    // 1º de setembro de 2026 é uma terça-feira.
+    const semanas = semanasDoMes('2026-09');
+    expect(semanas[0]).toEqual([
+      null,
+      null,
+      '2026-09-01',
+      '2026-09-02',
+      '2026-09-03',
+      '2026-09-04',
+      '2026-09-05',
+    ]);
+    expect(semanas.at(-1)).toEqual([
+      '2026-09-27',
+      '2026-09-28',
+      '2026-09-29',
+      '2026-09-30',
+      null,
+      null,
+      null,
+    ]);
+    expect(semanas.flat().filter(Boolean)).toHaveLength(30);
   });
 });

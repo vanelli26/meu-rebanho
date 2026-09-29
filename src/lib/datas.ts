@@ -33,22 +33,6 @@ export function ehDataISO(texto: string): boolean {
   return isoParaBR(texto) !== '';
 }
 
-/** `dd/MM/yyyy` → `YYYY-MM-DD`, ou `null` se a data não existir. */
-export function brParaISO(br: string): DataISO | null {
-  if (!/^\d{2}\/\d{2}\/\d{4}$/.test(br)) return null;
-  const data = parse(br, FORMATO_BR, new Date(2000, 0, 1));
-  if (!isValid(data) || format(data, FORMATO_BR) !== br) return null;
-  return paraDataISO(data);
-}
-
-/** Aplica a máscara `dd/MM/yyyy` enquanto o usuário digita só números. */
-export function mascaraDataBR(texto: string): string {
-  const digitos = texto.replace(/\D/g, '').slice(0, 8);
-  if (digitos.length <= 2) return digitos;
-  if (digitos.length <= 4) return `${digitos.slice(0, 2)}/${digitos.slice(2)}`;
-  return `${digitos.slice(0, 2)}/${digitos.slice(2, 4)}/${digitos.slice(4)}`;
-}
-
 /** `YYYY-MM-DD` → `Date` local (meia-noite). */
 export function dataDeISO(iso: DataISO): Date {
   return parseISO(iso);
@@ -104,4 +88,17 @@ export function somarMeses(mes: MesISO, meses: number): MesISO {
 /** `2026-09` → "setembro de 2026". */
 export function nomeDoMes(mes: MesISO): string {
   return format(parseISO(`${mes}-01`), "MMMM 'de' yyyy", { locale: ptBR });
+}
+
+/**
+ * Semanas do mês para o calendário, de domingo a sábado. Dias fora do mês
+ * ficam `null`.
+ */
+export function semanasDoMes(mes: MesISO): (DataISO | null)[][] {
+  const { inicio, fim } = limitesDoMes(mes);
+  const vazios = parseISO(inicio).getDay();
+  const dias: (DataISO | null)[] = Array.from({ length: vazios }, () => null);
+  for (let d = inicio; d <= fim; d = somarDias(d, 1)) dias.push(d);
+  while (dias.length % 7) dias.push(null);
+  return Array.from({ length: dias.length / 7 }, (_, i) => dias.slice(i * 7, i * 7 + 7));
 }

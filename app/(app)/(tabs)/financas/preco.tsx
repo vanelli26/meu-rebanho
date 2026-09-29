@@ -84,6 +84,7 @@ export default function NovoPreco() {
             render={({ field, fieldState }) => (
               <CampoData
                 rotulo="Vale a partir de"
+                maximo={null}
                 valor={field.value}
                 aoMudar={field.onChange}
                 erro={fieldState.error?.message}

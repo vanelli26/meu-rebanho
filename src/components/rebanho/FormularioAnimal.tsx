@@ -168,6 +168,7 @@ export function FormularioAnimal({ valoresIniciais, animalId, tituloBotao, aoSal
             render={({ field, fieldState }) => (
               <CampoData
                 rotulo="Data de nascimento"
+                opcional
                 valor={field.value}
                 aoMudar={field.onChange}
                 erro={fieldState.error?.message}
@@ -212,6 +213,7 @@ export function FormularioAnimal({ valoresIniciais, animalId, tituloBotao, aoSal
               render={({ field, fieldState }) => (
                 <CampoData
                   rotulo="Data de entrada na fazenda"
+                  opcional
                   valor={field.value}
                   aoMudar={field.onChange}
                   erro={fieldState.error?.message}
