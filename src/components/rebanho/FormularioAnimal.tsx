@@ -1,4 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod';
+import * as Haptics from 'expo-haptics';
 import { useRef, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { KeyboardAvoidingView, Platform, ScrollView, View, type TextInput } from 'react-native';
@@ -9,10 +10,12 @@ import {
   esquemaAnimal,
   nomeDisponivel,
   ROTULO_STATUS,
+  validarDatasAnimal,
   type FormularioAnimal as Formulario,
   type StatusAnimal,
 } from '@/domain/animal';
 import { useAnimais } from '@/features/animais';
+import { useHoje } from '@/features/hoje';
 
 import { ESPACO_BARRA_ABAS } from '../BarraAbas';
 import { Botao, CampoData, CampoTexto, Card, Seletor, Texto, type Opcao } from '../ui';
@@ -46,6 +49,7 @@ export function FormularioAnimal({ valoresIniciais, animalId, tituloBotao, aoSal
   const { animais } = useAnimais();
   const brincoRef = useRef<TextInput>(null);
   const edicao = animalId !== undefined;
+  const hoje = useHoje();
 
   const [salvo, setSalvo] = useState(false);
   const { control, handleSubmit, setError } = useForm<Formulario>({
@@ -56,12 +60,21 @@ export function FormularioAnimal({ valoresIniciais, animalId, tituloBotao, aoSal
   const status = useWatch({ control, name: 'status' });
 
   const salvar = handleSubmit((dados) => {
+    const errosData = Object.entries(validarDatasAnimal(dados, hoje)) as [
+      keyof Formulario,
+      string,
+    ][];
+    errosData.forEach(([campo, message]) => setError(campo, { message }));
     const nomeLivre = nomeDisponivel(dados.nome, animais, animalId);
     const brincoLivre = brincoDisponivel(dados.brinco, animais, animalId);
     if (!nomeLivre) setError('nome', { message: 'Já existe um animal com este nome.' });
     if (!brincoLivre) setError('brinco', { message: 'Já existe um animal com este brinco.' });
-    if (!nomeLivre || !brincoLivre) return;
+    if (!nomeLivre || !brincoLivre || errosData.length) {
+      void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      return;
+    }
     setSalvo(true);
+    void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     aoSalvar(dados);
   });
 
@@ -110,6 +123,7 @@ export function FormularioAnimal({ valoresIniciais, animalId, tituloBotao, aoSal
                     placeholder="123"
                     autoCapitalize="characters"
                     autoCorrect={false}
+                    returnKeyType="done"
                     value={field.value}
                     onChangeText={field.onChange}
                     onBlur={field.onBlur}

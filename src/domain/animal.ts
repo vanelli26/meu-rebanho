@@ -211,6 +211,35 @@ export const esquemaAnimal = z
 
 export type FormularioAnimal = z.infer<typeof esquemaAnimal>;
 
+type CampoData = 'dataNascimento' | 'dataEntrada' | 'dataSaida';
+
+/**
+ * Datas do cadastro que dependem de hoje (o esquema não sabe a data): nada no
+ * futuro, e a saída não antes do nascimento ou da entrada.
+ */
+export function validarDatasAnimal(
+  form: Pick<FormularioAnimal, CampoData | 'status' | 'origem'>,
+  hoje: DataISO,
+): Partial<Record<CampoData, string>> {
+  const erros: Partial<Record<CampoData, string>> = {};
+  const futuro = 'A data não pode ser no futuro.';
+  if (form.dataNascimento && form.dataNascimento > hoje) erros.dataNascimento = futuro;
+  if (form.origem === 'comprado' && form.dataEntrada && form.dataEntrada > hoje) {
+    erros.dataEntrada = futuro;
+  }
+  if (form.status !== 'ativo' && form.dataSaida) {
+    const inicio = [form.dataNascimento, form.origem === 'comprado' ? form.dataEntrada : null]
+      .filter((d): d is DataISO => !!d)
+      .sort()
+      .at(-1);
+    if (form.dataSaida > hoje) erros.dataSaida = futuro;
+    else if (inicio && form.dataSaida < inicio) {
+      erros.dataSaida = 'A saída não pode ser antes do nascimento ou da entrada.';
+    }
+  }
+  return erros;
+}
+
 export const FORMULARIO_ANIMAL_VAZIO: FormularioAnimal = {
   brinco: '',
   nome: '',

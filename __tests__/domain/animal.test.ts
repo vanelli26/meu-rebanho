@@ -13,6 +13,7 @@ import {
   ordenarPorPrevisaoParto,
   situacaoAtual,
   situacaoSemParto,
+  validarDatasAnimal,
   type Animal,
 } from '@/domain/animal';
 
@@ -198,5 +199,53 @@ describe('esquemaAnimal e montarDadosAnimal', () => {
       brinco: '12',
       nome: 'Mimosa',
     });
+  });
+});
+
+describe('validarDatasAnimal', () => {
+  const base = {
+    dataNascimento: '2024-01-01',
+    dataEntrada: null,
+    dataSaida: null,
+    status: 'ativo' as const,
+    origem: 'nascido' as const,
+  };
+
+  it('aceita datas até hoje', () => {
+    expect(validarDatasAnimal({ ...base, dataNascimento: '2026-09-29' }, '2026-09-29')).toEqual({});
+  });
+
+  it('rejeita datas no futuro', () => {
+    expect(
+      validarDatasAnimal(
+        {
+          dataNascimento: '2026-10-01',
+          origem: 'comprado',
+          dataEntrada: '2026-10-02',
+          status: 'vendido',
+          dataSaida: '2026-10-03',
+        },
+        '2026-09-29',
+      ),
+    ).toEqual({
+      dataNascimento: 'A data não pode ser no futuro.',
+      dataEntrada: 'A data não pode ser no futuro.',
+      dataSaida: 'A data não pode ser no futuro.',
+    });
+  });
+
+  it('saída antes da entrada ou do nascimento', () => {
+    const comprada = { ...base, origem: 'comprado' as const, dataEntrada: '2025-06-01' };
+    expect(
+      validarDatasAnimal({ ...comprada, status: 'morto', dataSaida: '2025-05-01' }, '2026-09-29')
+        .dataSaida,
+    ).toMatch(/antes/);
+    // Entrada ignorada quando o animal nasceu aqui.
+    expect(
+      validarDatasAnimal(
+        { ...base, dataEntrada: '2025-06-01', status: 'morto', dataSaida: '2025-05-01' },
+        '2026-09-29',
+      ),
+    ).toEqual({});
   });
 });
