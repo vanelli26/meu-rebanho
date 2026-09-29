@@ -177,16 +177,14 @@ describe('esquemaAnimal e montarDadosAnimal', () => {
   });
 
   it('limpa dados de saída de animal ativo e faz ida e volta com o formulário', () => {
-    const dados = montarDadosAnimal(
-      {
-        ...FORMULARIO_ANIMAL_VAZIO,
-        brinco: ' 12 ',
-        nome: ' Mimosa ',
-        dataSaida: '2026-01-01',
-        motivoSaida: 'x',
-      },
-      'mae-1',
-    );
+    const dados = montarDadosAnimal({
+      ...FORMULARIO_ANIMAL_VAZIO,
+      brinco: ' 12 ',
+      nome: ' Mimosa ',
+      dataSaida: '2026-01-01',
+      motivoSaida: 'x',
+      maeId: 'mae-1',
+    });
     expect(dados).toMatchObject({
       brinco: '12',
       nome: 'Mimosa',
@@ -198,6 +196,7 @@ describe('esquemaAnimal e montarDadosAnimal', () => {
       ...FORMULARIO_ANIMAL_VAZIO,
       brinco: '12',
       nome: 'Mimosa',
+      maeId: 'mae-1',
     });
   });
 });

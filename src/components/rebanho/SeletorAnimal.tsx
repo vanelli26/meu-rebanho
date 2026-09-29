@@ -12,12 +12,29 @@ type Props = {
   aoSelecionar: (animal: Animal | null) => void;
   hoje: Date;
   erro?: string;
+  rotulo?: string;
+  /** Abre o teclado ao aparecer (padrão: sim). */
+  autoFocus?: boolean;
+  /** Mensagem quando a busca não encontra ninguém. */
+  semResultado?: string;
+  /** Mostra "Remover" além de "Trocar" (campo opcional). */
+  removivel?: boolean;
 };
 
 const LIMITE = 6;
 
 /** Escolha rápida de um animal pelo nome (ou brinco). */
-export function SeletorAnimal({ animais, selecionado, aoSelecionar, hoje, erro }: Props) {
+export function SeletorAnimal({
+  animais,
+  selecionado,
+  aoSelecionar,
+  hoje,
+  erro,
+  rotulo = 'Animal',
+  autoFocus = true,
+  semResultado = 'Nenhuma fêmea ativa com esse nome.',
+  removivel = false,
+}: Props) {
   const [busca, setBusca] = useState('');
   const encontrados = useMemo(() => buscarAnimais(animais, busca), [animais, busca]);
 
@@ -25,7 +42,7 @@ export function SeletorAnimal({ animais, selecionado, aoSelecionar, hoje, erro }
     return (
       <View className="gap-2">
         <Texto variante="rotulo" tom="suave">
-          Animal
+          {rotulo}
         </Texto>
         <LinhaAnimal
           animal={selecionado}
@@ -34,11 +51,12 @@ export function SeletorAnimal({ animais, selecionado, aoSelecionar, hoje, erro }
           onPress={() => aoSelecionar(null)}
         />
         <Pressable
+          accessibilityRole="button"
           onPress={() => aoSelecionar(null)}
           className="min-h-12 justify-center self-start"
         >
           <Texto variante="rotulo" tom="primaria">
-            Trocar animal
+            {removivel ? 'Trocar ou remover' : 'Trocar animal'}
           </Texto>
         </Pressable>
       </View>
@@ -50,7 +68,7 @@ export function SeletorAnimal({ animais, selecionado, aoSelecionar, hoje, erro }
       <Texto variante="rotulo" tom="suave">
         Animal
       </Texto>
-      <CampoBusca valor={busca} aoMudar={setBusca} autoFocus />
+      <CampoBusca valor={busca} aoMudar={setBusca} autoFocus={autoFocus} />
       {erro ? (
         <Texto variante="legenda" tom="perigo">
           {erro}
@@ -71,7 +89,7 @@ export function SeletorAnimal({ animais, selecionado, aoSelecionar, hoje, erro }
           ))}
           {encontrados.length === 0 ? (
             <Texto tom="suave" className="py-2 text-center">
-              Nenhuma fêmea ativa com esse nome.
+              {semResultado}
             </Texto>
           ) : encontrados.length > LIMITE ? (
             <Texto variante="legenda" tom="suave" className="text-center">
@@ -81,7 +99,7 @@ export function SeletorAnimal({ animais, selecionado, aoSelecionar, hoje, erro }
         </View>
       ) : (
         <Texto variante="legenda" tom="suave">
-          Digite o nome para encontrar a vaca.
+          Digite o nome para encontrar.
         </Texto>
       )}
     </View>

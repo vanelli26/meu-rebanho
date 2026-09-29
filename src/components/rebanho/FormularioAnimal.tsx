@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as Haptics from 'expo-haptics';
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { KeyboardAvoidingView, Platform, ScrollView, View, type TextInput } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -16,9 +16,11 @@ import {
 } from '@/domain/animal';
 import { useAnimais } from '@/features/animais';
 import { useHoje } from '@/features/hoje';
+import { dataDeISO } from '@/lib/datas';
 
 import { ESPACO_BARRA_ABAS } from '../BarraAbas';
 import { Botao, CampoData, CampoTexto, Card, Seletor, Texto, type Opcao } from '../ui';
+import { SeletorAnimal } from './SeletorAnimal';
 
 const OPCOES_SEXO: Opcao<'F' | 'M'>[] = [
   { valor: 'F', rotulo: 'Fêmea' },
@@ -50,6 +52,11 @@ export function FormularioAnimal({ valoresIniciais, animalId, tituloBotao, aoSal
   const brincoRef = useRef<TextInput>(null);
   const edicao = animalId !== undefined;
   const hoje = useHoje();
+  // Qualquer fêmea, inclusive as que já saíram, menos o próprio animal.
+  const maes = useMemo(
+    () => animais.filter((a) => a.sexo === 'F' && a.id !== animalId),
+    [animais, animalId],
+  );
 
   const [salvo, setSalvo] = useState(false);
   const { control, handleSubmit, setError } = useForm<Formulario>({
@@ -216,6 +223,22 @@ export function FormularioAnimal({ valoresIniciais, animalId, tituloBotao, aoSal
                 onChangeText={field.onChange}
                 onBlur={field.onBlur}
                 erro={fieldState.error?.message}
+              />
+            )}
+          />
+          <Controller
+            control={control}
+            name="maeId"
+            render={({ field }) => (
+              <SeletorAnimal
+                rotulo="Mãe"
+                animais={maes}
+                selecionado={maes.find((a) => a.id === field.value) ?? null}
+                aoSelecionar={(a) => field.onChange(a?.id ?? null)}
+                hoje={dataDeISO(hoje)}
+                autoFocus={false}
+                semResultado="Nenhuma fêmea com esse nome."
+                removivel
               />
             )}
           />

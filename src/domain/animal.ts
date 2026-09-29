@@ -189,6 +189,7 @@ export const esquemaAnimal = z
     sexo: z.enum(['F', 'M']),
     dataNascimento: dataOpcional,
     pai: textoOpcional(60),
+    maeId: z.string().nullable(),
     origem: z.enum(['nascido', 'comprado']),
     dataEntrada: dataOpcional,
     status: z.enum(['ativo', 'vendido', 'morto', 'descartado']),
@@ -247,6 +248,7 @@ export const FORMULARIO_ANIMAL_VAZIO: FormularioAnimal = {
   sexo: 'F',
   dataNascimento: null,
   pai: '',
+  maeId: null,
   origem: 'nascido',
   dataEntrada: null,
   status: 'ativo',
@@ -256,7 +258,7 @@ export const FORMULARIO_ANIMAL_VAZIO: FormularioAnimal = {
 };
 
 /** Converte o formulário validado nos dados a gravar. */
-export function montarDadosAnimal(form: FormularioAnimal, maeId: string | null): DadosAnimal {
+export function montarDadosAnimal(form: FormularioAnimal): DadosAnimal {
   const ativo = form.status === 'ativo';
   return {
     brinco: form.brinco.trim(),
@@ -264,7 +266,7 @@ export function montarDadosAnimal(form: FormularioAnimal, maeId: string | null):
     raca: form.raca.trim(),
     sexo: form.sexo,
     dataNascimento: form.dataNascimento,
-    maeId,
+    maeId: form.maeId,
     pai: form.pai.trim(),
     origem: form.origem,
     dataEntrada: form.dataEntrada,
@@ -283,6 +285,7 @@ export function formularioDoAnimal(animal: DadosAnimal): FormularioAnimal {
     sexo: animal.sexo,
     dataNascimento: animal.dataNascimento,
     pai: animal.pai,
+    maeId: animal.maeId,
     origem: animal.origem,
     dataEntrada: animal.dataEntrada,
     status: animal.status,

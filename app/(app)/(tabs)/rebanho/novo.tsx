@@ -14,7 +14,7 @@ export default function NovoAnimal() {
       aoSalvar={(form) => {
         // Grava e volta para a lista, que se atualiza pelo onSnapshot. Voltar (em vez de
         // trocar esta tela pelo detalhe) evita a pilha quebrada que deixava a aba em branco no iOS.
-        criarAnimal(contexto, montarDadosAnimal(form, null));
+        criarAnimal(contexto, montarDadosAnimal(form));
         if (router.canGoBack()) router.back();
         else router.replace('/rebanho');
       }}

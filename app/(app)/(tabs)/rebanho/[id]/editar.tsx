@@ -19,7 +19,7 @@ export default function EditarAnimal() {
       animalId={animal.id}
       tituloBotao="Salvar alterações"
       aoSalvar={(form) => {
-        editarAnimal(contexto, animal, eventos, montarDadosAnimal(form, animal.maeId));
+        editarAnimal(contexto, animal, eventos, montarDadosAnimal(form));
         router.back();
       }}
     />
