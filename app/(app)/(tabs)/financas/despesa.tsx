@@ -10,7 +10,16 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ICONE_CATEGORIA } from '@/components/financas/estiloCategoria';
 import { NaoEncontrado } from '@/components/NaoEncontrado';
 import { SeletorVariosAnimais } from '@/components/rebanho/SeletorVariosAnimais';
-import { Botao, CampoData, CampoNumero, CampoTexto, Card, Seletor, Texto } from '@/components/ui';
+import {
+  Aviso,
+  Botao,
+  CampoData,
+  CampoNumero,
+  CampoTexto,
+  Card,
+  Seletor,
+  Texto,
+} from '@/components/ui';
 import {
   CATEGORIAS_ALIMENTACAO,
   CATEGORIAS_DESPESA,
