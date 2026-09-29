@@ -10,7 +10,7 @@ import { Aviso, Card, Seletor, Texto } from '@/components/ui';
 import { identificacao } from '@/domain/animal';
 import { useDadosFazenda } from '@/features/DadosFazendaProvider';
 import { useHoje } from '@/features/hoje';
-import { useResultadoMes } from '@/features/resultado';
+import { useAnaliseMes } from '@/features/analise';
 import { ehDataISO, mesDe } from '@/lib/datas';
 import { formatarReais } from '@/lib/dinheiro';
 import { numeroParaTexto } from '@/lib/numeros';
@@ -29,7 +29,8 @@ export default function ResultadoAnimais() {
     params.mes && ehDataISO(`${params.mes}-01`) ? params.mes : mesDe(hoje),
   );
   const [ordem, setOrdem] = useState<Ordem>('pior');
-  const { carregando, rateio, resultados } = useResultadoMes(mes);
+  const { carregando, analise } = useAnaliseMes(mes);
+  const { rateio, animais: resultados } = analise;
 
   const lista = useMemo(
     () =>

@@ -28,7 +28,7 @@ import { useContextoGravacao } from '@/features/contexto';
 import { useDadosFazenda } from '@/features/DadosFazendaProvider';
 import { excluirEvento } from '@/features/eventos';
 import { useFinanceiro } from '@/features/FinanceiroProvider';
-import { useResultadoMes } from '@/features/resultado';
+import { useAnaliseMes } from '@/features/analise';
 import { useHoje } from '@/features/hoje';
 import { useProducoes } from '@/features/producao';
 import { excluirTratamento } from '@/features/tratamentos';
@@ -47,7 +47,7 @@ export default function DetalheAnimal() {
   const { cores } = useTema();
   const insets = useSafeAreaInsets();
   const hoje = useHoje();
-  const resultadoMes = useResultadoMes(mesDe(hoje));
+  const { analise: analiseMes } = useAnaliseMes(mesDe(hoje));
   const { producoes } = useProducoes(fazenda.id, hoje, 30);
 
   const estado = useMemo(
@@ -66,7 +66,7 @@ export default function DetalheAnimal() {
   if (!animal) return carregando ? null : <NaoEncontrado />;
 
   const r = animal.resumo;
-  const resultado = resultadoMes.resultados.find((x) => x.animalId === animal.id);
+  const resultado = analiseMes.animais.find((x) => x.animalId === animal.id);
   const situacao = situacaoAtual(animal, dataDeISO(hoje));
   const femea = animal.sexo === 'F';
   const ativo = animal.status === 'ativo';

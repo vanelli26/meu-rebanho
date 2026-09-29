@@ -4,51 +4,34 @@ import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { useSessaoPronta } from '@/auth/SessaoProvider';
 import { ESPACO_BARRA_ABAS } from '@/components/BarraAbas';
 import { ICONE_CATEGORIA } from '@/components/financas/estiloCategoria';
 import { SeletorMes } from '@/components/financas/SeletorMes';
 import { Aviso, Botao, Card, Texto } from '@/components/ui';
-import {
-  calcularResultadoMes,
-  despesasDoPeriodo,
-  resumirDespesas,
-  ROTULO_CATEGORIA,
-  ROTULO_GRUPO,
-} from '@/domain/despesas';
-import { calcularReceita, precoNaData } from '@/domain/precoLeite';
+import { ListaSugestoes } from '@/components/financas/ListaSugestoes';
+import { despesasDoPeriodo, ROTULO_CATEGORIA, ROTULO_GRUPO } from '@/domain/despesas';
+import { precoNaData } from '@/domain/precoLeite';
+import { useAnaliseMes, useSugestoes } from '@/features/analise';
 import { useFinanceiro } from '@/features/FinanceiroProvider';
 import { useHoje } from '@/features/hoje';
-import { useProducoesDesde } from '@/features/producao';
 import { isoParaBR, isoParaDiaMes, limitesDoMes, mesDe } from '@/lib/datas';
 import { formatarPrecoLitro, formatarReais, formatarReaisCurto } from '@/lib/dinheiro';
 import { numeroParaTexto } from '@/lib/numeros';
 import { useTema } from '@/lib/tema';
 
 export default function Financas() {
-  const { fazenda } = useSessaoPronta();
   const { disponivel, carregando, precos, despesas } = useFinanceiro();
   const { cores } = useTema();
   const insets = useSafeAreaInsets();
   const hoje = useHoje();
   const [mes, setMes] = useState(() => mesDe(hoje));
-  const { inicio, fim } = limitesDoMes(mes);
-  const { producoes } = useProducoesDesde(fazenda.id, inicio);
-
-  const receita = useMemo(
-    () => calcularReceita(producoes, precos, inicio, fim),
-    [producoes, precos, inicio, fim],
+  const { analise } = useAnaliseMes(mes);
+  const { receita, gastos, resultado: r } = analise;
+  const { sugestoes } = useSugestoes();
+  const doMes = useMemo(
+    () => despesasDoPeriodo(despesas, analise.inicio, limitesDoMes(mes).fim),
+    [despesas, analise.inicio, mes],
   );
-  const doMes = useMemo(() => despesasDoPeriodo(despesas, inicio, fim), [despesas, inicio, fim]);
-  const gastos = useMemo(() => resumirDespesas(doMes), [doMes]);
-  const r = calcularResultadoMes({
-    receita: receita.receita,
-    litrosComPreco: receita.litrosEntregues - receita.litrosSemPreco,
-    litrosProduzidos: receita.litrosEntregues + receita.litrosDescartados,
-    despesas: gastos,
-    inicio,
-    fim,
-  });
   const vigente = precoNaData(precos, hoje);
 
   if (!disponivel) {
@@ -70,6 +53,8 @@ export default function Financas() {
       contentContainerClassName="gap-4 px-4 pt-2"
       contentContainerStyle={{ paddingBottom: ESPACO_BARRA_ABAS + insets.bottom }}
     >
+      {sugestoes.length && mes === mesDe(hoje) ? <ListaSugestoes sugestoes={sugestoes} /> : null}
+
       <SeletorMes mes={mes} aoMudar={setMes} mesAtual={mesDe(hoje)} />
 
       <Card>

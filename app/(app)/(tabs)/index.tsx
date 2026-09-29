@@ -2,7 +2,7 @@ import Ionicons from '@expo/vector-icons/Ionicons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
 import { useMemo } from 'react';
-import { ScrollView, View } from 'react-native';
+import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { useSessaoPronta } from '@/auth/SessaoProvider';
@@ -14,6 +14,7 @@ import { Logo } from '@/components/marca/Logo';
 import { Card, Texto } from '@/components/ui';
 import { gerarAlertas } from '@/domain/alertas';
 import { resumoProducao } from '@/domain/producao';
+import { useSugestoes } from '@/features/analise';
 import { useAnimais } from '@/features/animais';
 import { useHoje } from '@/features/hoje';
 import { useProducoes } from '@/features/producao';
@@ -29,6 +30,7 @@ export default function Painel() {
   const hoje = useHoje();
   const { carregando, animais } = useAnimais();
   const { producoes } = useProducoes(fazenda.id, hoje, 8);
+  const { sugestoes } = useSugestoes();
 
   const emLactacao = animais.filter(
     (a) => a.status === 'ativo' && a.resumo.situacao === 'lactacao',
@@ -110,6 +112,31 @@ export default function Painel() {
           </View>
         </LinearGradient>
       </View>
+
+      {sugestoes.length ? (
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.navigate('/financas')}
+          className="active:opacity-70"
+        >
+          <Card className="flex-row items-center gap-3">
+            <View className="h-11 w-11 items-center justify-center rounded-full bg-destaque-suave">
+              <Ionicons name="bulb" size={20} color={cores.destaque} />
+            </View>
+            <View className="flex-1 gap-0.5">
+              <Texto variante="rotulo" className="text-[14px]" numberOfLines={2}>
+                {sugestoes[0].titulo}
+              </Texto>
+              <Texto variante="legenda" tom="suave">
+                {sugestoes.length === 1
+                  ? 'Sugestão financeira'
+                  : `E mais ${sugestoes.length - 1} ${sugestoes.length === 2 ? 'sugestão' : 'sugestões'} em Finanças`}
+              </Texto>
+            </View>
+            <Ionicons name="chevron-forward" size={18} color={cores.textoSuave} />
+          </Card>
+        </Pressable>
+      ) : null}
 
       <View className="gap-3">
         <View className="flex-row items-baseline justify-between px-1">

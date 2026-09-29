@@ -88,6 +88,7 @@ export function ratearDespesas({
   producoes,
   inicio,
   fim,
+  fimDespesas = fim,
 }: {
   despesas: readonly Pick<
     Despesa,
@@ -97,7 +98,10 @@ export function ratearDespesas({
   eventosPorAnimal: ReadonlyMap<string, readonly EventoRateio[]>;
   producoes: readonly Pick<ProducaoOrdenha, 'data' | 'registros'>[];
   inicio: DataISO;
+  /** Último dia vivido: conta as cabeças-dia até ele. */
   fim: DataISO;
+  /** Despesas lançadas até esta data entram (padrão: `fim`; use o fim do mês). */
+  fimDespesas?: DataISO;
 }): Rateio {
   const porAnimal = new Map<string, CustoAnimal>();
   let naoRateado = 0;
@@ -150,7 +154,7 @@ export function ratearDespesas({
   };
 
   for (const d of despesas) {
-    if (d.data < inicio || d.data > fim) continue;
+    if (d.data < inicio || d.data > fimDespesas) continue;
     let rateou: boolean;
     if (d.grupo === 'animais') {
       rateou = dividir(new Map(d.animalIds.map((id) => [id, 1])), d.categoria, d.valor);

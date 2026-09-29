@@ -100,6 +100,10 @@ src/
     alertas.ts
     lembretes.ts          # Texto e agenda das notificações a partir de gerarAlertas
     precoLeite.ts         # Preço do leite por vigência e receita das ordenhas
+    despesas.ts           # Despesas, resumo por categoria, resultado e custo por litro
+    rateio.ts             # Rateio por cabeça-dia e resultado por animal
+    analiseMes.ts         # Tudo do financeiro de um mês (receita, despesas, rateio, animais)
+    sugestoes.ts          # Sugestões de gestão a partir das análises mensais
     exportacao.ts         # CSV para Excel pt-BR: `;`, vírgula decimal, dd/MM/yyyy, BOM
   features/               # Hooks (useAnimais, useProducoes...) e ações de gravação
     DadosFazendaProvider.tsx  # Listeners de animais, de todos os eventos e de todos os tratamentos
@@ -343,6 +347,8 @@ Todos os prazos vêm de `fazenda.configuracoes`.
 - Grupo sem nenhum animal no mês: valor fica "sem rateio" (entra no resultado do mês, em nenhum animal).
 - Resultado do animal: receita (litros entregues × preço vigente) − custo rateado = margem. O leite descartado aparece à parte.
 
+**Sugestões** (`sugestoes.ts`, a partir de `analisarMes` do mês corrente e dos 3 anteriores): cadastrar preço / preço sem atualização há 45 dias; custo por litro acima do preço; mês fechado no prejuízo; vaca em lactação no vermelho nos 3 últimos meses fechados; vazia com DEL > 150 e margem abaixo da média; alimentação por litro subindo > 15%; alimentação > 70% das despesas; leite descartado > R$ 50 no mês; nenhuma despesa lançada até o dia 10. Mostradas em Finanças e, a primeira, no Painel (só o dono).
+
 **Lembretes** (`lembretes.ts` + `features/lembretes.ts`): notificações locais, sem servidor. Para cada um dos próximos 7 dias, `gerarAlertas` com os resumos atuais e aquela data; dia sem pendência não notifica. Reagendados (cancela e agenda de novo) quando os dados, os prazos, a preferência ou o dia mudam, e cancelados ao sair da conta. A preferência (ligado, hora) fica num arquivo do aparelho, não no Firestore, porque a permissão de notificação também é do aparelho.
 
 ---
@@ -441,7 +447,7 @@ firebase deploy --only firestore:rules,firestore:indexes
 - [x] Despesas por categoria, resumo do mês e custo por litro
 - [x] Custo no tratamento (vira despesa do animal no mesmo batch)
 - [x] Rateio por cabeça-dia (ração de lactação: opção pelos litros) e resultado por animal
-- [ ] Sugestões automáticas (vaca no prejuízo, custo subindo, preço desatualizado...)
+- [x] Sugestões automáticas (vaca no prejuízo, custo subindo, preço desatualizado...)
 - [ ] CSV financeiro
 
 ---
