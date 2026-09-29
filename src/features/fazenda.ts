@@ -3,6 +3,7 @@ import { serverTimestamp, writeBatch } from '@react-native-firebase/firestore';
 import type { Animal } from '@/domain/animal';
 import {
   montarNovaFazenda,
+  normalizarDadosFazenda,
   type ConfiguracoesFazenda,
   type DadosNovaFazenda,
 } from '@/domain/fazenda';
@@ -85,4 +86,14 @@ export function salvarPrazos(
     gravacoes++;
   }
   acompanharGravacao(batch.commit(), 'salvar prazos');
+}
+
+/** Atualiza nome, município e UF (só o dono, pelas regras). */
+export function editarDadosFazenda(fazendaId: string, dados: DadosNovaFazenda): void {
+  const batch = writeBatch(db);
+  batch.update(fazendaRef(fazendaId), {
+    ...normalizarDadosFazenda(dados),
+    updatedAt: serverTimestamp(),
+  });
+  acompanharGravacao(batch.commit(), 'editar fazenda');
 }

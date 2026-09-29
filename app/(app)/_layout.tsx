@@ -9,6 +9,7 @@ import { useOpcoesCabecalho } from '@/lib/navegacao';
 
 const TELAS = {
   mais: 'Conta e fazenda',
+  fazenda: 'Dados da fazenda',
   tratamento: 'Registrar tratamento',
   prazos: 'Prazos reprodutivos',
   exportar: 'Exportar planilha',

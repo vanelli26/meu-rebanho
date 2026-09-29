@@ -70,12 +70,19 @@ export type NovaFazenda = {
   configuracoes: ConfiguracoesFazenda;
 };
 
-/** Monta o documento de uma fazenda recém-criada, com o criador como único dono. */
-export function montarNovaFazenda(dados: DadosNovaFazenda, donoUid: string): NovaFazenda {
+/** Nome, município e UF sem espaços sobrando e com a UF em maiúsculas. */
+export function normalizarDadosFazenda(dados: DadosNovaFazenda): DadosNovaFazenda {
   return {
     nome: dados.nome.trim(),
     municipio: dados.municipio.trim(),
     uf: dados.uf.trim().toUpperCase(),
+  };
+}
+
+/** Monta o documento de uma fazenda recém-criada, com o criador como único dono. */
+export function montarNovaFazenda(dados: DadosNovaFazenda, donoUid: string): NovaFazenda {
+  return {
+    ...normalizarDadosFazenda(dados),
     donoUid,
     membros: { [donoUid]: 'dono' },
     configuracoes: { ...CONFIGURACOES_PADRAO },

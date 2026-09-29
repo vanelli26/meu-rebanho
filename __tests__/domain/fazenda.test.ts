@@ -4,6 +4,7 @@ import {
   esquemaConfiguracoes,
   esquemaNovaFazenda,
   montarNovaFazenda,
+  normalizarDadosFazenda,
 } from '@/domain/fazenda';
 
 describe('montarNovaFazenda', () => {
@@ -83,5 +84,15 @@ describe('esquemaConfiguracoes', () => {
         'periodoVoluntarioEspera',
       ]);
     }
+  });
+});
+
+describe('normalizarDadosFazenda', () => {
+  it('tira espaços e põe a UF em maiúsculas', () => {
+    expect(normalizarDadosFazenda({ nome: ' Sítio ', municipio: ' Castro ', uf: ' pr ' })).toEqual({
+      nome: 'Sítio',
+      municipio: 'Castro',
+      uf: 'PR',
+    });
   });
 });

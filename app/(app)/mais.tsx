@@ -71,6 +71,7 @@ export default function Mais() {
           icone="home"
           titulo={fazenda.nome}
           detalhe={`${fazenda.municipio} – ${fazenda.uf}`}
+          onPress={() => router.push('/fazenda')}
         />
         <LinhaMenu
           icone="options"
