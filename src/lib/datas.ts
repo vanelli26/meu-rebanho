@@ -1,5 +1,7 @@
 import {
   addDays,
+  addMonths,
+  endOfMonth,
   differenceInCalendarDays,
   differenceInMonths,
   format,
@@ -7,6 +9,7 @@ import {
   parse,
   parseISO,
 } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 /** Data de manejo no formato `YYYY-MM-DD` (sem fuso). */
 export type DataISO = string;
@@ -78,4 +81,27 @@ export function idadeTexto(nascimento: DataISO, hoje: DataISO): string {
   const resto = meses % 12;
   const textoAnos = `${anos} ${anos === 1 ? 'ano' : 'anos'}`;
   return resto ? `${textoAnos} e ${resto} ${resto === 1 ? 'mês' : 'meses'}` : textoAnos;
+}
+
+/** Mês no formato `YYYY-MM`. */
+export type MesISO = string;
+
+export function mesDe(iso: DataISO): MesISO {
+  return iso.slice(0, 7);
+}
+
+/** Primeiro e último dia do mês (`YYYY-MM-DD`). */
+export function limitesDoMes(mes: MesISO): { inicio: DataISO; fim: DataISO } {
+  const inicio = `${mes}-01`;
+  return { inicio, fim: paraDataISO(endOfMonth(parseISO(inicio))) };
+}
+
+/** Soma (ou subtrai) meses de um `YYYY-MM`. */
+export function somarMeses(mes: MesISO, meses: number): MesISO {
+  return format(addMonths(parseISO(`${mes}-01`), meses), 'yyyy-MM');
+}
+
+/** `2026-09` → "setembro de 2026". */
+export function nomeDoMes(mes: MesISO): string {
+  return format(parseISO(`${mes}-01`), "MMMM 'de' yyyy", { locale: ptBR });
 }

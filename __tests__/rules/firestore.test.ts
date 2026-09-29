@@ -194,6 +194,44 @@ describe('subcoleções da fazenda', () => {
   });
 });
 
+describe('financeiro (só o dono)', () => {
+  beforeEach(async () => {
+    await semear();
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await updateDoc(doc(ctx.firestore(), 'fazendas', FAZENDA), {
+        [`membros.${OUTRO}`]: 'funcionario',
+      });
+    });
+  });
+
+  const precoRef = (uid: string, id: string) =>
+    doc(dbDe(uid), 'fazendas', FAZENDA, 'precosLeite', id);
+  const preco = { inicio: '2026-09-01', valorLitro: 2.5, observacao: '' };
+
+  it('dono grava e lê preços e despesas', async () => {
+    await assertSucceeds(setDoc(precoRef(DONO, '2026-09-01'), preco));
+    await assertSucceeds(getDoc(precoRef(DONO, '2026-09-01')));
+    const despesa = doc(dbDe(DONO), 'fazendas', FAZENDA, 'despesas', 'd1');
+    await assertSucceeds(setDoc(despesa, { valor: 1000 }));
+    await assertSucceeds(getDoc(despesa));
+    await assertSucceeds(deleteDoc(precoRef(DONO, '2026-09-01')));
+  });
+
+  it('funcionário não lê nem grava o financeiro', async () => {
+    await assertFails(setDoc(precoRef(OUTRO, '2026-09-01'), preco));
+    await assertFails(getDoc(precoRef(OUTRO, '2026-09-01')));
+    await assertFails(getDoc(doc(dbDe(OUTRO), 'fazendas', FAZENDA, 'despesas', 'd1')));
+    // O resto da fazenda continua liberado para o funcionário.
+    await assertSucceeds(getDoc(doc(dbDe(OUTRO), 'fazendas', FAZENDA, 'animais', 'a1')));
+  });
+
+  it('o id do preço é a data de início e o valor é positivo', async () => {
+    await assertFails(setDoc(precoRef(DONO, '2026-09-02'), preco));
+    await assertFails(setDoc(precoRef(DONO, '2026-09-01'), { ...preco, valorLitro: 0 }));
+    await assertFails(setDoc(precoRef(DONO, '2026-09-01'), { ...preco, valorLitro: '2,50' }));
+  });
+});
+
 describe.each(['eventos', 'tratamentos'])('%s por grupo de coleção', (colecao) => {
   beforeEach(async () => {
     await semear();

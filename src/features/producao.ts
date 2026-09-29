@@ -15,7 +15,14 @@ export function useProducoes(
   hoje: DataISO,
   dias: number,
 ): { carregando: boolean; producoes: ProducaoOrdenha[] } {
-  const desde = somarDias(hoje, -dias);
+  return useProducoesDesde(fazendaId, somarDias(hoje, -dias));
+}
+
+/** Ordenhas a partir de uma data (inclusive), mais recentes primeiro. */
+export function useProducoesDesde(
+  fazendaId: string,
+  desde: DataISO,
+): { carregando: boolean; producoes: ProducaoOrdenha[] } {
   const consulta = useConsulta(
     producaoDesdeQuery(fazendaId, desde),
     `producao:${fazendaId}:${desde}`,

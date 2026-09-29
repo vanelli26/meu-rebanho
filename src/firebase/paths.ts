@@ -13,6 +13,7 @@ import {
   animalConverter,
   eventoConverter,
   fazendaConverter,
+  precoLeiteConverter,
   producaoConverter,
   tratamentoConverter,
   usuarioConverter,
@@ -73,3 +74,11 @@ export const producaoDesdeQuery = (fazendaId: string, desde: DataISO) =>
   query(producaoRef(fazendaId), where('data', '>=', desde), orderBy('data', 'desc')).withConverter(
     producaoConverter,
   );
+
+export const precosLeiteRef = (fazendaId: string) =>
+  collection(db, 'fazendas', fazendaId, 'precosLeite');
+/** O id é a data de início: cadastrar de novo na mesma data substitui. */
+export const precoLeiteRef = (fazendaId: string, inicio: DataISO) =>
+  doc(precosLeiteRef(fazendaId), inicio);
+export const precosLeiteLeituraRef = (fazendaId: string) =>
+  precosLeiteRef(fazendaId).withConverter(precoLeiteConverter);

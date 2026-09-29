@@ -77,6 +77,7 @@ app/
       index.tsx           # Painel (resumo + alertas)
       rebanho/            # Lista (filtro "Prenhes" = partos previstos), detalhe, cadastro e registro de evento
       producao/           # Lançamento em lote e histórico
+      financas/           # Resumo do mês, preço do leite (vigências), despesas (só o dono)
     mais.tsx              # Conta e fazenda (aberta pela foto no Painel, fora das abas)
     tratamento.tsx        # Tratamento em um ou vários animais (fora das abas)
     prazos.tsx            # Prazos reprodutivos da fazenda (só o dono edita)
@@ -98,9 +99,11 @@ src/
     resumoAnimal.ts       # Recalcula o resumo a partir dos eventos
     alertas.ts
     lembretes.ts          # Texto e agenda das notificações a partir de gerarAlertas
+    precoLeite.ts         # Preço do leite por vigência e receita das ordenhas
     exportacao.ts         # CSV para Excel pt-BR: `;`, vírgula decimal, dd/MM/yyyy, BOM
   features/               # Hooks (useAnimais, useProducoes...) e ações de gravação
     DadosFazendaProvider.tsx  # Listeners de animais, de todos os eventos e de todos os tratamentos
+    FinanceiroProvider.tsx    # Listeners do financeiro (só para o dono)
   components/ui/
   lib/
 firestore.rules
@@ -124,6 +127,8 @@ fazendas/{fazendaId}
     eventos/{eventoId}
     tratamentos/{tratamentoId}
   producao/{data_ordenha}     # ex.: "2026-09-27_manha"
+  precosLeite/{inicio}        # ex.: "2026-09-01" (só o dono)
+  despesas/{despesaId}        # (só o dono)
 ```
 
 ### `usuarios/{uid}`
@@ -191,6 +196,13 @@ Um documento por ordenha, com todas as vacas dentro (barato de ler e gravar em l
 - `registros`: mapa `{ [animalId]: { litros: number, descartado: boolean } }`
 - `totalLitros` (só o que foi para o tanque), `totalDescartado` (calculados no cliente ao salvar)
 - `criadoPor`, `updatedAt`
+
+### `precosLeite/{inicio}` (financeiro, só o dono)
+
+- `inicio` (= id do documento), `valorLitro` (reais, até 4 casas), `observacao`, `criadoPor`, `updatedAt`
+- **Vigência:** cada preço vale do `inicio` até a véspera do próximo. O fim não é gravado (`vigencias()` calcula), então nunca há dois preços valendo ao mesmo tempo, mesmo offline. Cadastrar de novo na mesma data substitui (mesmo id). O histórico nunca é sobrescrito: a receita dos meses passados usa o preço da época.
+
+**Dinheiro:** totais e despesas em **centavos inteiros** (`src/lib/dinheiro.ts`); só o preço do litro fica em reais com até 4 casas.
 
 ### Fluxo de gravação de evento ou tratamento
 
@@ -264,6 +276,8 @@ service cloud.firestore {
 }
 ```
 
+Financeiro (`precosLeite`, `despesas`): só o dono lê e grava (`dono(fazendaId)`); a regra geral das subcoleções exclui essas coleções. Ver `firestore.rules`.
+
 ---
 
 ## 7. Regras de negócio (`src/domain/`)
@@ -308,6 +322,8 @@ Todos os prazos vêm de `fazenda.configuracoes`.
 - Observar retorno de cio (18–24 dias após inseminação sem diagnóstico).
 - Vacas liberadas para inseminar há mais de 30 dias sem inseminação.
 
+**Receita do leite** (`precoLeite.ts`): litros entregues de cada ordenha × preço vigente na data. Leite descartado vira valor perdido. Ordenhas antes do primeiro preço ficam fora da receita e são avisadas ("L sem preço").
+
 **Lembretes** (`lembretes.ts` + `features/lembretes.ts`): notificações locais, sem servidor. Para cada um dos próximos 7 dias, `gerarAlertas` com os resumos atuais e aquela data; dia sem pendência não notifica. Reagendados (cancela e agenda de novo) quando os dados, os prazos, a preferência ou o dia mudam, e cancelados ao sair da conta. A preferência (ligado, hora) fica num arquivo do aparelho, não no Firestore, porque a permissão de notificação também é do aparelho.
 
 ---
@@ -322,7 +338,8 @@ Todos os prazos vêm de `fazenda.configuracoes`.
    **Lançar produção em lote**: escolher data e ordenha → lista das vacas em lactação → litros com teclado numérico e "próximo" automático → salvar em um documento.
 6. **Registrar evento reprodutivo** (`rebanho/evento`, pelo botão "Registrar evento" no detalhe da vaca): vaca → tipo → data (padrão hoje) → campos específicos. No parto, oferecer cadastro rápido da cria.
 7. **Tratamentos** (`tratamento`, pelo botão no detalhe do animal ou por "Tratamento em lote" em Conta e fazenda): um animal ou vários de uma vez (atalhos "Em lactação" e "Todo o rebanho"). No detalhe, lista de tratamentos (segurar para excluir) e avisos de carência de leite e carne.
-8. **Conta e fazenda** (`mais`, aberta ao tocar na foto do usuário no Painel; não é aba): prazos reprodutivos (`prazos`: limites em `LIMITES_PRAZOS`; salvar recalcula o resumo de todos os animais em batches), tratamento em lote, exportar CSV, lembretes, conta (foto, e-mail, sair). Abas: Painel, Rebanho e Produção.
+8. **Conta e fazenda** (`mais`, aberta ao tocar na foto do usuário no Painel; não é aba): prazos reprodutivos (`prazos`: limites em `LIMITES_PRAZOS`; salvar recalcula o resumo de todos os animais em batches), tratamento em lote, exportar CSV, lembretes, conta (foto, e-mail, sair). Abas: Painel, Rebanho, Produção e Finanças.
+9. **Finanças** (aba, só o dono): mês selecionável com receita do leite, preço médio, leite descartado em R$ e preço vigente; histórico de preços (`financas/precos`, segurar para excluir) e novo preço (`financas/preco`, avisa qual preço perde a vigência).
 
 ---
 
@@ -399,8 +416,17 @@ firebase deploy --only firestore:rules,firestore:indexes
 - [ ] Pesagem de bezerras/novilhas
 - [ ] Indicadores (IEP médio, taxa de prenhez)
 
+### Fase 5 — Financeiro
+
+- [x] Preço do leite com vigência e receita do mês (aba Finanças)
+- [ ] Despesas por categoria, resumo do mês e custo por litro
+- [ ] Custo no tratamento (vira despesa do animal no mesmo batch)
+- [ ] Rateio por cabeça-dia (ração de lactação: opção pelos litros) e resultado por animal
+- [ ] Sugestões automáticas (vaca no prejuízo, custo subindo, preço desatualizado...)
+- [ ] CSV financeiro
+
 ---
 
 ## 12. Fora do escopo (por enquanto)
 
-Gestão financeira, estoque de insumos, integração com balanças ou coleiras, versão web.
+Contabilidade completa (fluxo de caixa, impostos), estoque de insumos, integração com balanças ou coleiras, versão web.

@@ -17,6 +17,7 @@ const ICONES: Record<string, [NomeIcone, NomeIcone]> = {
   index: ['home-outline', 'home'],
   rebanho: ['paw-outline', 'paw'],
   producao: ['water-outline', 'water'],
+  financas: ['wallet-outline', 'wallet'],
 };
 
 const MARGEM = 16;

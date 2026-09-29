@@ -5,9 +5,13 @@ import {
   idadeTexto,
   isoParaBR,
   isoParaDiaMes,
+  limitesDoMes,
   mascaraDataBR,
+  mesDe,
+  nomeDoMes,
   paraDataISO,
   somarDias,
+  somarMeses,
 } from '@/lib/datas';
 
 describe('datas', () => {
@@ -62,5 +66,14 @@ describe('idadeTexto', () => {
     expect(idadeTexto('2026-04-28', '2026-09-28')).toBe('5 meses');
     expect(idadeTexto('2025-09-28', '2026-09-28')).toBe('1 ano');
     expect(idadeTexto('2024-06-01', '2026-09-28')).toBe('2 anos e 3 meses');
+  });
+});
+
+describe('meses', () => {
+  it('mesDe, limites, soma e nome', () => {
+    expect(mesDe('2026-09-29')).toBe('2026-09');
+    expect(limitesDoMes('2026-02')).toEqual({ inicio: '2026-02-01', fim: '2026-02-28' });
+    expect(somarMeses('2026-01', -1)).toBe('2025-12');
+    expect(nomeDoMes('2026-09')).toBe('setembro de 2026');
   });
 });

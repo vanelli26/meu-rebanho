@@ -11,6 +11,11 @@ service cloud.firestore {
         request.auth.uid in get(/databases/$(database)/documents/fazendas/$(fazendaId)).data.membros;
     }
 
+    function dono(fazendaId) {
+      return logado() &&
+        get(/databases/$(database)/documents/fazendas/$(fazendaId)).data.membros[request.auth.uid] == "dono";
+    }
+
     match /usuarios/{uid} {
       allow read, create, update: if logado() && request.auth.uid == uid;
       allow delete: if false;
@@ -40,7 +45,21 @@ service cloud.firestore {
       // Subcoleções (animais, eventos, produção...). Não usar /{sub=**} aqui: no
       // rules_version 2 ele também casa com o próprio documento da fazenda.
       match /{colecao}/{resto=**} {
-        allow read, write: if membro(fazendaId);
+        allow read, write: if membro(fazendaId) && !(colecao in ['precosLeite', 'despesas']);
+      }
+
+      // Financeiro: só o dono, mesmo quando houver funcionários.
+      // O id do preço é a data de início (cadastrar de novo no mesmo dia substitui).
+      match /precosLeite/{inicio} {
+        allow read, delete: if dono(fazendaId);
+        allow create, update: if dono(fazendaId)
+          && request.resource.data.inicio == inicio
+          && request.resource.data.valorLitro is number
+          && request.resource.data.valorLitro > 0;
+      }
+
+      match /despesas/{despesaId} {
+        allow read, write: if dono(fazendaId);
       }
     }
 
