@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { diasEntre, ehDataISO, type DataISO } from '@/lib/datas';
 import { reaisParaCentavos } from '@/lib/dinheiro';
 
+import type { NovoTratamento } from './carencia';
+
 export type CategoriaDespesa =
   | 'racao'
   | 'volumoso'
@@ -236,5 +238,45 @@ export function formularioDaDespesa(d: Despesa): FormularioDespesa {
     grupo: d.grupo,
     animalIds: d.animalIds,
     porLitros: d.porLitros,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Custo de tratamento
+
+/** Despesa com o custo total de um tratamento, dividida entre os animais tratados. */
+export function despesaDoTratamento(
+  tratamento: Pick<NovoTratamento, 'data' | 'produto'>,
+  animalIds: readonly string[],
+  custoReais: number,
+  tratamentoId: string,
+): DadosDespesa {
+  return {
+    data: tratamento.data,
+    categoria: 'tratamentos',
+    descricao: tratamento.produto,
+    valor: reaisParaCentavos(custoReais),
+    quantidade: null,
+    unidade: null,
+    grupo: 'animais',
+    animalIds: [...animalIds],
+    porLitros: false,
+    tratamentoId,
+  };
+}
+
+/**
+ * Ao excluir o tratamento de um animal, tira a parte dele da despesa do lote.
+ * `null` se era o único animal (a despesa deve ser apagada).
+ */
+export function despesaSemAnimal(despesa: Despesa, animalId: string): DadosDespesa | null {
+  if (!despesa.animalIds.includes(animalId)) return null;
+  const restantes = despesa.animalIds.filter((id) => id !== animalId);
+  if (!restantes.length) return null;
+  const { id: _, ...dados } = despesa;
+  return {
+    ...dados,
+    animalIds: restantes,
+    valor: Math.round((despesa.valor * restantes.length) / despesa.animalIds.length),
   };
 }

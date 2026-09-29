@@ -31,6 +31,8 @@ export type Tratamento = {
   carenciaLeiteDias: number;
   carenciaCarneDias: number;
   observacoes: string;
+  /** Despesa criada com o custo do tratamento (financeiro), se houver. */
+  despesaId: string | null;
 };
 
 type Carencias = Pick<Tratamento, 'data' | 'carenciaLeiteDias' | 'carenciaCarneDias'>;
@@ -107,6 +109,8 @@ export const esquemaTratamento = z.object({
   carenciaLeiteDias: dias,
   carenciaCarneDias: dias,
   observacoes: z.string().trim().max(500, 'Texto muito longo.'),
+  /** Custo total em reais (todos os animais). Opcional; vira despesa. */
+  custo: z.number().min(0, 'Valor inválido.').max(1_000_000, 'Valor muito alto.').nullable(),
 });
 
 export type FormularioTratamento = z.input<typeof esquemaTratamento>;
@@ -125,6 +129,7 @@ export function montarTratamento(form: TratamentoValidado): NovoTratamento {
     carenciaLeiteDias: form.carenciaLeiteDias,
     carenciaCarneDias: form.carenciaCarneDias,
     observacoes: form.observacoes,
+    despesaId: null,
   };
 }
 

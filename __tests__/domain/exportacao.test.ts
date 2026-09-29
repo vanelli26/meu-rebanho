@@ -146,6 +146,7 @@ describe('csvEventos e csvTratamentos', () => {
         carenciaLeiteDias: 4,
         carenciaCarneDias: 7,
         observacoes: '',
+        despesaId: null,
       },
     ];
     expect(linhas(csvTratamentos(tratamentos, porId))[1]).toBe(

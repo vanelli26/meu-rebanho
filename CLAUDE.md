@@ -186,6 +186,7 @@ A situação `bezerra` vira `novilha` com a idade sem nova gravação: as telas 
 - `data`, `tipo`: `vacina` | `vermifugo` | `antibiotico` | `hormonio` | `outro`
 - `produto`, `dose`, `via`, `carenciaLeiteDias`, `carenciaCarneDias`
 - `observacoes`, `criadoPor`, `createdAt`
+- `despesaId`: despesa criada com o custo informado (só o dono vê o campo). Excluir o tratamento de um animal tira a parte dele da despesa (`despesaSemAnimal`), ou apaga a despesa se era o único.
 - `fazendaId`: lidos todos de uma vez por `collectionGroup('tratamentos')`, como os eventos, para recalcular a carência offline.
 
 ### `producao/{data_ordenha}`
@@ -430,7 +431,7 @@ firebase deploy --only firestore:rules,firestore:indexes
 
 - [x] Preço do leite com vigência e receita do mês (aba Finanças)
 - [x] Despesas por categoria, resumo do mês e custo por litro
-- [ ] Custo no tratamento (vira despesa do animal no mesmo batch)
+- [x] Custo no tratamento (vira despesa do animal no mesmo batch)
 - [ ] Rateio por cabeça-dia (ração de lactação: opção pelos litros) e resultado por animal
 - [ ] Sugestões automáticas (vaca no prejuízo, custo subindo, preço desatualizado...)
 - [ ] CSV financeiro

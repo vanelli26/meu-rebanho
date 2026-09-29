@@ -82,6 +82,7 @@ describe('esquemaTratamento', () => {
     carenciaLeiteDias: 4,
     carenciaCarneDias: 7,
     observacoes: '',
+    custo: null,
   };
 
   it('aceita e monta o tratamento', () => {
@@ -97,6 +98,7 @@ describe('esquemaTratamento', () => {
         carenciaLeiteDias: 4,
         carenciaCarneDias: 7,
         observacoes: '',
+        despesaId: null,
       });
     }
   });

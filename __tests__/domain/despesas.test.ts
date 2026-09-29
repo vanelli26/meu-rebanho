@@ -1,5 +1,7 @@
 import {
   calcularResultadoMes,
+  despesaDoTratamento,
+  despesaSemAnimal,
   despesasDoPeriodo,
   esquemaDespesa,
   formularioDaDespesa,
@@ -136,5 +138,30 @@ describe('esquemaDespesa e montarDespesa', () => {
   it('formulário da despesa volta para reais', () => {
     const d = { ...despesa('2026-09-01', 'energia', 45990), id: 'd1' };
     expect(formularioDaDespesa(d).valor).toBe(459.9);
+  });
+});
+
+describe('custo de tratamento', () => {
+  it('vira despesa de tratamentos dos animais tratados', () => {
+    expect(
+      despesaDoTratamento({ data: '2026-09-10', produto: 'Aftosa' }, ['a', 'b'], 35.5, 't1'),
+    ).toMatchObject({
+      categoria: 'tratamentos',
+      descricao: 'Aftosa',
+      valor: 3550,
+      grupo: 'animais',
+      animalIds: ['a', 'b'],
+      tratamentoId: 't1',
+    });
+  });
+
+  it('excluir o tratamento de um animal tira a parte dele', () => {
+    const d = {
+      ...despesa('2026-09-10', 'tratamentos', 3000),
+      grupo: 'animais' as const,
+      animalIds: ['a', 'b', 'c'],
+    };
+    expect(despesaSemAnimal(d, 'b')).toMatchObject({ animalIds: ['a', 'c'], valor: 2000 });
+    expect(despesaSemAnimal({ ...d, animalIds: ['a'] }, 'a')).toBeNull();
   });
 });

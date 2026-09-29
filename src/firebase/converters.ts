@@ -146,6 +146,7 @@ export const tratamentoConverter = conversorLeitura<TratamentoDoAnimal>((snapsho
     carenciaLeiteDias: d.carenciaLeiteDias ?? 0,
     carenciaCarneDias: d.carenciaCarneDias ?? 0,
     observacoes: d.observacoes ?? '',
+    despesaId: d.despesaId ?? null,
   };
 });
 

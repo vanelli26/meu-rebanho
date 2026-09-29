@@ -30,9 +30,11 @@ import {
 } from '@/domain/carencia';
 import { useContextoGravacao } from '@/features/contexto';
 import { useDadosFazenda } from '@/features/DadosFazendaProvider';
+import { useFinanceiro } from '@/features/FinanceiroProvider';
 import { useHoje } from '@/features/hoje';
 import { registrarTratamento } from '@/features/tratamentos';
 import { dataDeISO, isoParaBR } from '@/lib/datas';
+import { formatarReais } from '@/lib/dinheiro';
 
 const OPCOES_TIPO = TIPOS_TRATAMENTO.map((valor) => ({ valor, rotulo: ROTULO_TRATAMENTO[valor] }));
 
@@ -41,6 +43,7 @@ export default function RegistrarTratamento() {
   const params = useLocalSearchParams<{ animalId?: string }>();
   const contexto = useContextoGravacao();
   const { animais, animalPorId, eventosPorAnimal, tratamentosPorAnimal } = useDadosFazenda();
+  const { disponivel } = useFinanceiro();
   const insets = useSafeAreaInsets();
   const hoje = useHoje();
   const [salvo, setSalvo] = useState(false);
@@ -61,12 +64,13 @@ export default function RegistrarTratamento() {
       carenciaLeiteDias: 0,
       carenciaCarneDias: 0,
       observacoes: '',
+      custo: null,
     },
   });
 
-  const [animalIds, data, leiteDias] = useWatch({
+  const [animalIds, data, leiteDias, custo] = useWatch({
     control,
-    name: ['animalIds', 'data', 'carenciaLeiteDias'],
+    name: ['animalIds', 'data', 'carenciaLeiteDias', 'custo'],
   });
   const ativos = useMemo(() => animais.filter((a) => a.status === 'ativo'), [animais]);
 
@@ -91,6 +95,7 @@ export default function RegistrarTratamento() {
       escolhidos,
       { eventosPorAnimal, tratamentosPorAnimal },
       montarTratamento(form),
+      disponivel ? form.custo : null,
     );
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     if (router.canGoBack()) router.back();
@@ -287,6 +292,29 @@ export default function RegistrarTratamento() {
             )}
           />
         </Card>
+
+        {disponivel ? (
+          <Card className="gap-2">
+            <Controller
+              control={control}
+              name="custo"
+              render={({ field, fieldState }) => (
+                <CampoNumero
+                  rotulo="Custo total (R$)"
+                  placeholder="Opcional"
+                  valor={field.value}
+                  aoMudar={field.onChange}
+                  erro={fieldState.error?.message}
+                />
+              )}
+            />
+            <Texto variante="legenda" tom="suave">
+              {custo && animalIds.length > 1
+                ? `Vira uma despesa de tratamentos: ${formatarReais(Math.round((custo * 100) / animalIds.length))} por animal.`
+                : 'Vira uma despesa de tratamentos do animal, no financeiro.'}
+            </Texto>
+          </Card>
+        ) : null}
 
         <Botao
           titulo={animalIds.length > 1 ? `Registrar em ${animalIds.length} animais` : 'Registrar'}

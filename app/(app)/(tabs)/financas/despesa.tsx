@@ -294,6 +294,12 @@ function EditorDespesa({ existente }: { existente: Despesa | null }) {
           </Texto>
         </Card>
 
+        {existente?.tratamentoId ? (
+          <Aviso
+            titulo="Custo de um tratamento"
+            mensagem="Criada ao registrar o tratamento. Excluir o tratamento de um animal também tira a parte dele daqui."
+          />
+        ) : null}
         <Botao titulo="Salvar" icone="checkmark" onPress={salvar} carregando={salvo} />
         {existente ? (
           <Botao

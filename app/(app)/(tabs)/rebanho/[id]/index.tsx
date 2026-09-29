@@ -26,6 +26,7 @@ import { useAnimal } from '@/features/animais';
 import { useContextoGravacao } from '@/features/contexto';
 import { useDadosFazenda } from '@/features/DadosFazendaProvider';
 import { excluirEvento } from '@/features/eventos';
+import { useFinanceiro } from '@/features/FinanceiroProvider';
 import { useHoje } from '@/features/hoje';
 import { useProducoes } from '@/features/producao';
 import { excluirTratamento } from '@/features/tratamentos';
@@ -39,6 +40,7 @@ export default function DetalheAnimal() {
   const contexto = useContextoGravacao();
   const { carregando, animal, eventos, tratamentos } = useAnimal(id);
   const { animalPorId } = useDadosFazenda();
+  const { despesas } = useFinanceiro();
   const { cores } = useTema();
   const insets = useSafeAreaInsets();
   const hoje = useHoje();
@@ -88,13 +90,22 @@ export default function DetalheAnimal() {
   const confirmarExclusaoTratamento = (tratamento: Tratamento) => {
     Alert.alert(
       `Excluir ${tratamento.produto}?`,
-      `Tratamento de ${isoParaBR(tratamento.data)}. A carência será recalculada.`,
+      `Tratamento de ${isoParaBR(tratamento.data)}. A carência será recalculada` +
+        (tratamento.despesaId ? ' e o custo deste animal sai das despesas.' : '.'),
       [
         { text: 'Cancelar', style: 'cancel' },
         {
           text: 'Excluir',
           style: 'destructive',
-          onPress: () => excluirTratamento(contexto, animal, eventos, tratamentos, tratamento.id),
+          onPress: () =>
+            excluirTratamento(
+              contexto,
+              animal,
+              eventos,
+              tratamentos,
+              tratamento.id,
+              despesas.find((d) => d.id === tratamento.despesaId) ?? null,
+            ),
         },
       ],
     );
