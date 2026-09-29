@@ -33,6 +33,7 @@ import { useDadosFazenda } from '@/features/DadosFazendaProvider';
 import { useFinanceiro } from '@/features/FinanceiroProvider';
 import { useHoje } from '@/features/hoje';
 import { registrarTratamento } from '@/features/tratamentos';
+import { useConfirmarDescarte } from '@/lib/confirmarDescarte';
 import { dataDeISO, isoParaBR } from '@/lib/datas';
 import { formatarReais } from '@/lib/dinheiro';
 
@@ -48,7 +49,7 @@ export default function RegistrarTratamento() {
   const hoje = useHoje();
   const [salvo, setSalvo] = useState(false);
 
-  const { control, handleSubmit, setError } = useForm<
+  const { formState, control, handleSubmit, setError } = useForm<
     FormularioTratamento,
     unknown,
     TratamentoValidado
@@ -83,6 +84,8 @@ export default function RegistrarTratamento() {
       })
     : [];
 
+  const liberar = useConfirmarDescarte(formState.isDirty);
+
   const salvar = handleSubmit((form) => {
     if (form.data > hoje) {
       setError('data', { message: 'A data não pode ser no futuro.' });
@@ -90,6 +93,7 @@ export default function RegistrarTratamento() {
     }
     const escolhidos = form.animalIds.flatMap((id) => animalPorId.get(id) ?? []);
     setSalvo(true);
+    liberar();
     registrarTratamento(
       contexto,
       escolhidos,

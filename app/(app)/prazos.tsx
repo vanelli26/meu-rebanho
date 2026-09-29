@@ -17,6 +17,7 @@ import {
 } from '@/domain/fazenda';
 import { useDadosFazenda } from '@/features/DadosFazendaProvider';
 import { salvarPrazos } from '@/features/fazenda';
+import { useConfirmarDescarte } from '@/lib/confirmarDescarte';
 
 const CAMPOS: { campo: keyof ConfiguracoesFazenda; rotulo: string; ajuda: string }[] = [
   {
@@ -53,7 +54,7 @@ export default function Prazos() {
   const [salvo, setSalvo] = useState(false);
   const dono = fazenda.membros[conta.uid] === 'dono';
 
-  const { control, handleSubmit, reset } = useForm<
+  const { formState, control, handleSubmit, reset } = useForm<
     FormularioConfiguracoes,
     unknown,
     ConfiguracoesFazenda
@@ -62,8 +63,11 @@ export default function Prazos() {
     defaultValues: fazenda.configuracoes,
   });
 
+  const liberar = useConfirmarDescarte(formState.isDirty);
+
   const salvar = handleSubmit((config) => {
     setSalvo(true);
+    liberar();
     salvarPrazos(fazenda.id, config, animais, eventosPorAnimal);
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     router.back();

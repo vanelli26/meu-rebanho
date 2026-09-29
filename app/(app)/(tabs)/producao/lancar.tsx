@@ -33,6 +33,7 @@ import { useHoje } from '@/features/hoje';
 import { salvarProducao, useOrdenha } from '@/features/producao';
 import { dataDeISO, ehDataISO, isoParaBR, type DataISO } from '@/lib/datas';
 import { numeroParaTexto, textoParaNumero } from '@/lib/numeros';
+import { useConfirmarDescarte } from '@/lib/confirmarDescarte';
 import { useTecladoVisivel } from '@/lib/teclado';
 
 const OPCOES_ORDENHA = ORDENHAS.map((valor) => ({ valor, rotulo: ROTULO_ORDENHA[valor] }));
@@ -143,6 +144,8 @@ function ListaOrdenha({
   const rolagem = useRef<ScrollView>(null);
   const [erros, setErros] = useState<Record<string, string>>({});
   const [salvo, setSalvo] = useState(false);
+  const [alterado, setAlterado] = useState(false);
+  const liberar = useConfirmarDescarte(alterado);
 
   // Pela data da ordenha: vale também ao lançar ou editar dias passados.
   const emCarencia = (animal: Animal) =>
@@ -188,6 +191,7 @@ function ListaOrdenha({
   const carencias = vacas.filter(emCarencia);
 
   const atualizar = (id: string, mudanca: Partial<Rascunho[string]>) => {
+    setAlterado(true);
     setRascunho((atual) => ({
       ...atual,
       [id]: { ...(atual[id] ?? { texto: '', descartado: false }), ...mudanca },
@@ -211,6 +215,7 @@ function ListaOrdenha({
       return;
     }
     setSalvo(true);
+    liberar();
     salvarProducao(contexto, data, ordenha, lancamentos);
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     if (router.canGoBack()) router.back();

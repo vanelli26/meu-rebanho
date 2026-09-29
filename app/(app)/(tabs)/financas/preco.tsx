@@ -17,6 +17,7 @@ import { useContextoGravacao } from '@/features/contexto';
 import { salvarPrecoLeite } from '@/features/financeiro';
 import { useFinanceiro } from '@/features/FinanceiroProvider';
 import { useHoje } from '@/features/hoje';
+import { useConfirmarDescarte } from '@/lib/confirmarDescarte';
 import { dataDeISO, isoParaBR, somarDias } from '@/lib/datas';
 import { formatarPrecoLitro } from '@/lib/dinheiro';
 
@@ -27,7 +28,11 @@ export default function NovoPreco() {
   const hoje = useHoje();
   const [salvo, setSalvo] = useState(false);
 
-  const { control, handleSubmit } = useForm<FormularioPrecoLeite, unknown, PrecoLeiteValidado>({
+  const { formState, control, handleSubmit } = useForm<
+    FormularioPrecoLeite,
+    unknown,
+    PrecoLeiteValidado
+  >({
     resolver: zodResolver(esquemaPrecoLeite),
     defaultValues: { inicio: hoje, valorLitro: null, observacao: '' },
   });
@@ -37,8 +42,11 @@ export default function NovoPreco() {
   const anterior = inicio ? precoNaData(precos, somarDias(inicio, -1)) : null;
   const mesmoDia = inicio ? precos.find((p) => p.inicio === inicio) : undefined;
 
+  const liberar = useConfirmarDescarte(formState.isDirty);
+
   const salvar = handleSubmit((preco) => {
     setSalvo(true);
+    liberar();
     salvarPrecoLeite(contexto, preco);
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     router.back();

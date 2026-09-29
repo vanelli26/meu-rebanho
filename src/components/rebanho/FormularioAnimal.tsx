@@ -16,6 +16,7 @@ import {
 } from '@/domain/animal';
 import { useAnimais } from '@/features/animais';
 import { useHoje } from '@/features/hoje';
+import { useConfirmarDescarte } from '@/lib/confirmarDescarte';
 import { dataDeISO } from '@/lib/datas';
 
 import { ESPACO_BARRA_ABAS } from '../BarraAbas';
@@ -59,10 +60,16 @@ export function FormularioAnimal({ valoresIniciais, animalId, tituloBotao, aoSal
   );
 
   const [salvo, setSalvo] = useState(false);
-  const { control, handleSubmit, setError } = useForm<Formulario>({
+  const {
+    control,
+    handleSubmit,
+    setError,
+    formState: { isDirty },
+  } = useForm<Formulario>({
     resolver: zodResolver(esquemaAnimal),
     defaultValues: valoresIniciais,
   });
+  const liberar = useConfirmarDescarte(isDirty);
   const origem = useWatch({ control, name: 'origem' });
   const status = useWatch({ control, name: 'status' });
 
@@ -81,6 +88,7 @@ export function FormularioAnimal({ valoresIniciais, animalId, tituloBotao, aoSal
       return;
     }
     setSalvo(true);
+    liberar();
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     aoSalvar(dados);
   });

@@ -40,6 +40,7 @@ import { useContextoGravacao } from '@/features/contexto';
 import { excluirDespesa, salvarDespesa } from '@/features/financeiro';
 import { useFinanceiro } from '@/features/FinanceiroProvider';
 import { useHoje } from '@/features/hoje';
+import { useConfirmarDescarte } from '@/lib/confirmarDescarte';
 import { dataDeISO } from '@/lib/datas';
 import { formatarPrecoLitro } from '@/lib/dinheiro';
 import { useTema } from '@/lib/tema';
@@ -67,7 +68,11 @@ function EditorDespesa({ existente }: { existente: Despesa | null }) {
   const hoje = useHoje();
   const [salvo, setSalvo] = useState(false);
 
-  const { control, handleSubmit, setValue } = useForm<FormularioDespesa, unknown, DespesaValidada>({
+  const { formState, control, handleSubmit, setValue } = useForm<
+    FormularioDespesa,
+    unknown,
+    DespesaValidada
+  >({
     resolver: zodResolver(esquemaDespesa),
     defaultValues: existente
       ? formularioDaDespesa(existente)
@@ -89,8 +94,11 @@ function EditorDespesa({ existente }: { existente: Despesa | null }) {
   });
   const ativos = useMemo(() => animais.filter((a) => a.status === 'ativo'), [animais]);
 
+  const liberar = useConfirmarDescarte(formState.isDirty);
+
   const salvar = handleSubmit((form) => {
     setSalvo(true);
+    liberar();
     salvarDespesa(contexto, existente?.id ?? null, montarDespesa(form, existente?.tratamentoId));
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     router.back();
@@ -104,6 +112,7 @@ function EditorDespesa({ existente }: { existente: Despesa | null }) {
         text: 'Excluir',
         style: 'destructive',
         onPress: () => {
+          liberar();
           excluirDespesa(contexto, existente.id);
           router.back();
         },

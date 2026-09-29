@@ -35,6 +35,7 @@ import { useContextoGravacao } from '@/features/contexto';
 import { useDadosFazenda } from '@/features/DadosFazendaProvider';
 import { registrarEvento } from '@/features/eventos';
 import { useHoje } from '@/features/hoje';
+import { useConfirmarDescarte } from '@/lib/confirmarDescarte';
 import { dataDeISO, isoParaBR, somarDias, type DataISO } from '@/lib/datas';
 import { useTema } from '@/lib/tema';
 
@@ -47,7 +48,7 @@ export default function RegistrarEvento() {
   const hoje = useHoje();
   const [salvo, setSalvo] = useState(false);
 
-  const { control, handleSubmit, setError, setValue, clearErrors } = useForm<
+  const { formState, control, handleSubmit, setError, setValue, clearErrors } = useForm<
     FormularioEvento,
     unknown,
     EventoValidado
@@ -93,6 +94,8 @@ export default function RegistrarEvento() {
     return calcularResumo(animal, [...eventos, novo], fazenda.configuracoes, dataDeISO(hoje));
   }, [animal, tipo, data, eventos, fazenda.configuracoes, hoje]);
 
+  const liberar = useConfirmarDescarte(formState.isDirty);
+
   const salvar = handleSubmit((form) => {
     if (!animal) return;
     const erroData = validarEventoNaData(form.data, hoje, animal);
@@ -110,6 +113,7 @@ export default function RegistrarEvento() {
       if (!nomeLivre || !brincoLivre) return;
     }
     setSalvo(true);
+    liberar();
     registrarEvento(contexto, animal, eventos, { ...form, tipo: form.tipo }, cria);
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     if (router.canGoBack()) router.back();
