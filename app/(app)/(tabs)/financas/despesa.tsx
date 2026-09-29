@@ -53,14 +53,28 @@ const OPCOES_UNIDADE = UNIDADES.map((valor) => ({ valor, rotulo: valor }));
 
 /** Lançar (sem `id`) ou editar uma despesa. */
 export default function TelaDespesa() {
-  const { id } = useLocalSearchParams<{ id?: string }>();
+  const { id, copiar } = useLocalSearchParams<{ id?: string; copiar?: string }>();
   const { carregando, despesas } = useFinanceiro();
   const existente = id ? despesas.find((d) => d.id === id) : undefined;
-  if (id && !existente) return carregando ? null : <NaoEncontrado />;
-  return <EditorDespesa key={existente?.id ?? 'nova'} existente={existente ?? null} />;
+  const modelo = copiar ? despesas.find((d) => d.id === copiar) : undefined;
+  if ((id && !existente) || (copiar && !modelo)) return carregando ? null : <NaoEncontrado />;
+  return (
+    <EditorDespesa
+      key={existente?.id ?? modelo?.id ?? 'nova'}
+      existente={existente ?? null}
+      modelo={modelo ?? null}
+    />
+  );
 }
 
-function EditorDespesa({ existente }: { existente: Despesa | null }) {
+/** `existente`: edição. `modelo`: nova despesa copiada de outra, com a data de hoje. */
+function EditorDespesa({
+  existente,
+  modelo,
+}: {
+  existente: Despesa | null;
+  modelo: Despesa | null;
+}) {
   const contexto = useContextoGravacao();
   const { animais } = useAnimais();
   const { cores } = useTema();
@@ -76,17 +90,19 @@ function EditorDespesa({ existente }: { existente: Despesa | null }) {
     resolver: zodResolver(esquemaDespesa),
     defaultValues: existente
       ? formularioDaDespesa(existente)
-      : {
-          categoria: null,
-          data: hoje,
-          valor: null,
-          descricao: '',
-          quantidade: null,
-          unidade: 'kg',
-          grupo: 'rebanho',
-          animalIds: [],
-          porLitros: false,
-        },
+      : modelo
+        ? { ...formularioDaDespesa(modelo), data: hoje }
+        : {
+            categoria: null,
+            data: hoje,
+            valor: null,
+            descricao: '',
+            quantidade: null,
+            unidade: 'kg',
+            grupo: 'rebanho',
+            animalIds: [],
+            porLitros: false,
+          },
   });
   const [categoria, grupo, valor, quantidade, unidade] = useWatch({
     control,
@@ -319,6 +335,14 @@ function EditorDespesa({ existente }: { existente: Despesa | null }) {
           />
         ) : null}
         <Botao titulo="Salvar" icone="checkmark" onPress={salvar} carregando={salvo} />
+        {existente && !existente.tratamentoId ? (
+          <Botao
+            titulo="Lançar de novo com a data de hoje"
+            variante="secundaria"
+            icone="copy-outline"
+            onPress={() => router.replace(`/financas/despesa?copiar=${existente.id}`)}
+          />
+        ) : null}
         {existente ? (
           <Botao
             titulo="Excluir despesa"
