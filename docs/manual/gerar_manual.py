@@ -581,9 +581,19 @@ h += caixa("info", "Por que inseminação aparece para vaca em lactação?",
            "Porque é normal: a vaca é inseminada durante a lactação, depois do período de espera "
            "após o parto (padrão 45 dias). Assim ela pare de novo em cerca de 13 meses.")
 h += secao("Parto com cadastro da cria")
-h += [p("No parto, a opção <b>Cadastrar agora</b> vem ligada. Informe <b>nome</b>, <b>brinco</b> "
-        "e <b>sexo</b> da cria. Ela é cadastrada junto com o parto, com a mãe, a data de "
-        "nascimento, a raça e o pai (do último serviço) já preenchidos.")]
+h += [p("No parto, escolha o que fazer com a cria:")]
+h += itens(
+    "<b>Cadastrar agora:</b> informe <b>nome</b>, <b>brinco</b> e <b>sexo</b>. A cria é cadastrada "
+    "junto com o parto, com a mãe, a data de nascimento, a raça e o pai (do último serviço) já "
+    "preenchidos.",
+    "<b>Já cadastrada:</b> para o bezerro que você cadastrou antes de lançar o parto. O app "
+    "mostra os <b>prováveis</b> (sem mãe e nascidos até 30 dias do parto) com a data de "
+    "nascimento; toque no certo ou busque pelo nome. Ele fica ligado à mãe, e pai e data de "
+    "nascimento em branco são preenchidos com os do parto.",
+    "<b>Agora não:</b> registra só o parto.",
+)
+h += caixa("dica", "Apareceu \"Já existe um animal com este nome\" no parto?",
+           "É sinal de que a cria já foi cadastrada. Escolha <b>Já cadastrada</b> e toque nela.")
 h += secao("Como o app calcula a situação")
 h += tabela(
     ["Situação", "Regra"],

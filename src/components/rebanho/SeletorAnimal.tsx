@@ -19,6 +19,10 @@ type Props = {
   semResultado?: string;
   /** Mostra "Remover" além de "Trocar" (campo opcional). */
   removivel?: boolean;
+  /** Mostrados antes de buscar, como sugestão (ex.: prováveis crias do parto). */
+  sugeridos?: readonly Animal[];
+  /** Linha extra sob o nome (ex.: data de nascimento). */
+  detalhe?: (animal: Animal) => string | undefined;
 };
 
 const LIMITE = 6;
@@ -34,6 +38,8 @@ export function SeletorAnimal({
   autoFocus = true,
   semResultado = 'Nenhuma fêmea ativa com esse nome.',
   removivel = false,
+  sugeridos = [],
+  detalhe,
 }: Props) {
   const [busca, setBusca] = useState('');
   const encontrados = useMemo(() => buscarAnimais(animais, busca), [animais, busca]);
@@ -66,7 +72,7 @@ export function SeletorAnimal({
   return (
     <View className="gap-2">
       <Texto variante="rotulo" tom="suave">
-        Animal
+        {rotulo}
       </Texto>
       <CampoBusca valor={busca} aoMudar={setBusca} autoFocus={autoFocus} />
       {erro ? (
@@ -74,13 +80,32 @@ export function SeletorAnimal({
           {erro}
         </Texto>
       ) : null}
-      {busca || animais.length <= LIMITE ? (
+      {!busca && sugeridos.length ? (
+        <View className="gap-2">
+          <Texto variante="legenda" tom="suave">
+            Prováveis
+          </Texto>
+          {sugeridos.slice(0, LIMITE).map((animal) => (
+            <LinhaAnimal
+              key={animal.id}
+              animal={animal}
+              hoje={hoje}
+              detalhe={detalhe?.(animal)}
+              onPress={() => aoSelecionar(animal)}
+            />
+          ))}
+          <Texto variante="legenda" tom="suave">
+            Não está aqui? Digite o nome.
+          </Texto>
+        </View>
+      ) : busca || animais.length <= LIMITE ? (
         <View className="gap-2">
           {encontrados.slice(0, LIMITE).map((animal) => (
             <LinhaAnimal
               key={animal.id}
               animal={animal}
               hoje={hoje}
+              detalhe={detalhe?.(animal)}
               onPress={() => {
                 setBusca('');
                 aoSelecionar(animal);

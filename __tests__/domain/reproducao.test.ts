@@ -1,11 +1,13 @@
 import { CONFIGURACOES_PADRAO } from '@/domain/fazenda';
 import {
+  criasCandidatas,
   estadoReprodutivo,
   esquemaEvento,
   ordenarEventos,
   servicoDoParto,
   tiposEventoSugeridos,
   validarEventoNaData,
+  vinculoDaCria,
   type TipoEvento,
 } from '@/domain/reproducao';
 
@@ -235,7 +237,7 @@ describe('esquemaEvento', () => {
     touroSemen: '',
     responsavel: '',
     observacoes: '',
-    cria: { cadastrar: false, brinco: '', nome: '', sexo: 'F' as const },
+    cria: { modo: 'nenhuma' as const, existenteId: '', brinco: '', nome: '', sexo: 'F' as const },
   };
 
   it('aceita evento válido', () => {
@@ -250,8 +252,16 @@ describe('esquemaEvento', () => {
     }
   });
 
+  it('exige escolher a cria quando ela já está cadastrada', () => {
+    const r = esquemaEvento.safeParse({ ...valido, cria: { ...valido.cria, modo: 'existente' } });
+    expect(r.success).toBe(false);
+    if (!r.success) expect(r.error.issues[0].path.join('.')).toBe('cria.existenteId');
+    const ok = { ...valido, cria: { ...valido.cria, modo: 'existente', existenteId: 'b1' } };
+    expect(esquemaEvento.safeParse(ok).success).toBe(true);
+  });
+
   it('exige nome e brinco quando cadastra a cria', () => {
-    const r = esquemaEvento.safeParse({ ...valido, cria: { ...valido.cria, cadastrar: true } });
+    const r = esquemaEvento.safeParse({ ...valido, cria: { ...valido.cria, modo: 'nova' } });
     expect(r.success).toBe(false);
     if (!r.success) {
       expect(r.error.issues.map((i) => i.path.join('.')).sort()).toEqual([
@@ -259,5 +269,54 @@ describe('esquemaEvento', () => {
         'cria.nome',
       ]);
     }
+  });
+});
+
+describe('criasCandidatas', () => {
+  const a = (
+    id: string,
+    extra: Partial<{
+      dataNascimento: string | null;
+      maeId: string | null;
+      status: 'ativo' | 'vendido';
+    }> = {},
+  ) => ({
+    id,
+    nome: id,
+    brinco: id,
+    status: 'ativo' as const,
+    dataNascimento: null,
+    maeId: null,
+    ...extra,
+  });
+
+  it('prováveis primeiro (nascidos perto do parto), sem a mãe e sem quem já tem mãe', () => {
+    const animais = [
+      a('mae'),
+      a('longe', { dataNascimento: '2026-01-01' }),
+      a('perto', { dataNascimento: '2026-09-27' }),
+      a('mesmoDia', { dataNascimento: '2026-09-25' }),
+      a('semData'),
+      a('jaTemMae', { dataNascimento: '2026-09-25', maeId: 'outra' }),
+      a('vendido', { dataNascimento: '2026-09-25', status: 'vendido' }),
+    ];
+    const r = criasCandidatas(animais, 'mae', '2026-09-25');
+    expect(r.provaveis.map((x) => x.id)).toEqual(['mesmoDia', 'perto']);
+    expect(r.outras.map((x) => x.id)).toEqual(['longe', 'semData']);
+  });
+});
+
+describe('vinculoDaCria', () => {
+  it('liga a mãe e só preenche pai e nascimento em branco', () => {
+    expect(
+      vinculoDaCria({ pai: '', dataNascimento: null }, 'mae', '2026-09-25', 'Touro X'),
+    ).toEqual({
+      maeId: 'mae',
+      pai: 'Touro X',
+      dataNascimento: '2026-09-25',
+    });
+    expect(
+      vinculoDaCria({ pai: 'Outro', dataNascimento: '2026-09-24' }, 'mae', '2026-09-25', 'Touro X'),
+    ).toEqual({ maeId: 'mae', pai: 'Outro', dataNascimento: '2026-09-24' });
   });
 });

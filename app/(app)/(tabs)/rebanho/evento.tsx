@@ -21,6 +21,7 @@ import {
   type ResumoAnimal,
 } from '@/domain/animal';
 import {
+  criasCandidatas,
   esquemaEvento,
   ROTULO_EVENTO,
   TIPOS_EVENTO,
@@ -33,7 +34,7 @@ import {
 import { calcularResumo } from '@/domain/resumoAnimal';
 import { useContextoGravacao } from '@/features/contexto';
 import { useDadosFazenda } from '@/features/DadosFazendaProvider';
-import { registrarEvento } from '@/features/eventos';
+import { registrarEvento, type CriaDoParto } from '@/features/eventos';
 import { useHoje } from '@/features/hoje';
 import { useConfirmarDescarte } from '@/lib/confirmarDescarte';
 import { dataDeISO, isoParaBR, somarDias, type DataISO } from '@/lib/datas';
@@ -61,13 +62,13 @@ export default function RegistrarEvento() {
       touroSemen: '',
       responsavel: '',
       observacoes: '',
-      cria: { cadastrar: true, brinco: '', nome: '', sexo: 'F' },
+      cria: { modo: 'nova', existenteId: '', brinco: '', nome: '', sexo: 'F' },
     },
   });
 
-  const [animalId, tipo, data, cadastrarCria] = useWatch({
+  const [animalId, tipo, data, modoCria] = useWatch({
     control,
-    name: ['animalId', 'tipo', 'data', 'cria.cadastrar'],
+    name: ['animalId', 'tipo', 'data', 'cria.modo'],
   });
   const animal = animalPorId.get(animalId) ?? null;
   const eventos = useMemo(
@@ -103,14 +104,31 @@ export default function RegistrarEvento() {
       setError('data', { message: erroData });
       return;
     }
-    const cria = form.tipo === 'parto' && form.cria.cadastrar ? form.cria : null;
-    if (cria) {
-      const nomeLivre = nomeDisponivel(cria.nome, animais);
-      const brincoLivre = brincoDisponivel(cria.brinco, animais);
-      if (!nomeLivre) setError('cria.nome', { message: 'Já existe um animal com este nome.' });
-      if (!brincoLivre)
-        setError('cria.brinco', { message: 'Já existe um animal com este brinco.' });
+    let cria: CriaDoParto | null = null;
+    if (form.tipo === 'parto' && form.cria.modo === 'nova') {
+      const nomeLivre = nomeDisponivel(form.cria.nome, animais);
+      const brincoLivre = brincoDisponivel(form.cria.brinco, animais);
+      // Cadastrou o bezerro antes do parto? Aponta o caminho certo.
+      const dica = ' Se for esta cria, escolha “Já cadastrada”.';
+      if (!nomeLivre) {
+        setError('cria.nome', { message: `Já existe um animal com este nome.${dica}` });
+      }
+      if (!brincoLivre) {
+        setError('cria.brinco', { message: `Brinco já usado.${dica}` });
+      }
       if (!nomeLivre || !brincoLivre) return;
+      cria = { tipo: 'nova', dados: form.cria };
+    } else if (form.tipo === 'parto' && form.cria.modo === 'existente') {
+      const existente = animalPorId.get(form.cria.existenteId);
+      if (!existente) {
+        setError('cria.existenteId', { message: 'Escolha a cria já cadastrada.' });
+        return;
+      }
+      cria = {
+        tipo: 'existente',
+        animal: existente,
+        eventos: eventosPorAnimal.get(existente.id) ?? [],
+      };
     }
     setSalvo(true);
     liberar();
@@ -221,7 +239,14 @@ export default function RegistrarEvento() {
                   />
                 ) : null}
                 {tipo === 'parto' ? (
-                  <SecaoCria control={control} cadastrar={cadastrarCria} />
+                  <SecaoCria
+                    control={control}
+                    modo={modoCria}
+                    animais={animais}
+                    maeId={animal.id}
+                    dataParto={data}
+                    hoje={dataDeISO(hoje)}
+                  />
                 ) : null}
                 <Controller
                   control={control}
@@ -360,31 +385,78 @@ function GradeTipos({
   );
 }
 
+const OPCOES_CRIA = [
+  { valor: 'nova', rotulo: 'Cadastrar agora' },
+  { valor: 'existente', rotulo: 'Já cadastrada' },
+  { valor: 'nenhuma', rotulo: 'Agora não' },
+] as const;
+
 function SecaoCria({
   control,
-  cadastrar,
+  modo,
+  animais,
+  maeId,
+  dataParto,
+  hoje,
 }: {
   control: ReturnType<typeof useForm<FormularioEvento, unknown, EventoValidado>>['control'];
-  cadastrar: boolean;
+  modo: 'nova' | 'existente' | 'nenhuma';
+  animais: readonly Animal[];
+  maeId: string;
+  dataParto: DataISO | null;
+  hoje: Date;
 }) {
+  const { provaveis, outras } = useMemo(
+    () => criasCandidatas(animais, maeId, dataParto),
+    [animais, maeId, dataParto],
+  );
+  const candidatas = useMemo(() => [...provaveis, ...outras], [provaveis, outras]);
+
   return (
     <View className="gap-4 rounded-2xl bg-superficie-2 p-4">
       <Controller
         control={control}
-        name="cria.cadastrar"
+        name="cria.modo"
         render={({ field }) => (
           <Seletor
-            rotulo="Cadastrar a cria?"
-            opcoes={[
-              { valor: 'sim', rotulo: 'Cadastrar agora' },
-              { valor: 'nao', rotulo: 'Agora não' },
-            ]}
-            valor={field.value ? 'sim' : 'nao'}
-            aoMudar={(v) => field.onChange(v === 'sim')}
+            rotulo="Cria"
+            opcoes={OPCOES_CRIA}
+            valor={field.value}
+            aoMudar={field.onChange}
           />
         )}
       />
-      {cadastrar ? (
+      {modo === 'existente' ? (
+        <Controller
+          control={control}
+          name="cria.existenteId"
+          render={({ field, fieldState }) => (
+            <View className="gap-2">
+              <SeletorAnimal
+                rotulo="Qual animal é a cria?"
+                animais={candidatas}
+                sugeridos={provaveis}
+                selecionado={candidatas.find((a) => a.id === field.value) ?? null}
+                aoSelecionar={(a) => field.onChange(a?.id ?? '')}
+                hoje={hoje}
+                autoFocus={false}
+                semResultado="Nenhum animal sem mãe com esse nome."
+                detalhe={(a) =>
+                  a.dataNascimento
+                    ? `Nasceu em ${isoParaBR(a.dataNascimento)}`
+                    : 'Sem data de nascimento'
+                }
+                erro={fieldState.error?.message}
+              />
+              <Texto variante="legenda" tom="suave">
+                A cria fica ligada a esta mãe. Pai e data de nascimento são preenchidos com os do
+                parto se estiverem em branco.
+              </Texto>
+            </View>
+          )}
+        />
+      ) : null}
+      {modo === 'nova' ? (
         <>
           <View className="flex-row gap-3">
             <View className="flex-1">
@@ -436,6 +508,11 @@ function SecaoCria({
               />
             )}
           />
+          {provaveis.length ? (
+            <Texto variante="legenda" tom="suave">
+              Já cadastrou o bezerro antes? Escolha “Já cadastrada” para ligar ele a esta mãe.
+            </Texto>
+          ) : null}
         </>
       ) : null}
     </View>

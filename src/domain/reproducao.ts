@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { diasEntre, ehDataISO, somarDias, type DataISO } from '@/lib/datas';
 
-import type { ResumoAnimal, Situacao } from './animal';
+import { compararNome, type Animal, type ResumoAnimal, type Situacao } from './animal';
 import type { ConfiguracoesFazenda } from './fazenda';
 
 export type TipoEvento =
@@ -224,14 +224,24 @@ export const esquemaEvento = z
     responsavel: texto(60),
     observacoes: texto(500),
     cria: z.object({
-      cadastrar: z.boolean(),
+      /** Cadastrar a cria agora, ligar uma já cadastrada ou deixar para depois. */
+      modo: z.enum(['nova', 'existente', 'nenhuma']),
+      existenteId: z.string(),
       brinco: texto(20),
       nome: texto(60),
       sexo: z.enum(['F', 'M']),
     }),
   })
   .superRefine((d, ctx) => {
-    if (d.tipo !== 'parto' || !d.cria.cadastrar) return;
+    if (d.tipo !== 'parto') return;
+    if (d.cria.modo === 'existente' && !d.cria.existenteId) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['cria', 'existenteId'],
+        message: 'Escolha a cria já cadastrada.',
+      });
+    }
+    if (d.cria.modo !== 'nova') return;
     if (!d.cria.nome) {
       ctx.addIssue({ code: 'custom', path: ['cria', 'nome'], message: 'Informe o nome da cria.' });
     }
@@ -259,4 +269,53 @@ export function validarEventoNaData(
     return 'A data é anterior ao nascimento do animal.';
   }
   return null;
+}
+
+// ---------------------------------------------------------------------------
+// Cria já cadastrada
+
+/** Dias de diferença entre o nascimento informado e o parto para sugerir a cria. */
+export const DIAS_CRIA_PROVAVEL = 30;
+
+type CandidataCria = Pick<Animal, 'id' | 'nome' | 'brinco' | 'status' | 'dataNascimento' | 'maeId'>;
+
+/**
+ * Animais que podem ser a cria de um parto, para ligar uma cria cadastrada antes
+ * do parto. Primeiro os prováveis (sem mãe e nascidos perto da data do parto, ou
+ * sem data de nascimento), depois os demais sem mãe; quem já tem mãe fica fora.
+ */
+export function criasCandidatas<T extends CandidataCria>(
+  animais: readonly T[],
+  maeId: string,
+  dataParto: DataISO | null,
+): { provaveis: T[]; outras: T[] } {
+  const livres = animais.filter((a) => a.id !== maeId && a.status === 'ativo' && !a.maeId);
+  const perto = (a: T) =>
+    !a.dataNascimento ||
+    !dataParto ||
+    Math.abs(diasEntre(a.dataNascimento, dataParto)) <= DIAS_CRIA_PROVAVEL;
+  const distancia = (a: T) =>
+    a.dataNascimento && dataParto ? Math.abs(diasEntre(a.dataNascimento, dataParto)) : 0;
+  const provaveis = livres
+    .filter((a) => a.dataNascimento && perto(a))
+    .sort((a, b) => distancia(a) - distancia(b) || compararNome(a, b));
+  const outras = livres.filter((a) => !provaveis.includes(a)).sort(compararNome);
+  return { provaveis, outras };
+}
+
+/**
+ * O que gravar numa cria já cadastrada ao ligá-la ao parto: a mãe sempre; o pai
+ * (do serviço) e a data de nascimento (do parto) só se estiverem em branco.
+ */
+export function vinculoDaCria(
+  cria: Pick<Animal, 'pai' | 'dataNascimento'>,
+  maeId: string,
+  dataParto: DataISO,
+  paiDoServico: string | null,
+): { maeId: string; pai: string; dataNascimento: DataISO } {
+  return {
+    maeId,
+    pai: cria.pai || paiDoServico || '',
+    dataNascimento: cria.dataNascimento ?? dataParto,
+  };
 }
