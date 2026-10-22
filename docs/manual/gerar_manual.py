@@ -533,6 +533,14 @@ h += passos(
 )
 h += [p("O animal sai das listas do dia a dia e passa para o filtro <b>Saíram</b>. O histórico "
         "dele continua guardado.")]
+h += secao("Excluir um animal cadastrado por engano")
+h += [p("Abra o animal, toque em <b>Editar</b> e, no fim da tela, em <b>Excluir animal</b>. O app "
+        "confirma antes e diz o que vai junto: os eventos e tratamentos dele são apagados, e ele "
+        "deixa de aparecer como mãe das crias e como cria no parto da mãe. Os litros dele já "
+        "lançados continuam nos totais das ordenhas.")]
+h += caixa("atencao", "Excluir não é o mesmo que dar saída",
+           "Para animal vendido, morto ou descartado, use <b>Situação no rebanho</b>: ele sai das "
+           "listas e o histórico fica guardado. Excluir apaga de vez e não dá para desfazer.")
 
 # 6 -------------------------------------------------------------------------
 h += capitulo(6, "Reprodução", "Eventos, previsões e a situação de cada vaca")

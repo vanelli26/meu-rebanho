@@ -106,6 +106,7 @@ src/
     analiseMes.ts         # Tudo do financeiro de um mês (receita, despesas, rateio, animais)
     sugestoes.ts          # Sugestões de gestão a partir das análises mensais
     primeirosPassos.ts    # Guia do Painel enquanto não há vaca em lactação
+    exclusao.ts           # O que apagar/desligar ao excluir um animal cadastrado por engano
     exportacao.ts         # CSV para Excel pt-BR: `;`, vírgula decimal, dd/MM/yyyy, BOM
   features/               # Hooks (useAnimais, useProducoes...) e ações de gravação
     DadosFazendaProvider.tsx  # Listeners de animais, de todos os eventos e de todos os tratamentos
@@ -168,6 +169,7 @@ Dados cadastrais:
 - `origem` (`nascido` | `comprado`), `dataEntrada`
 - `status` (`ativo` | `vendido` | `morto` | `descartado`), `dataSaida`, `motivoSaida`
 - `observacoes`, `createdAt`, `updatedAt`
+- **Excluir** (na edição) é só para cadastro por engano: apaga o animal, seus eventos e tratamentos, limpa o `maeId` das crias e o `criaId` do parto da mãe (`planoExclusao` + `excluirAnimal`, em batches). Saída real (venda, morte, descarte) muda o `status` e mantém o histórico. Litros já lançados continuam nos totais das ordenhas.
 
 Resumo calculado (escrito só por `resumoAnimal.ts`):
 

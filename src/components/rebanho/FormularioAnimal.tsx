@@ -2,7 +2,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as Haptics from 'expo-haptics';
 import { useMemo, useRef, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import { KeyboardAvoidingView, Platform, ScrollView, View, type TextInput } from 'react-native';
+import {
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  View,
+  type TextInput,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import {
@@ -44,10 +51,18 @@ type Props = {
   animalId?: string;
   tituloBotao: string;
   aoSalvar: (dados: Formulario) => void;
+  /** Na edição: excluir o animal (cadastro por engano), após confirmação. */
+  exclusao?: { titulo: string; mensagem: string; aoConfirmar: () => void };
 };
 
 /** Formulário de cadastro e edição de animal. */
-export function FormularioAnimal({ valoresIniciais, animalId, tituloBotao, aoSalvar }: Props) {
+export function FormularioAnimal({
+  valoresIniciais,
+  animalId,
+  tituloBotao,
+  aoSalvar,
+  exclusao,
+}: Props) {
   const insets = useSafeAreaInsets();
   const { animais } = useAnimais();
   const brincoRef = useRef<TextInput>(null);
@@ -317,6 +332,26 @@ export function FormularioAnimal({ valoresIniciais, animalId, tituloBotao, aoSal
         ) : null}
 
         <Botao titulo={tituloBotao} icone="checkmark" onPress={salvar} carregando={salvo} />
+        {exclusao ? (
+          <Botao
+            titulo="Excluir animal"
+            variante="perigo"
+            icone="trash-outline"
+            onPress={() =>
+              Alert.alert(exclusao.titulo, exclusao.mensagem, [
+                { text: 'Cancelar', style: 'cancel' },
+                {
+                  text: 'Excluir',
+                  style: 'destructive',
+                  onPress: () => {
+                    liberar();
+                    exclusao.aoConfirmar();
+                  },
+                },
+              ])
+            }
+          />
+        ) : null}
         {!edicao ? (
           <Texto variante="legenda" tom="suave" className="text-center">
             Só nome e brinco são obrigatórios. Dá para completar depois.
